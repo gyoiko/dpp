@@ -17,6 +17,7 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
   const travelerRef = useRef<MapLibreMarker | null>(null);
   const onSelectRef = useRef(onSelect);
   const [isReady, setIsReady] = useState(false);
+  const [isFallback, setIsFallback] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
   const activeIndex = Math.max(0, mockProduct.journey.findIndex((stage) => stage.id === activeId));
@@ -27,6 +28,7 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     let cancelled = false;
+    const fallbackTimer = window.setTimeout(() => setIsFallback(true), 3500);
 
     void import("maplibre-gl").then((maplibregl) => {
       if (cancelled || !containerRef.current) return;
@@ -70,11 +72,12 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
         traveler.className = "journey-traveler";
         traveler.setAttribute("aria-hidden", "true");
         travelerRef.current = new maplibregl.Marker({ element: traveler, anchor: "center" }).setLngLat(activeStage.coordinates).addTo(map);
+        window.clearTimeout(fallbackTimer);
         setIsReady(true);
       });
-    });
+    }).catch(() => setIsFallback(true));
 
-    return () => { cancelled = true; markersRef.current.clear(); travelerRef.current = null; mapRef.current?.remove(); mapRef.current = null; };
+    return () => { cancelled = true; window.clearTimeout(fallbackTimer); markersRef.current.clear(); travelerRef.current = null; mapRef.current?.remove(); mapRef.current = null; };
   }, []);
 
   useEffect(() => {
@@ -118,8 +121,13 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
   };
 
   return <section className="track-map-shell" aria-label="Interactive world map of the product journey">
-    <div ref={containerRef} className="track-map" />
-    {!isReady && <div className="map-loading"><Route size={22} /><span>Building the verified route…</span></div>}
+    <div className={`instant-map ${isReady ? "hidden" : ""}`}>
+      <div className="land land-one" /><div className="land land-two" /><div className="land land-three" /><div className="map-grid" />
+      <div className="route-line line-one" /><div className="route-line line-two" />
+      {mockProduct.journey.map((stage, index) => <button key={stage.id} className={`instant-point ${activeId === stage.id ? "active" : ""}`} style={{ left: `${stage.position.x}%`, top: `${stage.position.y}%` }} onClick={() => onSelect(stage)} aria-label={`Open ${stage.title}`}><span>{index + 1}</span></button>)}
+      <span className="map-mode"><Route size={12} /> {isFallback ? "Lite map · route stays interactive" : "Loading detailed map…"}</span>
+    </div>
+    <div ref={containerRef} className={`track-map ${isReady ? "ready" : ""}`} />
     <div className="track-map-header"><span><i /> LIVE PRODUCT ROUTE</span><button onClick={showOverview} aria-label="Show complete route"><Maximize2 size={15} /> Overview</button></div>
     <div className="track-progress" aria-hidden="true"><span style={{ width: `${((activeIndex + 1) / mockProduct.journey.length) * 100}%` }} /></div>
     <div className="track-hud">
