@@ -15,8 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(origin),
     title: "GTI Digital Product Passport",
     description: "Follow the documented journey of a Golden Tekstil Indonesia product, from fibre to finished piece.",
-    openGraph: { title: "GTI Digital Product Passport", description: "From fibre to finished piece.", images: [{ url: `${origin}/og.png`, width: 1728, height: 909 }] },
-    twitter: { card: "summary_large_image", title: "GTI Digital Product Passport", description: "From fibre to finished piece.", images: [`${origin}/og.png`] },
+    openGraph: { title: "GTI Digital Product Passport", description: "Track the journey from fibre to finished piece.", images: [{ url: `${origin}/og-track.png`, width: 1536, height: 1024 }] },
+    twitter: { card: "summary_large_image", title: "GTI Digital Product Passport", description: "Track the journey from fibre to finished piece.", images: [`${origin}/og-track.png`] },
   };
 }
 

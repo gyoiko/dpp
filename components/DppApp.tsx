@@ -3,24 +3,13 @@
 import { ArrowLeft, ArrowRight, BadgeCheck, ChevronDown, Factory, FileCheck2, Leaf, MapPin, PackageCheck, Route, ScanLine, Shirt, Sparkles, Sprout, X } from "lucide-react";
 import { useState } from "react";
 import { DppBadge, JourneyStage, mockProduct } from "@/data/mockProduct";
+import TrackMap from "@/components/TrackMap";
 
 type Tab = "journey" | "product" | "badges";
 const stageIcons = [Sprout, Sparkles, Route, Factory, Shirt, PackageCheck];
 
 function BrandMark() {
   return <div className="brand-mark" aria-label="Golden Tekstil Indonesia"><span className="brand-icon"><Leaf size={19} /></span><span><b>GOLDEN</b><small>TEKSTIL INDONESIA</small></span></div>;
-}
-
-function JourneyMap({ activeId, onSelect }: { activeId: string | null; onSelect: (stage: JourneyStage) => void }) {
-  return <section className="journey-map" aria-label="Product journey map">
-    <div className="map-topline"><span><Route size={14} /> PRODUCT JOURNEY</span><span className="map-live"><i /> 6 locations</span></div>
-    <div className="map-canvas">
-      <div className="land land-one" /><div className="land land-two" /><div className="land land-three" /><div className="map-grid" />
-      <div className="route-line line-one" /><div className="route-line line-two" />
-      {mockProduct.journey.map((stage, index) => <button key={stage.id} className={`map-point ${activeId === stage.id ? "active" : ""}`} style={{ left: `${stage.position.x}%`, top: `${stage.position.y}%` }} onClick={() => onSelect(stage)} aria-label={`Open ${stage.title}, ${stage.location}`}><span>{index + 1}</span><em>{stage.location.split(",")[0]}</em></button>)}
-    </div>
-    <div className="map-caption"><MapPin size={14} /> India → Indonesia <span>•</span> Mock route</div>
-  </section>;
 }
 
 function Navigation({ tab, setTab }: { tab: Tab; setTab: (tab: Tab) => void }) {
@@ -78,7 +67,7 @@ export default function DppApp() {
   const [tab, setTab] = useState<Tab>("journey");
   const [openStage, setOpenStage] = useState<string | null>("fabric-manufacturing");
   const [detailBadge, setDetailBadge] = useState<DppBadge | null>(null);
-  const selectStage = (stage: JourneyStage, fromMap = false) => { const next = openStage === stage.id && !fromMap ? null : stage.id; setOpenStage(next); if (fromMap) requestAnimationFrame(() => document.getElementById(`stage-${stage.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })); };
+  const selectStage = (stage: JourneyStage, forceOpen = false) => { const next = openStage === stage.id && !forceOpen ? null : stage.id; setOpenStage(next); };
   const changeTab = (next: Tab) => { setTab(next); setDetailBadge(null); };
-  return <main className="page-shell"><div className="ambient ambient-one" /><div className="ambient ambient-two" /><section className="dpp-card"><header className="topbar"><BrandMark /><span className="verified-chip"><BadgeCheck size={14} /> DPP prototype</span></header>{!detailBadge && tab === "journey" && <JourneyMap activeId={openStage} onSelect={(stage) => selectStage(stage, true)} />}{!detailBadge && <Navigation tab={tab} setTab={changeTab} />}<div className="content-panel">{detailBadge ? <BadgeDetail badge={detailBadge} onBack={() => setDetailBadge(null)} /> : tab === "journey" ? <JourneyTab openStage={openStage} selectStage={selectStage} /> : tab === "product" ? <ProductTab /> : <BadgesTab onOpen={setDetailBadge} />}</div><footer><BrandMark /><p>Digital Product Passport · {mockProduct.passportId}</p><small>Mock data for demonstration · Updated {mockProduct.lastUpdated}</small></footer></section><aside className="desktop-note"><span>01</span><p>Scan-ready product transparency</p><i /></aside></main>;
+  return <main className="page-shell"><div className="ambient ambient-one" /><div className="ambient ambient-two" /><section className="dpp-card"><header className="topbar"><BrandMark /><span className="verified-chip"><BadgeCheck size={14} /> DPP prototype</span></header>{!detailBadge && tab === "journey" && <TrackMap activeId={openStage} onSelect={(stage) => selectStage(stage, true)} />}{!detailBadge && <Navigation tab={tab} setTab={changeTab} />}<div className="content-panel">{detailBadge ? <BadgeDetail badge={detailBadge} onBack={() => setDetailBadge(null)} /> : tab === "journey" ? <JourneyTab openStage={openStage} selectStage={selectStage} /> : tab === "product" ? <ProductTab /> : <BadgesTab onOpen={setDetailBadge} />}</div><footer><BrandMark /><p>Digital Product Passport · {mockProduct.passportId}</p><small>Mock data for demonstration · Updated {mockProduct.lastUpdated}</small></footer></section><aside className="desktop-note"><span>01</span><p>Scan-ready product transparency</p><i /></aside></main>;
 }
