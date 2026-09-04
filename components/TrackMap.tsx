@@ -20,11 +20,14 @@ const gridPath = path(geoGraticule10()) ?? "";
 export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(2.05);
+  const [focusMode, setFocusMode] = useState<"route" | "stage">("route");
   const initialId = useRef(activeId);
   const activeIndex = Math.max(0, mockProduct.journey.findIndex((stage) => stage.id === activeId));
   const activeStage = mockProduct.journey[activeIndex];
   const activePoint = projection(activeStage.coordinates) ?? [WIDTH / 2, HEIGHT / 2];
+  const routePoint = projection([89, 8]) ?? [WIDTH / 2, HEIGHT / 2];
+  const focusPoint = focusMode === "route" ? routePoint : activePoint;
 
   const routePath = useMemo(() => path({ type: "LineString", coordinates: mockProduct.journey.map((stage) => stage.coordinates) }) ?? "", []);
   const completedPath = useMemo(() => {
@@ -34,14 +37,14 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
   }, [activeIndex]);
 
   useEffect(() => {
-    if (activeId !== initialId.current && isPlaying) setZoom(1.75);
+    if (activeId !== initialId.current && isPlaying) { setFocusMode("stage"); setZoom(2.55); }
   }, [activeId, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying) return;
     const timer = window.setInterval(() => {
       setTourIndex((current) => {
-        if (current >= mockProduct.journey.length - 1) { setIsPlaying(false); setZoom(1); return current; }
+        if (current >= mockProduct.journey.length - 1) { setIsPlaying(false); setFocusMode("route"); setZoom(2.05); return current; }
         const next = current + 1;
         onSelect(mockProduct.journey[next]);
         return next;
@@ -55,18 +58,20 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
     const start = activeIndex >= mockProduct.journey.length - 1 ? 0 : activeIndex;
     setTourIndex(start);
     onSelect(mockProduct.journey[start]);
-    setZoom(1.75);
+    setFocusMode("stage");
+    setZoom(2.55);
     setIsPlaying(true);
   };
 
   const selectMarker = (stage: JourneyStage, index: number) => {
     setIsPlaying(false);
     setTourIndex(index);
-    setZoom(1.75);
+    setFocusMode("stage");
+    setZoom(2.55);
     onSelect(stage);
   };
 
-  const transform = zoom === 1 ? "translate(0px, 0px) scale(1)" : `translate(${WIDTH / 2}px, ${HEIGHT / 2}px) scale(${zoom}) translate(${-activePoint[0]}px, ${-activePoint[1]}px)`;
+  const transform = zoom === 1 ? "translate(0px, 0px) scale(1)" : `translate(${WIDTH / 2}px, ${HEIGHT / 2}px) scale(${zoom}) translate(${-focusPoint[0]}px, ${-focusPoint[1]}px)`;
 
   return <section className="track-map-shell" aria-label="Interactive world map of the product journey">
     <div className="world-map">
@@ -92,7 +97,7 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
       </svg>
       <span className="map-source">Natural Earth world data · Stored locally</span>
     </div>
-    <div className="track-map-header"><span><i /> VERIFIED ROUTE VIEW</span><div className="world-controls"><button onClick={() => setZoom((value) => Math.min(2.4, value + .25))} aria-label="Zoom in"><Plus size={14} /></button><button onClick={() => setZoom((value) => Math.max(1, value - .25))} aria-label="Zoom out"><Minus size={14} /></button><button onClick={() => { setZoom(1); setIsPlaying(false); }} aria-label="Show complete world map"><Maximize2 size={14} /><b>World</b></button></div></div>
+    <div className="track-map-header"><span><i /> VERIFIED ROUTE VIEW</span><div className="world-controls"><button onClick={() => setZoom((value) => Math.min(3.2, value + .3))} aria-label="Zoom in"><Plus size={14} /></button><button onClick={() => setZoom((value) => Math.max(1, value - .3))} aria-label="Zoom out"><Minus size={14} /></button><button onClick={() => { setFocusMode("route"); setZoom(2.05); setIsPlaying(false); }} aria-label="Focus on the complete product route"><Route size={14} /><b>Route</b></button><button onClick={() => { setFocusMode("route"); setZoom(1); setIsPlaying(false); }} aria-label="Show complete world map"><Maximize2 size={14} /><b>World</b></button></div></div>
     <div className="track-progress" aria-hidden="true"><span style={{ width: `${((activeIndex + 1) / mockProduct.journey.length) * 100}%` }} /></div>
     <div className="track-hud"><div className="hud-step"><small>STAGE {String(activeIndex + 1).padStart(2, "0")} / {String(mockProduct.journey.length).padStart(2, "0")}</small><strong>{activeStage.title}</strong><span>{activeStage.location}</span></div><button className="play-route" onClick={playJourney}>{isPlaying ? <Pause size={16} /> : activeIndex === mockProduct.journey.length - 1 ? <RotateCcw size={16} /> : <Play size={16} fill="currentColor" />}<span>{isPlaying ? "Pause" : activeIndex === mockProduct.journey.length - 1 ? "Replay" : "Play journey"}</span></button></div>
   </section>;
