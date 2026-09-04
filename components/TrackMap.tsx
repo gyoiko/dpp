@@ -20,7 +20,7 @@ const gridPath = path(geoGraticule10()) ?? "";
 export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
-  const [zoom, setZoom] = useState(2.05);
+  const [zoom, setZoom] = useState(2.25);
   const [focusMode, setFocusMode] = useState<"route" | "stage">("route");
   const initialId = useRef(activeId);
   const activeIndex = Math.max(0, mockProduct.journey.findIndex((stage) => stage.id === activeId));
@@ -37,14 +37,14 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
   }, [activeIndex]);
 
   useEffect(() => {
-    if (activeId !== initialId.current && isPlaying) { setFocusMode("stage"); setZoom(2.55); }
+    if (activeId !== initialId.current && isPlaying) { setFocusMode("stage"); setZoom(4); }
   }, [activeId, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying) return;
     const timer = window.setInterval(() => {
       setTourIndex((current) => {
-        if (current >= mockProduct.journey.length - 1) { setIsPlaying(false); setFocusMode("route"); setZoom(2.05); return current; }
+        if (current >= mockProduct.journey.length - 1) { setIsPlaying(false); setFocusMode("route"); setZoom(2.25); return current; }
         const next = current + 1;
         onSelect(mockProduct.journey[next]);
         return next;
@@ -55,11 +55,12 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
 
   const playJourney = () => {
     if (isPlaying) { setIsPlaying(false); return; }
-    const start = activeIndex >= mockProduct.journey.length - 1 ? 0 : activeIndex;
+    const canResume = tourIndex > 0 && tourIndex < mockProduct.journey.length - 1 && activeId === mockProduct.journey[tourIndex].id;
+    const start = canResume ? tourIndex : 0;
     setTourIndex(start);
     onSelect(mockProduct.journey[start]);
     setFocusMode("stage");
-    setZoom(2.55);
+    setZoom(4);
     setIsPlaying(true);
   };
 
@@ -67,7 +68,7 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
     setIsPlaying(false);
     setTourIndex(index);
     setFocusMode("stage");
-    setZoom(2.55);
+    setZoom(4);
     onSelect(stage);
   };
 
@@ -97,7 +98,7 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
       </svg>
       <span className="map-source">Natural Earth world data · Stored locally</span>
     </div>
-    <div className="track-map-header"><span><i /> VERIFIED ROUTE VIEW</span><div className="world-controls"><button onClick={() => setZoom((value) => Math.min(3.2, value + .3))} aria-label="Zoom in"><Plus size={14} /></button><button onClick={() => setZoom((value) => Math.max(1, value - .3))} aria-label="Zoom out"><Minus size={14} /></button><button onClick={() => { setFocusMode("route"); setZoom(2.05); setIsPlaying(false); }} aria-label="Focus on the complete product route"><Route size={14} /><b>Route</b></button><button onClick={() => { setFocusMode("route"); setZoom(1); setIsPlaying(false); }} aria-label="Show complete world map"><Maximize2 size={14} /><b>World</b></button></div></div>
+    <div className="track-map-header"><span><i /> VERIFIED ROUTE VIEW</span><div className="world-controls"><button onClick={() => setZoom((value) => Math.min(5.2, value + .4))} aria-label="Zoom in"><Plus size={14} /></button><button onClick={() => setZoom((value) => Math.max(1, value - .4))} aria-label="Zoom out"><Minus size={14} /></button><button onClick={() => { setFocusMode("route"); setZoom(2.25); setIsPlaying(false); }} aria-label="Focus on the complete product route"><Route size={14} /><b>Route</b></button><button onClick={() => { setFocusMode("route"); setZoom(1); setIsPlaying(false); }} aria-label="Show complete world map"><Maximize2 size={14} /><b>World</b></button></div></div>
     <div className="track-progress" aria-hidden="true"><span style={{ width: `${((activeIndex + 1) / mockProduct.journey.length) * 100}%` }} /></div>
     <div className="track-hud"><div className="hud-step"><small>STAGE {String(activeIndex + 1).padStart(2, "0")} / {String(mockProduct.journey.length).padStart(2, "0")}</small><strong>{activeStage.title}</strong><span>{activeStage.location}</span></div><button className="play-route" onClick={playJourney}>{isPlaying ? <Pause size={16} /> : activeIndex === mockProduct.journey.length - 1 ? <RotateCcw size={16} /> : <Play size={16} fill="currentColor" />}<span>{isPlaying ? "Pause" : activeIndex === mockProduct.journey.length - 1 ? "Replay" : "Play journey"}</span></button></div>
   </section>;

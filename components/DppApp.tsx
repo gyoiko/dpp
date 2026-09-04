@@ -71,7 +71,7 @@ function BadgesTab({ onOpen }: { onOpen: (badge: DppBadge) => void }) {
 
 export default function DppApp() {
   const [tab, setTab] = useState<Tab>("journey");
-  const [openStage, setOpenStage] = useState<string | null>("fabric-manufacturing");
+  const [openStage, setOpenStage] = useState<string | null>("raw-material");
   const [detailBadge, setDetailBadge] = useState<DppBadge | null>(null);
   const selectStage = (stage: JourneyStage, forceOpen = false) => { const next = openStage === stage.id && !forceOpen ? null : stage.id; setOpenStage(next); };
   const changeTab = (next: Tab) => { setTab(next); setDetailBadge(null); };
