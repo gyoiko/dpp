@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, BadgeCheck, ChevronDown, Factory, FileCheck2, Leaf, MapPin, PackageCheck, Route, ScanLine, Shirt, Sparkles, Sprout, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, Box, ChevronDown, Cog, Factory, FileCheck2, FileText, Leaf, MapPin, PackageCheck, Route, ScanLine, ShieldCheck, Shirt, Sparkles, Sprout, X } from "lucide-react";
 import { useState } from "react";
 import { DppBadge, JourneyStage, mockProduct } from "@/data/mockProduct";
 import TrackMap from "@/components/TrackMap";
@@ -27,7 +27,13 @@ function StageCard({ stage, index, open, onToggle }: { stage: JourneyStage; inde
     {open && <div className="stage-detail">
       <p>{stage.description}</p>
       <div className="facility-row"><span className="facility-avatar">{stage.countryCode}</span><span><small>FACILITY / ORGANISATION</small><strong>{stage.facility}</strong><em><MapPin size={13} /> {stage.location}</em></span></div>
-      <dl><div><dt>Material</dt><dd>{stage.material}</dd></div><div><dt>Process</dt><dd>{stage.process}</dd></div><div><dt>Traceability</dt><dd><span className={`status ${stage.status.toLowerCase()}`}>{stage.status}</span></dd></div><div><dt>Evidence</dt><dd>{stage.evidence}</dd></div></dl>
+      <div className="trace-heading"><span>TRACE RECORD</span><small>4 DATA POINTS</small></div>
+      <dl className="trace-record">
+        <div className="trace-row"><span className="trace-icon material"><Box size={19} /></span><span><dt>Material</dt><dd>{stage.material}</dd></span></div>
+        <div className="trace-row"><span className="trace-icon process"><Cog size={19} /></span><span><dt>Process</dt><dd>{stage.process}</dd></span></div>
+        <div className="trace-row"><span className="trace-icon verification"><ShieldCheck size={19} /></span><span><dt>Traceability status</dt><dd><span className={`status ${stage.status.toLowerCase()}`}>{stage.status}</span></dd></span></div>
+        <div className="trace-row evidence"><span className="trace-icon"><FileText size={19} /></span><span><dt>Supporting evidence</dt><dd>{stage.evidence}</dd></span><FileCheck2 className="evidence-check" size={18} /></div>
+      </dl>
     </div>}
   </article>;
 }
