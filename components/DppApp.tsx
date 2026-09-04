@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, BadgeCheck, Box, ChevronDown, Cog, Factory, FileCheck2, FileText, Leaf, MapPin, PackageCheck, Route, ScanLine, ShieldCheck, Shirt, Sparkles, Sprout, X } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { DppBadge, JourneyStage, mockProduct } from "@/data/mockProduct";
 import TrackMap from "@/components/TrackMap";
 
@@ -22,27 +22,27 @@ function StageCard({ stage, index, open, onToggle }: { stage: JourneyStage; inde
   return <article id={`stage-${stage.id}`} className={`stage ${open ? "open" : ""}`}>
     <div className="timeline-node"><span>{index + 1}</span></div>
     <button className="stage-trigger" onClick={onToggle} aria-expanded={open}>
-      <span className={`stage-icon ${stage.tone}`}><Icon size={21} /></span><span className="stage-title"><strong>{stage.title}</strong><small>{stage.subtitle}</small></span><span className="stage-action">{open ? <X size={17} /> : <ChevronDown size={18} />}</span>
+      <span className={`stage-icon ${stage.tone}`}><Icon size={21} /></span><span className="stage-title"><strong>{stage.title}</strong><small>{stage.subtitle}</small></span><span className="stage-action"><ChevronDown size={18} /></span>
     </button>
-    {open && <div className="stage-detail">
-      <p>{stage.description}</p>
-      <div className="facility-row"><span className="facility-avatar">{stage.countryCode}</span><span><small>FACILITY / ORGANISATION</small><strong>{stage.facility}</strong><em><MapPin size={13} /> {stage.location}</em></span></div>
-      <div className="trace-heading"><span>TRACE RECORD</span><small>4 DATA POINTS</small></div>
-      <dl className="trace-record">
-        <div className="trace-row"><span className="trace-icon material"><Box size={19} /></span><span><dt>Material</dt><dd>{stage.material}</dd></span></div>
-        <div className="trace-row"><span className="trace-icon process"><Cog size={19} /></span><span><dt>Process</dt><dd>{stage.process}</dd></span></div>
-        <div className="trace-row"><span className="trace-icon verification"><ShieldCheck size={19} /></span><span><dt>Traceability status</dt><dd><span className={`status ${stage.status.toLowerCase()}`}>{stage.status}</span></dd></span></div>
-        <div className="trace-row evidence"><span className="trace-icon"><FileText size={19} /></span><span><dt>Supporting evidence</dt><dd>{stage.evidence}</dd></span><FileCheck2 className="evidence-check" size={18} /></div>
-      </dl>
-    </div>}
+    <div className="stage-detail-slide" aria-hidden={!open}><div className="stage-detail-clip"><div className="stage-detail">
+        <p>{stage.description}</p>
+        <div className="facility-row"><span className="facility-avatar">{stage.countryCode}</span><span><small>FACILITY / ORGANISATION</small><strong>{stage.facility}</strong><em><MapPin size={13} /> {stage.location}</em></span></div>
+        <div className="trace-heading"><span>TRACE RECORD</span><small>4 DATA POINTS</small></div>
+        <dl className="trace-record">
+          <div className="trace-row"><span className="trace-icon material"><Box size={19} /></span><span><dt>Material</dt><dd>{stage.material}</dd></span></div>
+          <div className="trace-row"><span className="trace-icon process"><Cog size={19} /></span><span><dt>Process</dt><dd>{stage.process}</dd></span></div>
+          <div className="trace-row"><span className="trace-icon verification"><ShieldCheck size={19} /></span><span><dt>Traceability status</dt><dd><span className={`status ${stage.status.toLowerCase()}`}>{stage.status}</span></dd></span></div>
+          <div className="trace-row evidence"><span className="trace-icon"><FileText size={19} /></span><span><dt>Supporting evidence</dt><dd>{stage.evidence}</dd></span><FileCheck2 className="evidence-check" size={18} /></div>
+        </dl>
+      </div></div></div>
   </article>;
 }
 
-function JourneyTab({ openStage, selectStage }: { openStage: string | null; selectStage: (stage: JourneyStage) => void }) {
+function JourneyTab({ openStages, selectStage }: { openStages: Set<string>; selectStage: (stage: JourneyStage) => void }) {
   return <div className="tab-content">
     <header className="section-intro"><span className="eyebrow">FOLLOW THE MAKING</span><h1>From fibre to finished piece.</h1><p>Explore the deepest documented journey available for this product.</p></header>
     <div className="section-label"><span>Steps & processes</span><span>{mockProduct.journey.length}</span></div>
-    <div className="timeline">{mockProduct.journey.map((stage, index) => <StageCard key={stage.id} stage={stage} index={index} open={openStage === stage.id} onToggle={() => selectStage(stage)} />)}</div>
+    <div className="timeline">{mockProduct.journey.map((stage, index) => <StageCard key={stage.id} stage={stage} index={index} open={openStages.has(stage.id)} onToggle={() => selectStage(stage)} />)}</div>
     <div className="transparency-note"><FileCheck2 size={19} /><div><strong>Transparency by design</strong><p>Unknown tiers stay hidden. This prototype does not infer farms, certifications, or impact claims.</p></div></div>
   </div>;
 }
@@ -71,9 +71,20 @@ function BadgesTab({ onOpen }: { onOpen: (badge: DppBadge) => void }) {
 
 export default function DppApp() {
   const [tab, setTab] = useState<Tab>("journey");
-  const [openStage, setOpenStage] = useState<string | null>("raw-material");
+  const [activeStageId, setActiveStageId] = useState("raw-material");
+  const [openStages, setOpenStages] = useState<Set<string>>(() => new Set(["raw-material"]));
   const [detailBadge, setDetailBadge] = useState<DppBadge | null>(null);
-  const selectStage = (stage: JourneyStage, forceOpen = false) => { const next = openStage === stage.id && !forceOpen ? null : stage.id; setOpenStage(next); };
+  const selectStage = useCallback((stage: JourneyStage, forceOpen = false) => {
+    setActiveStageId(stage.id);
+    setOpenStages((current) => {
+      const next = new Set(current);
+      if (forceOpen) next.add(stage.id);
+      else if (next.has(stage.id)) next.delete(stage.id);
+      else next.add(stage.id);
+      return next;
+    });
+  }, []);
+  const selectStageFromMap = useCallback((stage: JourneyStage) => selectStage(stage, true), [selectStage]);
   const changeTab = (next: Tab) => { setTab(next); setDetailBadge(null); };
-  return <main className="page-shell"><div className="ambient ambient-one" /><div className="ambient ambient-two" /><section className="dpp-card"><header className="topbar"><BrandMark /><span className="verified-chip"><BadgeCheck size={14} /> DPP prototype</span></header>{!detailBadge && tab === "journey" && <TrackMap activeId={openStage} onSelect={(stage) => selectStage(stage, true)} />}{!detailBadge && <Navigation tab={tab} setTab={changeTab} />}<div className="content-panel">{detailBadge ? <BadgeDetail badge={detailBadge} onBack={() => setDetailBadge(null)} /> : tab === "journey" ? <JourneyTab openStage={openStage} selectStage={selectStage} /> : tab === "product" ? <ProductTab /> : <BadgesTab onOpen={setDetailBadge} />}</div><footer><BrandMark /><p>Digital Product Passport · {mockProduct.passportId}</p><small>Mock data for demonstration · Updated {mockProduct.lastUpdated}</small></footer></section><aside className="desktop-note"><span>01</span><p>Scan-ready product transparency</p><i /></aside></main>;
+  return <main className="page-shell"><div className="ambient ambient-one" /><div className="ambient ambient-two" /><section className="dpp-card"><header className="topbar"><BrandMark /><span className="verified-chip"><BadgeCheck size={14} /> DPP prototype</span></header>{!detailBadge && tab === "journey" && <TrackMap activeId={activeStageId} onSelect={selectStageFromMap} />}{!detailBadge && <Navigation tab={tab} setTab={changeTab} />}<div className="content-panel">{detailBadge ? <BadgeDetail badge={detailBadge} onBack={() => setDetailBadge(null)} /> : tab === "journey" ? <JourneyTab openStages={openStages} selectStage={selectStage} /> : tab === "product" ? <ProductTab /> : <BadgesTab onOpen={setDetailBadge} />}</div><footer><BrandMark /><p>Digital Product Passport · {mockProduct.passportId}</p><small>Mock data for demonstration · Updated {mockProduct.lastUpdated}</small></footer></section><aside className="desktop-note"><span>01</span><p>Scan-ready product transparency</p><i /></aside></main>;
 }
