@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "maplibre-gl/dist/maplibre-gl.css";
 
 :root { --ink:#173127; --muted:#6f7f77; --paper:#fffef9; --forest:#174f3a; --lime:#d8f169; }
 @theme inline { --font-sans:var(--font-dm-sans); }
@@ -19,6 +18,28 @@ button { color:inherit; font:inherit; }
 .brand-mark small { margin-top:4px; color:var(--muted); font-size:7px; letter-spacing:.18em; display:block; }
 .verified-chip,.prototype-pill { display:inline-flex; align-items:center; gap:6px; border:1px solid #d3dcc8; color:var(--forest); background:#f6f8ef; border-radius:999px; font-size:10px; font-weight:700; padding:7px 9px; }
 .track-map-shell { height:390px; position:relative; overflow:hidden; background:#cddbd5; isolation:isolate; }
+.world-map { position:absolute; inset:0; z-index:2; overflow:hidden; background:#b9d4cd; }
+.world-map svg { display:block; width:100%; height:calc(100% - 92px); }
+.world-viewport { transform-box:view-box; transform-origin:0 0; transition:transform 1.25s cubic-bezier(.22,.75,.2,1); }
+.world-ocean { fill:#b9d4cd; }
+.world-grid { fill:none; stroke:rgba(26,74,57,.13); stroke-width:.6; }
+.world-land { fill:#e8e4cc; stroke:rgba(23,49,39,.28); stroke-width:.7; vector-effect:non-scaling-stroke; }
+.world-route-shadow,.world-route,.world-route-complete-glow,.world-route-complete { fill:none; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+.world-route-shadow { stroke:rgba(23,49,39,.22); stroke-width:8; filter:blur(3px); }
+.world-route { stroke:#285d49; stroke-width:2; stroke-dasharray:5 5; }
+.world-route-complete-glow { stroke:rgba(216,241,105,.46); stroke-width:10; filter:blur(4px); }
+.world-route-complete { stroke:#b6dd38; stroke-width:3.5; }
+.world-marker { cursor:pointer; outline:none; }
+.world-marker .marker-dot { fill:#174f3a; stroke:#fff; stroke-width:3; vector-effect:non-scaling-stroke; transition:r .25s,fill .25s; }
+.world-marker text { fill:#fff; font:900 7px var(--font-manrope),sans-serif; pointer-events:none; }
+.world-marker.active .marker-dot,.world-marker:hover .marker-dot { fill:var(--lime); }
+.world-marker.active text,.world-marker:hover text { fill:var(--ink); }
+.marker-radar { fill:rgba(216,241,105,.25); stroke:rgba(216,241,105,.7); stroke-width:1; vector-effect:non-scaling-stroke; animation:radar 1.7s ease-out infinite; }
+@keyframes radar { 70% { r:24; opacity:0; } }
+.map-source { position:absolute; left:14px; bottom:101px; color:rgba(23,49,39,.75); font-size:7px; font-weight:700; }
+.world-controls { display:flex; gap:4px; pointer-events:auto; }
+.world-controls button { min-width:30px; height:30px; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:5px; border:0; border-radius:9px; color:var(--ink); background:rgba(255,255,255,.92); box-shadow:0 4px 14px rgba(23,49,39,.12); cursor:pointer; }
+.world-controls button b { font-size:8px; }
 .track-map { position:absolute; z-index:2; inset:0; opacity:0; transition:opacity .45s ease; }
 .track-map.ready { opacity:1; }
 .track-map .maplibregl-canvas { outline:none; }
@@ -37,6 +58,7 @@ button { color:inherit; font:inherit; }
 .track-map-header>span i { width:6px; height:6px; border-radius:50%; background:var(--lime); box-shadow:0 0 0 5px rgba(216,241,105,.16); animation:live-pulse 1.8s ease-out infinite; }
 @keyframes live-pulse { 70% { box-shadow:0 0 0 10px rgba(216,241,105,0); } }
 .track-map-header button { pointer-events:auto; display:flex; align-items:center; gap:5px; border:0; border-radius:99px; padding:8px 10px; color:var(--ink); background:rgba(255,255,255,.9); box-shadow:0 5px 18px rgba(23,49,39,.13); cursor:pointer; font-size:9px; font-weight:800; }
+.track-map-header .world-controls button { min-width:30px; height:30px; padding:0 7px; border-radius:9px; }
 .track-progress { position:absolute; z-index:7; left:0; right:0; bottom:112px; height:3px; background:rgba(255,255,255,.55); }
 .track-progress span { display:block; height:100%; background:var(--lime); box-shadow:0 0 14px rgba(216,241,105,.8); transition:width .6s ease; }
 .track-hud { position:absolute; z-index:7; left:12px; right:12px; bottom:12px; min-height:90px; padding:15px; display:flex; align-items:center; justify-content:space-between; gap:12px; color:#fff; background:rgba(17,55,42,.92); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.12); border-radius:16px; box-shadow:0 12px 28px rgba(23,49,39,.2); }

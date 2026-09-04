@@ -1,138 +1,99 @@
 "use client";
 
-import { Maximize2, Pause, Play, RotateCcw, Route } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import type { Map as MapLibreMap, Marker as MapLibreMarker } from "maplibre-gl";
+import { geoGraticule10, geoNaturalEarth1, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import landTopology from "world-atlas/land-110m.json";
+import { Maximize2, Minus, Pause, Play, Plus, RotateCcw, Route } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { JourneyStage, mockProduct } from "@/data/mockProduct";
 
-type TrackMapProps = {
-  activeId: string | null;
-  onSelect: (stage: JourneyStage) => void;
-};
+type TrackMapProps = { activeId: string | null; onSelect: (stage: JourneyStage) => void };
+const WIDTH = 640;
+const HEIGHT = 300;
+const projection = geoNaturalEarth1().fitExtent([[8, 8], [WIDTH - 8, HEIGHT - 8]], { type: "Sphere" });
+const path = geoPath(projection);
+const land = feature(landTopology as never, (landTopology as { objects: { land: never } }).objects.land);
+const worldPath = path(land) ?? "";
+const spherePath = path({ type: "Sphere" }) ?? "";
+const gridPath = path(geoGraticule10()) ?? "";
 
 export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<MapLibreMap | null>(null);
-  const markersRef = useRef<Map<string, MapLibreMarker>>(new Map());
-  const travelerRef = useRef<MapLibreMarker | null>(null);
-  const onSelectRef = useRef(onSelect);
-  const [isReady, setIsReady] = useState(false);
-  const [isFallback, setIsFallback] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const initialId = useRef(activeId);
   const activeIndex = Math.max(0, mockProduct.journey.findIndex((stage) => stage.id === activeId));
   const activeStage = mockProduct.journey[activeIndex];
+  const activePoint = projection(activeStage.coordinates) ?? [WIDTH / 2, HEIGHT / 2];
 
-  useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
-
-  useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    let cancelled = false;
-    const fallbackTimer = window.setTimeout(() => setIsFallback(true), 3500);
-
-    void import("maplibre-gl").then((maplibregl) => {
-      if (cancelled || !containerRef.current) return;
-      const map = new maplibregl.Map({
-        container: containerRef.current,
-        style: "https://tiles.openfreemap.org/styles/positron",
-        center: [88, 8],
-        zoom: 2.05,
-        minZoom: 1.35,
-        maxZoom: 11,
-        attributionControl: { compact: true },
-        projection: { type: "globe" },
-      });
-      map.dragRotate.disable();
-      map.touchZoomRotate.disableRotation();
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-      mapRef.current = map;
-
-      map.on("load", () => {
-        const coordinates = mockProduct.journey.map((stage) => stage.coordinates);
-        map.addSource("journey-route", { type: "geojson", lineMetrics: true, data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates } } });
-        map.addLayer({ id: "journey-route-shadow", type: "line", source: "journey-route", paint: { "line-color": "#173127", "line-width": 7, "line-opacity": .16, "line-blur": 5 } });
-        map.addLayer({ id: "journey-route", type: "line", source: "journey-route", paint: { "line-color": "#285d49", "line-width": 2.5, "line-opacity": .7, "line-dasharray": [2, 2] } });
-        map.addSource("completed-route", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: coordinates.slice(0, activeIndex + 1) } } });
-        map.addLayer({ id: "completed-route-glow", type: "line", source: "completed-route", paint: { "line-color": "#d8f169", "line-width": 10, "line-opacity": .28, "line-blur": 6 } });
-        map.addLayer({ id: "completed-route", type: "line", source: "completed-route", paint: { "line-color": "#bfe23d", "line-width": 4 } });
-
-        mockProduct.journey.forEach((stage, index) => {
-          const markerElement = document.createElement("button");
-          markerElement.type = "button";
-          markerElement.className = "track-marker";
-          markerElement.dataset.stage = stage.id;
-          markerElement.setAttribute("aria-label", `Track stage ${index + 1}: ${stage.title}`);
-          markerElement.textContent = String(index + 1);
-          markerElement.addEventListener("click", () => { setIsPlaying(false); setTourIndex(index); onSelectRef.current(stage); });
-          const marker = new maplibregl.Marker({ element: markerElement, anchor: "center" }).setLngLat(stage.coordinates).addTo(map);
-          markersRef.current.set(stage.id, marker);
-        });
-
-        const traveler = document.createElement("div");
-        traveler.className = "journey-traveler";
-        traveler.setAttribute("aria-hidden", "true");
-        travelerRef.current = new maplibregl.Marker({ element: traveler, anchor: "center" }).setLngLat(activeStage.coordinates).addTo(map);
-        window.clearTimeout(fallbackTimer);
-        setIsReady(true);
-      });
-    }).catch(() => setIsFallback(true));
-
-    return () => { cancelled = true; window.clearTimeout(fallbackTimer); markersRef.current.clear(); travelerRef.current = null; mapRef.current?.remove(); mapRef.current = null; };
-  }, []);
+  const routePath = useMemo(() => path({ type: "LineString", coordinates: mockProduct.journey.map((stage) => stage.coordinates) }) ?? "", []);
+  const completedPath = useMemo(() => {
+    const points = mockProduct.journey.slice(0, activeIndex + 1).map((stage) => stage.coordinates);
+    if (points.length === 1) points.push(points[0]);
+    return path({ type: "LineString", coordinates: points }) ?? "";
+  }, [activeIndex]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !isReady || !activeStage) return;
-    markersRef.current.forEach((marker, id) => marker.getElement().classList.toggle("active", id === activeStage.id));
-    travelerRef.current?.setLngLat(activeStage.coordinates);
-    const source = map.getSource("completed-route") as import("maplibre-gl").GeoJSONSource | undefined;
-    const completedCoordinates = mockProduct.journey.slice(0, activeIndex + 1).map((stage) => stage.coordinates);
-    if (completedCoordinates.length === 1) completedCoordinates.push(completedCoordinates[0]);
-    source?.setData({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: completedCoordinates } });
-    map.flyTo({ center: activeStage.coordinates, zoom: activeIndex < 2 ? 5.2 : 7.4, duration: 1500, essential: true });
-  }, [activeId, activeIndex, activeStage, isReady]);
+    if (activeId !== initialId.current && isPlaying) setZoom(1.75);
+  }, [activeId, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying) return;
     const timer = window.setInterval(() => {
       setTourIndex((current) => {
-        if (current >= mockProduct.journey.length - 1) { setIsPlaying(false); return current; }
+        if (current >= mockProduct.journey.length - 1) { setIsPlaying(false); setZoom(1); return current; }
         const next = current + 1;
-        onSelectRef.current(mockProduct.journey[next]);
+        onSelect(mockProduct.journey[next]);
         return next;
       });
-    }, 2600);
+    }, 2400);
     return () => window.clearInterval(timer);
-  }, [isPlaying]);
+  }, [isPlaying, onSelect]);
 
   const playJourney = () => {
     if (isPlaying) { setIsPlaying(false); return; }
     const start = activeIndex >= mockProduct.journey.length - 1 ? 0 : activeIndex;
     setTourIndex(start);
-    onSelectRef.current(mockProduct.journey[start]);
+    onSelect(mockProduct.journey[start]);
+    setZoom(1.75);
     setIsPlaying(true);
   };
 
-  const showOverview = () => {
-    const map = mapRef.current;
-    if (!map) return;
+  const selectMarker = (stage: JourneyStage, index: number) => {
     setIsPlaying(false);
-    map.fitBounds([[66, -12], [114, 27]], { padding: 42, duration: 1400, maxZoom: 3.4 });
+    setTourIndex(index);
+    setZoom(1.75);
+    onSelect(stage);
   };
 
+  const transform = zoom === 1 ? "translate(0px, 0px) scale(1)" : `translate(${WIDTH / 2}px, ${HEIGHT / 2}px) scale(${zoom}) translate(${-activePoint[0]}px, ${-activePoint[1]}px)`;
+
   return <section className="track-map-shell" aria-label="Interactive world map of the product journey">
-    <div className={`instant-map ${isReady ? "hidden" : ""}`}>
-      <div className="land land-one" /><div className="land land-two" /><div className="land land-three" /><div className="map-grid" />
-      <div className="route-line line-one" /><div className="route-line line-two" />
-      {mockProduct.journey.map((stage, index) => <button key={stage.id} className={`instant-point ${activeId === stage.id ? "active" : ""}`} style={{ left: `${stage.position.x}%`, top: `${stage.position.y}%` }} onClick={() => onSelect(stage)} aria-label={`Open ${stage.title}`}><span>{index + 1}</span></button>)}
-      <span className="map-mode"><Route size={12} /> {isFallback ? "Lite map · route stays interactive" : "Loading detailed map…"}</span>
+    <div className="world-map">
+      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="World map showing a cotton supply chain route from India to Indonesia">
+        <g className="world-viewport" style={{ transform }}>
+          <path className="world-ocean" d={spherePath} />
+          <path className="world-grid" d={gridPath} />
+          <path className="world-land" d={worldPath} />
+          <path className="world-route-shadow" d={routePath} />
+          <path className="world-route" d={routePath} />
+          <path className="world-route-complete-glow" d={completedPath} />
+          <path className="world-route-complete" d={completedPath} />
+          {mockProduct.journey.map((stage, index) => {
+            const point = projection(stage.coordinates) ?? [0, 0];
+            const active = stage.id === activeId;
+            return <g key={stage.id} className={`world-marker ${active ? "active" : ""}`} transform={`translate(${point[0]} ${point[1]})`} onClick={() => selectMarker(stage, index)} role="button" tabIndex={0} aria-label={`Stage ${index + 1}: ${stage.title}, ${stage.location}`} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") selectMarker(stage, index); }}>
+              {active && <circle className="marker-radar" r="16" />}
+              <circle className="marker-dot" r={active ? 11 : 8} />
+              <text y="3.2" textAnchor="middle">{index + 1}</text>
+            </g>;
+          })}
+        </g>
+      </svg>
+      <span className="map-source">Natural Earth world data · Stored locally</span>
     </div>
-    <div ref={containerRef} className={`track-map ${isReady ? "ready" : ""}`} />
-    <div className="track-map-header"><span><i /> LIVE PRODUCT ROUTE</span><button onClick={showOverview} aria-label="Show complete route"><Maximize2 size={15} /> Overview</button></div>
+    <div className="track-map-header"><span><i /> VERIFIED ROUTE VIEW</span><div className="world-controls"><button onClick={() => setZoom((value) => Math.min(2.4, value + .25))} aria-label="Zoom in"><Plus size={14} /></button><button onClick={() => setZoom((value) => Math.max(1, value - .25))} aria-label="Zoom out"><Minus size={14} /></button><button onClick={() => { setZoom(1); setIsPlaying(false); }} aria-label="Show complete world map"><Maximize2 size={14} /><b>World</b></button></div></div>
     <div className="track-progress" aria-hidden="true"><span style={{ width: `${((activeIndex + 1) / mockProduct.journey.length) * 100}%` }} /></div>
-    <div className="track-hud">
-      <div className="hud-step"><small>STAGE {String(activeIndex + 1).padStart(2, "0")} / {String(mockProduct.journey.length).padStart(2, "0")}</small><strong>{activeStage.title}</strong><span>{activeStage.location}</span></div>
-      <button className="play-route" onClick={playJourney}>{isPlaying ? <Pause size={16} /> : activeIndex === mockProduct.journey.length - 1 ? <RotateCcw size={16} /> : <Play size={16} fill="currentColor" />}<span>{isPlaying ? "Pause" : activeIndex === mockProduct.journey.length - 1 ? "Replay" : "Play journey"}</span></button>
-    </div>
+    <div className="track-hud"><div className="hud-step"><small>STAGE {String(activeIndex + 1).padStart(2, "0")} / {String(mockProduct.journey.length).padStart(2, "0")}</small><strong>{activeStage.title}</strong><span>{activeStage.location}</span></div><button className="play-route" onClick={playJourney}>{isPlaying ? <Pause size={16} /> : activeIndex === mockProduct.journey.length - 1 ? <RotateCcw size={16} /> : <Play size={16} fill="currentColor" />}<span>{isPlaying ? "Pause" : activeIndex === mockProduct.journey.length - 1 ? "Replay" : "Play journey"}</span></button></div>
   </section>;
 }
