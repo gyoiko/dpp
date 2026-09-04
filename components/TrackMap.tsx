@@ -89,9 +89,11 @@ export default function TrackMap({ activeId, onSelect }: TrackMapProps) {
             const point = projection(stage.coordinates) ?? [0, 0];
             const active = stage.id === activeId;
             return <g key={stage.id} className={`world-marker ${active ? "active" : ""}`} transform={`translate(${point[0]} ${point[1]})`} onClick={() => selectMarker(stage, index)} role="button" tabIndex={0} aria-label={`Stage ${index + 1}: ${stage.title}, ${stage.location}`} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") selectMarker(stage, index); }}>
-              {active && <circle className="marker-radar" r="16" />}
-              <circle className="marker-dot" r={active ? 11 : 8} />
-              <text y="3.2" textAnchor="middle">{index + 1}</text>
+              <g className="marker-pin" transform={`scale(${1 / zoom})`}>
+                {active && <circle className="marker-radar" r="12" />}
+                <circle className="marker-dot" r="8.5" />
+                <text y="3.2" textAnchor="middle">{index + 1}</text>
+              </g>
             </g>;
           })}
         </g>

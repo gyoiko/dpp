@@ -30,6 +30,7 @@ button { color:inherit; font:inherit; }
 .world-route-complete-glow { stroke:rgba(216,241,105,.46); stroke-width:10; filter:blur(4px); }
 .world-route-complete { stroke:#b6dd38; stroke-width:3.5; }
 .world-marker { cursor:pointer; outline:none; }
+.marker-pin { transition:transform 1.25s cubic-bezier(.22,.75,.2,1); }
 .world-marker .marker-dot { fill:#174f3a; stroke:#fff; stroke-width:3; vector-effect:non-scaling-stroke; transition:r .25s,fill .25s; }
 .world-marker text { fill:#fff; font:900 7px var(--font-manrope),sans-serif; pointer-events:none; }
 .world-marker.active .marker-dot,.world-marker:hover .marker-dot { fill:var(--lime); }
