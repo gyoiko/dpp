@@ -6,7 +6,6 @@ import {
   BadgeCheck,
   ChevronDown,
   Cog,
-  ExternalLink,
   Factory,
   FileCheck2,
   FileText,
@@ -15,7 +14,6 @@ import {
   Layers,
   Route,
   ScanLine,
-  ShieldCheck,
   Shirt,
   Sprout,
   X,
@@ -24,7 +22,6 @@ import { useCallback, useMemo, useState } from "react";
 import {
   type DppActor,
   type DppBadge,
-  type DppDocument,
   type DppProduct,
   type DppStage,
 } from "@/data/dppData";
@@ -32,10 +29,6 @@ import TrackMap, { type MapStage } from "@/components/TrackMap";
 
 type Tab = "journey" | "product" | "badges";
 const stageIcons = [Sprout, Factory, Route, Cog, Layers, Shirt];
-
-function statusLabel(status: DppStage["status"]) {
-  return status === "complete" ? "Complete" : status === "partial" ? "Partial" : status === "declared" ? "Declared" : "Not documented";
-}
 
 function badgeStatusClass(status: DppBadge["status"]) {
   return status === "Supported" ? "supported" : status === "Partial" ? "partial" : status === "Pending" ? "pending" : "not-documented";
@@ -107,7 +100,6 @@ function StageCard({ stage, index, open, onToggle }: { stage: DppStage; index: n
           <strong>{stage.title}</strong>
           <small>{stage.subtitle}</small>
         </span>
-        <span className={`stage-status ${stage.status}`}>{statusLabel(stage.status)}</span>
         <span className="stage-action">{open ? <X size={16} /> : <ChevronDown size={18} />}</span>
       </button>
       <div className="stage-detail-slide" aria-hidden={!open}>
@@ -332,7 +324,6 @@ export default function DppApp({ product }: { product: DppProduct }) {
       <section className="dpp-card">
         <header className="topbar">
           <BrandMark />
-          <span className="verified-chip"><BadgeCheck size={14} /> {product.coverage}% documented</span>
         </header>
         {!detailBadge && tab === "journey" && <TrackMap stages={mapStages} activeId={activeStageId} onSelect={selectStageFromMap} />}
         {!detailBadge && <Navigation tab={tab} setTab={(next) => { setTab(next); setDetailBadge(null); }} />}

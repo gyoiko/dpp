@@ -141,11 +141,20 @@ export default function TrackMap({ stages, activeId, onSelect }: TrackMapProps) 
     return offsets.map(([x, y]) => [round(x), round(y)]);
   }, [markers]);
 
-  const routePoints = useMemo(() => markers.map((marker) => marker.point.coordinates), [markers]);
-  const routePath = useMemo(() => routeLine(routePoints), [routePoints]);
-  const completedPath = useMemo(
-    () => routeLine(routePoints.slice(0, syncedTourIndex + 1)),
-    [routePoints, syncedTourIndex],
+  const segments = useMemo(
+    () =>
+      markers.flatMap((marker, index) => {
+        const target = journey[marker.stageIndex + 1]?.points[0];
+        if (!target) return [];
+        return [
+          {
+            key: `${marker.stage.id}-${marker.point.id}-${target.id}`,
+            index,
+            path: routeLine([marker.point.coordinates, target.coordinates]),
+          },
+        ];
+      }),
+    [journey, markers],
   );
 
   useEffect(() => {
@@ -204,10 +213,20 @@ export default function TrackMap({ stages, activeId, onSelect }: TrackMapProps) 
             <path className="world-ocean" d={spherePath} />
             <path className="world-grid" d={gridPath} />
             <path className="world-land" d={worldPath} />
-            <path className="world-route-shadow" d={routePath} />
-            <path className="world-route" d={routePath} />
-            <path className="world-route-complete-glow" d={completedPath} />
-            <path className="world-route-complete" d={completedPath} />
+            {segments.map((segment) => (
+              <g key={`route-${segment.key}`}>
+                <path className="world-route-shadow" d={segment.path} />
+                <path className="world-route" d={segment.path} />
+              </g>
+            ))}
+            {segments.map((segment) =>
+              segment.index < syncedTourIndex ? (
+                <g key={`route-done-${segment.key}`}>
+                  <path className="world-route-complete-glow" d={segment.path} />
+                  <path className="world-route-complete" d={segment.path} />
+                </g>
+              ) : null,
+            )}
             {markers.map(({ stage, point: mapPoint }, index) => {
               const projected = projection(mapPoint.coordinates) ?? [0, 0];
               const point = [round(projected[0]), round(projected[1])] as [number, number];
