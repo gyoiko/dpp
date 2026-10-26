@@ -1,0 +1,2116 @@
+{
+  "generatedAt": "2026-10-21T08:02:59.057Z",
+  "source": "D:\\KERJO\\Project\\DPP",
+  "products": {
+    "100027482": {
+      "files": [
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_BL.pdf",
+          "rel": "OLAM AUS/100027482_TD_OGA_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_BL.pdf",
+          "bytes": 1328888,
+          "sha": "9af10a48aa33c362"
+        },
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_CD Import.pdf",
+          "rel": "OLAM AUS/100027482_TD_OGA_CD Import.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_CD%20Import.pdf",
+          "bytes": 15350,
+          "sha": "70599205972a1df6"
+        },
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_CO.pdf",
+          "rel": "OLAM AUS/100027482_TD_OGA_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_CO.pdf",
+          "bytes": 749205,
+          "sha": "8e8a84886d7a5795"
+        },
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_DPL.PDF",
+          "rel": "OLAM AUS/100027482_TD_OGA_DPL.PDF",
+          "codes": [
+            "DPL"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_DPL.PDF",
+          "bytes": 290407,
+          "sha": "87ba3b5b705f8086"
+        },
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_INV.pdf",
+          "rel": "OLAM AUS/100027482_TD_OGA_INV.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_INV.pdf",
+          "bytes": 610344,
+          "sha": "b1374cd8d80aed60"
+        },
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_PHYTHO.pdf",
+          "rel": "OLAM AUS/100027482_TD_OGA_PHYTHO.pdf",
+          "codes": [
+            "PHYTO"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_PHYTHO.pdf",
+          "bytes": 877294,
+          "sha": "f07910f5fd03b36d"
+        },
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_SC.pdf",
+          "rel": "OLAM AUS/100027482_TD_OGA_SC.pdf",
+          "codes": [
+            "SC"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_SC.pdf",
+          "bytes": 100517,
+          "sha": "dcf3971c39f3d1b7"
+        },
+        {
+          "tier": "Cotton Trader 1",
+          "actor": "olam-au",
+          "name": "100027482_TD_OGA_TT.pdf",
+          "rel": "OLAM AUS/100027482_TD_OGA_TT.pdf",
+          "codes": [
+            "TT"
+          ],
+          "href": "/documents/100027482/Cotton%20Trader%201/OLAM%20AUS/100027482_TD_OGA_TT.pdf",
+          "bytes": 129175,
+          "sha": "c704d9dcde612c78"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_BL.pdf",
+          "rel": "100027482_TD_OGA_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": null,
+          "bytes": 996569,
+          "sha": "02f2fe55e9154bdc"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_CD Import.pdf",
+          "rel": "100027482_TD_OGA_CD Import.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": null,
+          "bytes": 24213,
+          "sha": "6c9e0655135dd080"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_CO.pdf",
+          "rel": "100027482_TD_OGA_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": null,
+          "bytes": 240724,
+          "sha": "4f0e9a2ea30c2d2b"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_DPL.pdf",
+          "rel": "100027482_TD_OGA_DPL.pdf",
+          "codes": [
+            "DPL"
+          ],
+          "href": null,
+          "bytes": 86270,
+          "sha": "0cc2ecf13dd016ed"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_INV.pdf",
+          "rel": "100027482_TD_OGA_INV.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": null,
+          "bytes": 249491,
+          "sha": "7caaf4a6d23cf629"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_PHYTHO.pdf",
+          "rel": "100027482_TD_OGA_PHYTHO.pdf",
+          "codes": [
+            "PHYTO"
+          ],
+          "href": null,
+          "bytes": 569086,
+          "sha": "ffec2f83e5ca2421"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_SC.pdf",
+          "rel": "100027482_TD_OGA_SC.pdf",
+          "codes": [
+            "SC"
+          ],
+          "href": null,
+          "bytes": 101245,
+          "sha": "2a4dcafed3509677"
+        },
+        {
+          "tier": "Cotton Trader 2",
+          "actor": "olam-us",
+          "name": "100027482_TD_OGA_TT.pdf",
+          "rel": "100027482_TD_OGA_TT.pdf",
+          "codes": [
+            "TT"
+          ],
+          "href": null,
+          "bytes": 141983,
+          "sha": "b5c995f78d998a1a"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_BL.pdf",
+          "rel": "100027482_TD_CAR_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": null,
+          "bytes": 2479153,
+          "sha": "21037898788b40a7"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_CD.pdf",
+          "rel": "100027482_TD_CAR_CD.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": null,
+          "bytes": 141452,
+          "sha": "6a3f42573de0ca50"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_CO.pdf",
+          "rel": "100027482_TD_CAR_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": null,
+          "bytes": 107162,
+          "sha": "5a528042a9ec6af2"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_DPL updated.pdf",
+          "rel": "100027482_TD_CAR_DPL updated.pdf",
+          "codes": [
+            "DPL"
+          ],
+          "href": null,
+          "bytes": 1025093,
+          "sha": "2f0a1824aec106c1"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_DPL.pdf",
+          "rel": "100027482_TD_CAR_DPL.pdf",
+          "codes": [
+            "DPL"
+          ],
+          "href": null,
+          "bytes": 39775,
+          "sha": "044b7d3448ec7b1a"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_HVI.xlsx",
+          "rel": "100027482_TD_CAR_HVI.xlsx",
+          "codes": [
+            "HVI"
+          ],
+          "href": null,
+          "bytes": 33770,
+          "sha": "0914879fbed0aaa0"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_INS.pdf",
+          "rel": "100027482_TD_CAR_INS.pdf",
+          "codes": [
+            "INS"
+          ],
+          "href": null,
+          "bytes": 471357,
+          "sha": "7b5a1b129cb092f4"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_INV.pdf",
+          "rel": "100027482_TD_CAR_INV.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": null,
+          "bytes": 348782,
+          "sha": "09922d84bfc07ce9"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_PHYTHO.pdf",
+          "rel": "100027482_TD_CAR_PHYTHO.pdf",
+          "codes": [
+            "PHYTO"
+          ],
+          "href": null,
+          "bytes": 95155,
+          "sha": "b64e640cec07d9cd"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_SC.pdf",
+          "rel": "100027482_TD_CAR_SC.pdf",
+          "codes": [
+            "SC"
+          ],
+          "href": null,
+          "bytes": 944820,
+          "sha": "956711b3e33cb48e"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_TT Proof.png",
+          "rel": "100027482_TD_CAR_TT Proof.png",
+          "codes": [
+            "TT"
+          ],
+          "href": null,
+          "bytes": 73082,
+          "sha": "99f7e499e019307c"
+        },
+        {
+          "tier": "Cotton Trader 3",
+          "actor": "cargill",
+          "name": "100027482_TD_CAR_TT.pdf",
+          "rel": "100027482_TD_CAR_TT.pdf",
+          "codes": [
+            "TT"
+          ],
+          "href": null,
+          "bytes": 151492,
+          "sha": "15a4b093320f0024"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_BIR.pdf",
+          "rel": "100027482_SP_SII_BIR.pdf",
+          "codes": [
+            "BIR"
+          ],
+          "href": null,
+          "bytes": 62997,
+          "sha": "be30cde39a9f0e44"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_CO.pdf",
+          "rel": "100027482_SP_SII_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": null,
+          "bytes": 762772,
+          "sha": "3b9262bbd8bb7ea6"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_SC.pdf",
+          "rel": "100027482_SP_SII_SC.pdf",
+          "codes": [
+            "SC"
+          ],
+          "href": null,
+          "bytes": 2807573,
+          "sha": "02ffb95cdcc5dea6"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_TT.pdf",
+          "rel": "100027482_SP_SII_TT.pdf",
+          "codes": [
+            "TT"
+          ],
+          "href": null,
+          "bytes": 58503,
+          "sha": "9e4c8955c86a7c3e"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_CD 1.pdf",
+          "rel": "1st SHIPMENT/100027482_SP_SII_CD 1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": null,
+          "bytes": 173153,
+          "sha": "13a4c4c0b7482c08"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_CD 2.pdf",
+          "rel": "1st SHIPMENT/100027482_SP_SII_CD 2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": null,
+          "bytes": 13934,
+          "sha": "0305f1831ffe24da"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_INV.pdf",
+          "rel": "1st SHIPMENT/100027482_SP_SII_INV.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": null,
+          "bytes": 491294,
+          "sha": "b574361f6d112172"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_TR,DPL.pdf",
+          "rel": "1st SHIPMENT/100027482_SP_SII_TR,DPL.pdf",
+          "codes": [
+            "TR",
+            "DPL"
+          ],
+          "href": null,
+          "bytes": 4565128,
+          "sha": "325942e7ba1a0e22"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_WH Received.pdf",
+          "rel": "1st SHIPMENT/100027482_SP_SII_WH Received.pdf",
+          "codes": [
+            "WH"
+          ],
+          "href": null,
+          "bytes": 135329,
+          "sha": "d9b9700bac3e82bb"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_WH Received.xls",
+          "rel": "1st SHIPMENT/100027482_SP_SII_WH Received.xls",
+          "codes": [
+            "WH"
+          ],
+          "href": null,
+          "bytes": 26624,
+          "sha": "ee732c06d87ab6fc"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_CD 1.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_CD 1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": null,
+          "bytes": 173234,
+          "sha": "c0b48335fe9c33a6"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_CD 2.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_CD 2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": null,
+          "bytes": 13899,
+          "sha": "e5c862be91a47e97"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_DPL 1.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_DPL 1.pdf",
+          "codes": [
+            "DPL"
+          ],
+          "href": null,
+          "bytes": 226038,
+          "sha": "77614615f92bc8a0"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_DPL 2.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_DPL 2.pdf",
+          "codes": [
+            "DPL"
+          ],
+          "href": null,
+          "bytes": 42960,
+          "sha": "fe45a9265a053293"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_INV.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_INV.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": null,
+          "bytes": 1213531,
+          "sha": "c96980c9e35d8c88"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_TR.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_TR.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": null,
+          "bytes": 10227124,
+          "sha": "2bcb2098996e95f7"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_WH Received 1.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_WH Received 1.pdf",
+          "codes": [
+            "WH"
+          ],
+          "href": null,
+          "bytes": 135583,
+          "sha": "dbfd371b20ed33c0"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_WH Received 1.xls",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_WH Received 1.xls",
+          "codes": [
+            "WH"
+          ],
+          "href": null,
+          "bytes": 33280,
+          "sha": "dbfb5e9d74eebb9a"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_WH Received 2.pdf",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_WH Received 2.pdf",
+          "codes": [
+            "WH"
+          ],
+          "href": null,
+          "bytes": 135698,
+          "sha": "5712a96134379b7f"
+        },
+        {
+          "tier": "Spinner 1",
+          "actor": "sii",
+          "name": "100027482_SP_SII_WH Received 2.xls",
+          "rel": "2nd SHIPMENT/100027482_SP_SII_WH Received 2.xls",
+          "codes": [
+            "WH"
+          ],
+          "href": null,
+          "bytes": 33280,
+          "sha": "9632b2fcf619a391"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_BIR.pdf",
+          "rel": "100027482_SP_XDD_BIR.pdf",
+          "codes": [
+            "BIR"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_BIR.pdf",
+          "bytes": 22698,
+          "sha": "7bd692f5b6780687"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_BL.pdf",
+          "rel": "100027482_SP_XDD_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_BL.pdf",
+          "bytes": 1034046,
+          "sha": "63d15c77fe819650"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_CD 1.pdf",
+          "rel": "100027482_SP_XDD_CD 1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_CD%201.pdf",
+          "bytes": 82828,
+          "sha": "d7e0445026523e7f"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_CD 2.pdf",
+          "rel": "100027482_SP_XDD_CD 2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_CD%202.pdf",
+          "bytes": 199642,
+          "sha": "b7ec9a17d5042332"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_CO.pdf",
+          "rel": "100027482_SP_XDD_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_CO.pdf",
+          "bytes": 413133,
+          "sha": "569b9a385d0fa30f"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_DPL.pdf",
+          "rel": "100027482_SP_XDD_DPL.pdf",
+          "codes": [
+            "DPL"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_DPL.pdf",
+          "bytes": 109677,
+          "sha": "441e8278fb12ff47"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_INV.pdf",
+          "rel": "100027482_SP_XDD_INV.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_INV.pdf",
+          "bytes": 373192,
+          "sha": "7319f58c7c1e5bf7"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_PL.pdf",
+          "rel": "100027482_SP_XDD_PL.pdf",
+          "codes": [
+            "PL"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_PL.pdf",
+          "bytes": 392799,
+          "sha": "b3d8a1cf69418139"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_PO.pdf",
+          "rel": "100027482_SP_XDD_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_PO.pdf",
+          "bytes": 2617497,
+          "sha": "057d71b2cb755782"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_TT.pdf",
+          "rel": "100027482_SP_XDD_TT.pdf",
+          "codes": [
+            "TT"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_TT.pdf",
+          "bytes": 54701,
+          "sha": "c7616feac27e292a"
+        },
+        {
+          "tier": "Spinner 2",
+          "actor": "xdd",
+          "name": "100027482_SP_XDD_WH Received.pdf",
+          "rel": "100027482_SP_XDD_WH Received.pdf",
+          "codes": [
+            "WH"
+          ],
+          "href": "/documents/100027482/Spinner%202/100027482_SP_XDD_WH%20Received.pdf",
+          "bytes": 106083,
+          "sha": "699dad4ff73e1c11"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100024782_WV_GTI_DPL.pdf",
+          "rel": "100024782_WV_GTI_DPL.pdf",
+          "codes": [
+            "DPL"
+          ],
+          "href": "/documents/100027482/Weaver/100024782_WV_GTI_DPL.pdf",
+          "bytes": 107007,
+          "sha": "5c75b9f52a6c71c3"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100024782_WV_GTI_DPL.xlsx",
+          "rel": "100024782_WV_GTI_DPL.xlsx",
+          "codes": [
+            "DPL"
+          ],
+          "href": "/documents/100027482/Weaver/100024782_WV_GTI_DPL.xlsx",
+          "bytes": 53671,
+          "sha": "8a02ddc802723653"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_BIR 1.pdf",
+          "rel": "100027482_WV_GTI_BIR 1.pdf",
+          "codes": [
+            "BIR"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_BIR%201.pdf",
+          "bytes": 107276,
+          "sha": "b3aa14f88bdb3b73"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_BIR 2.pdf",
+          "rel": "100027482_WV_GTI_BIR 2.pdf",
+          "codes": [
+            "BIR"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_BIR%202.pdf",
+          "bytes": 77886,
+          "sha": "fe799abf3ab4f31d"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_CD.pdf",
+          "rel": "100027482_WV_GTI_CD.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_CD.pdf",
+          "bytes": 16771,
+          "sha": "b0ba6a108661a8d6"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_CO.docx",
+          "rel": "100027482_WV_GTI_CO.docx",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_CO.docx",
+          "bytes": 38143,
+          "sha": "d97d488445aaa1c5"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_CO.pdf",
+          "rel": "100027482_WV_GTI_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_CO.pdf",
+          "bytes": 73174,
+          "sha": "e5590de3e3977339"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_FABRIC OUT.pdf",
+          "rel": "100027482_WV_GTI_FABRIC OUT.pdf",
+          "codes": [
+            "FABRIC_OUT"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_FABRIC%20OUT.pdf",
+          "bytes": 96042,
+          "sha": "3df7869501a7abd8"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_INV,PL,GRN.pdf",
+          "rel": "100027482_WV_GTI_INV,PL,GRN.pdf",
+          "codes": [
+            "INV",
+            "PL",
+            "GRN"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_INV%2CPL%2CGRN.pdf",
+          "bytes": 214572,
+          "sha": "0faa2148ad857180"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_SC.pdf",
+          "rel": "100027482_WV_GTI_SC.pdf",
+          "codes": [
+            "SC"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_SC.pdf",
+          "bytes": 205617,
+          "sha": "9e40489b785ca23c"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "100027482_WV_GTI_WH Received.pdf",
+          "rel": "100027482_WV_GTI_WH Received.pdf",
+          "codes": [
+            "WH"
+          ],
+          "href": "/documents/100027482/Weaver/100027482_WV_GTI_WH%20Received.pdf",
+          "bytes": 370527,
+          "sha": "78c2de2457dbf235"
+        },
+        {
+          "tier": "Weaver",
+          "actor": "gti",
+          "name": "10027482_WV_GTI_PP.pdf",
+          "rel": "10027482_WV_GTI_PP.pdf",
+          "codes": [
+            "PP"
+          ],
+          "href": "/documents/100027482/Weaver/10027482_WV_GTI_PP.pdf",
+          "bytes": 71055,
+          "sha": "46f4f1d9f0bb82ba"
+        },
+        {
+          "tier": "root",
+          "actor": "root",
+          "name": "COC Document 100027482 Update.xlsx",
+          "rel": "COC Document 100027482 Update.xlsx",
+          "codes": [
+            "COC"
+          ],
+          "label": "COC master document",
+          "href": "/documents/100027482/COC%20Document%20100027482%20Update.xlsx",
+          "bytes": 2198542,
+          "sha": "f1d3e7f841db98e5"
+        }
+      ]
+    },
+    "100070456": {
+      "files": [
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_BL.pdf",
+          "rel": "BCM/100070456_TD_BCM_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_BL.pdf",
+          "bytes": 293464,
+          "sha": "bef25e4fcef94c7f"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_CO.pdf",
+          "rel": "BCM/100070456_TD_BCM_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_CO.pdf",
+          "bytes": 254933,
+          "sha": "702a8a28f6e10ac9"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_INV1.pdf",
+          "rel": "BCM/100070456_TD_BCM_INV1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_INV1.pdf",
+          "bytes": 42280,
+          "sha": "3939afeee8f676ea"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_INV2a.pdf",
+          "rel": "BCM/100070456_TD_BCM_INV2a.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_INV2a.pdf",
+          "bytes": 119192,
+          "sha": "646d91f073e778db"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_INV2b.pdf",
+          "rel": "BCM/100070456_TD_BCM_INV2b.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_INV2b.pdf",
+          "bytes": 107865,
+          "sha": "95cd36c8ec54e491"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_PO.pdf",
+          "rel": "BCM/100070456_TD_BCM_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_PO.pdf",
+          "bytes": 1167335,
+          "sha": "5ac947287941d5fa"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_TR1.pdf",
+          "rel": "BCM/100070456_TD_BCM_TR1.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_TR1.pdf",
+          "bytes": 179152,
+          "sha": "f00911f7eb06e609"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "100070456_TD_BCM_TR2.pdf",
+          "rel": "BCM/100070456_TD_BCM_TR2.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/BCM/100070456_TD_BCM_TR2.pdf",
+          "bytes": 277290,
+          "sha": "df32c6e42da3df15"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "iih",
+          "name": "100070456_TD_IIH_INV1, TR1.pdf",
+          "rel": "IIH/100070456_TD_IIH_INV1, TR1.pdf",
+          "codes": [
+            "INV",
+            "TR"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/IIH/100070456_TD_IIH_INV1%2C%20TR1.pdf",
+          "bytes": 353581,
+          "sha": "cebe72c973ab7341"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "iih",
+          "name": "100070456_TD_IIH_INV2.png",
+          "rel": "IIH/100070456_TD_IIH_INV2.png",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/IIH/100070456_TD_IIH_INV2.png",
+          "bytes": 248702,
+          "sha": "3a414660646cd71a"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "iih",
+          "name": "100070456_TD_IIH_PO.pdf",
+          "rel": "IIH/100070456_TD_IIH_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/100070456/1.Cotton%20Trader/IIH/100070456_TD_IIH_PO.pdf",
+          "bytes": 1388838,
+          "sha": "62e0126d2c77d4c6"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_BL.pdf",
+          "rel": "100070456_SP_XDD_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_BL.pdf",
+          "bytes": 1015948,
+          "sha": "fcfa63f953f0e9df"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_CD1.pdf",
+          "rel": "100070456_SP_XDD_CD1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_CD1.pdf",
+          "bytes": 34133,
+          "sha": "1580c343d1552c79"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_CD2.pdf",
+          "rel": "100070456_SP_XDD_CD2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_CD2.pdf",
+          "bytes": 199316,
+          "sha": "8e2f08a9bed223dd"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_CO.pdf",
+          "rel": "100070456_SP_XDD_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_CO.pdf",
+          "bytes": 382154,
+          "sha": "aa76bf6ddff18398"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_INV1.pdf",
+          "rel": "100070456_SP_XDD_INV1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_INV1.pdf",
+          "bytes": 84584,
+          "sha": "422f9c7f5451a20c"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_INV2.pdf",
+          "rel": "100070456_SP_XDD_INV2.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_INV2.pdf",
+          "bytes": 55003,
+          "sha": "8a6ba7de0d56b48b"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_PO.pdf",
+          "rel": "100070456_SP_XDD_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_PO.pdf",
+          "bytes": 2615453,
+          "sha": "f1105b8aa40c097d"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "100070456_SP_XDD_TR.pdf",
+          "rel": "100070456_SP_XDD_TR.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/100070456/2.Spinner/100070456_SP_XDD_TR.pdf",
+          "bytes": 84934,
+          "sha": "af9db658588b0814"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_BIR.pdf",
+          "rel": "100070456_KW_PTG_BIR.pdf",
+          "codes": [
+            "BIR"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_BIR.pdf",
+          "bytes": 108538,
+          "sha": "9666c1a28a09f36f"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_CD1.pdf",
+          "rel": "100070456_KW_PTG_CD1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_CD1.pdf",
+          "bytes": 13789,
+          "sha": "8d72237209734841"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_CD2.pdf",
+          "rel": "100070456_KW_PTG_CD2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_CD2.pdf",
+          "bytes": 15297,
+          "sha": "150ef7f41335bd89"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_CO.pdf",
+          "rel": "100070456_KW_PTG_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_CO.pdf",
+          "bytes": 186681,
+          "sha": "e8e1a39d23d3bdaa"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_INV1,TR1,CD,BL.pdf",
+          "rel": "100070456_KW_PTG_INV1,TR1,CD,BL.pdf",
+          "codes": [
+            "INV",
+            "TR",
+            "CD",
+            "BL"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_INV1%2CTR1%2CCD%2CBL.pdf",
+          "bytes": 2602078,
+          "sha": "9ada4c87d350ea92"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_INV2a.pdf",
+          "rel": "100070456_KW_PTG_INV2a.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_INV2a.pdf",
+          "bytes": 236529,
+          "sha": "74e631a8912120e9"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_INV2b.pdf",
+          "rel": "100070456_KW_PTG_INV2b.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_INV2b.pdf",
+          "bytes": 473988,
+          "sha": "a2000977e81b26c2"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_PO1.pdf",
+          "rel": "100070456_KW_PTG_PO1.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_PO1.pdf",
+          "bytes": 338578,
+          "sha": "38130fb28870d80a"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_PO2.pdf",
+          "rel": "100070456_KW_PTG_PO2.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_PO2.pdf",
+          "bytes": 180072,
+          "sha": "b946c01a6e7eaf8b"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_TR2.pdf",
+          "rel": "100070456_KW_PTG_TR2.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_TR2.pdf",
+          "bytes": 43037,
+          "sha": "cf0156dfd38ee6b6"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "100070456_KW_PTG_WO.pdf",
+          "rel": "100070456_KW_PTG_WO.pdf",
+          "codes": [
+            "WO"
+          ],
+          "href": "/documents/100070456/3.Knitter_Weaver/100070456_KW_PTG_WO.pdf",
+          "bytes": 203923,
+          "sha": "35f8c97d42ea4e08"
+        },
+        {
+          "tier": "root",
+          "actor": "root",
+          "name": "COC Document 100070456.xlsx",
+          "rel": "COC Document 100070456.xlsx",
+          "codes": [
+            "COC"
+          ],
+          "label": "COC master document",
+          "href": "/documents/100070456/COC%20Document%20100070456.xlsx",
+          "bytes": 2189529,
+          "sha": "bc2f7b5be59966d0"
+        }
+      ]
+    },
+    "710954571003": {
+      "files": [
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_BL.pdf",
+          "rel": "BCM/710954571003_TD_BCM_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_BL.pdf",
+          "bytes": 293464,
+          "sha": "941a054aac6ef822"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_CD.pdf",
+          "rel": "BCM/710954571003_TD_BCM_CD.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_CD.pdf",
+          "bytes": 141293,
+          "sha": "1c3ad904bf606ccb"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_CO.pdf",
+          "rel": "BCM/710954571003_TD_BCM_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_CO.pdf",
+          "bytes": 254933,
+          "sha": "9100571c4681b1bf"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_INV1.pdf",
+          "rel": "BCM/710954571003_TD_BCM_INV1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_INV1.pdf",
+          "bytes": 42280,
+          "sha": "f04ed14c8db62c28"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_INV2.1.pdf",
+          "rel": "BCM/710954571003_TD_BCM_INV2.1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_INV2.1.pdf",
+          "bytes": 119192,
+          "sha": "f6f8be0dd789d6fd"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_INV2.2.pdf",
+          "rel": "BCM/710954571003_TD_BCM_INV2.2.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_INV2.2.pdf",
+          "bytes": 107865,
+          "sha": "e820d6db82b9e4cb"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_PO.pdf",
+          "rel": "BCM/710954571003_TD_BCM_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_PO.pdf",
+          "bytes": 1167335,
+          "sha": "d01f9ad46dcdffcc"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_TR1.pdf",
+          "rel": "BCM/710954571003_TD_BCM_TR1.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_TR1.pdf",
+          "bytes": 179152,
+          "sha": "c75135750328cd0d"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "bcm",
+          "name": "710954571003_TD_BCM_TR2.pdf",
+          "rel": "BCM/710954571003_TD_BCM_TR2.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/BCM/710954571003_TD_BCM_TR2.pdf",
+          "bytes": 275747,
+          "sha": "fb89bf3969e16c6d"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "cnd",
+          "name": "710954571003_TD_C&D_INV1.pdf",
+          "rel": "C&D/710954571003_TD_C&D_INV1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/C%26D/710954571003_TD_C%26D_INV1.pdf",
+          "bytes": 657234,
+          "sha": "3dba4808101acd1b"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "cnd",
+          "name": "710954571003_TD_C&D_INV2.pdf",
+          "rel": "C&D/710954571003_TD_C&D_INV2.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/C%26D/710954571003_TD_C%26D_INV2.pdf",
+          "bytes": 82465,
+          "sha": "a3d7263fde51fa52"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "cnd",
+          "name": "710954571003_TD_C&D_PO.pdf",
+          "rel": "C&D/710954571003_TD_C&D_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/C%26D/710954571003_TD_C%26D_PO.pdf",
+          "bytes": 3408969,
+          "sha": "c5ea697011eacfc2"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "cnd",
+          "name": "710954571003_TD_C&D_TR.pdf",
+          "rel": "C&D/710954571003_TD_C&D_TR.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/C%26D/710954571003_TD_C%26D_TR.pdf",
+          "bytes": 419400,
+          "sha": "5c8a26d03d1c6174"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "iih",
+          "name": "710954571003_TD_IIH_INV,TR.pdf",
+          "rel": "IIH/710954571003_TD_IIH_INV,TR.pdf",
+          "codes": [
+            "INV",
+            "TR"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/IIH/710954571003_TD_IIH_INV%2CTR.pdf",
+          "bytes": 353581,
+          "sha": "7b8546b9d508bf98"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "iih",
+          "name": "710954571003_TD_IIH_INV2.png",
+          "rel": "IIH/710954571003_TD_IIH_INV2.png",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/IIH/710954571003_TD_IIH_INV2.png",
+          "bytes": 248702,
+          "sha": "2af38f046ed42e65"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "iih",
+          "name": "710954571003_TD_IIH_PO.pdf",
+          "rel": "IIH/710954571003_TD_IIH_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/IIH/710954571003_TD_IIH_PO.pdf",
+          "bytes": 1388838,
+          "sha": "f6c7a07c647ded4c"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "ldc",
+          "name": "710954571003_TD_LDC_BIR.pdf",
+          "rel": "LDC/710954571003_TD_LDC_BIR.pdf",
+          "codes": [
+            "BIR"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/LDC/710954571003_TD_LDC_BIR.pdf",
+          "bytes": 320020,
+          "sha": "489c1009bf8dbad5"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "ldc",
+          "name": "710954571003_TD_LDC_BL.pdf",
+          "rel": "LDC/710954571003_TD_LDC_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/LDC/710954571003_TD_LDC_BL.pdf",
+          "bytes": 1000921,
+          "sha": "099ed8a52407cd4d"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "ldc",
+          "name": "710954571003_TD_LDC_CD.pdf",
+          "rel": "LDC/710954571003_TD_LDC_CD.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/LDC/710954571003_TD_LDC_CD.pdf",
+          "bytes": 210435,
+          "sha": "a99738d002514f62"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "ldc",
+          "name": "710954571003_TD_LDC_CO.pdf",
+          "rel": "LDC/710954571003_TD_LDC_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/LDC/710954571003_TD_LDC_CO.pdf",
+          "bytes": 358874,
+          "sha": "a49305cc87c864db"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "ldc",
+          "name": "710954571003_TD_LDC_INV1,TR.pdf",
+          "rel": "LDC/710954571003_TD_LDC_INV1,TR.pdf",
+          "codes": [
+            "INV",
+            "TR"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/LDC/710954571003_TD_LDC_INV1%2CTR.pdf",
+          "bytes": 316396,
+          "sha": "7fa13e69bb237eb4"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "ldc",
+          "name": "710954571003_TD_LDC_INV2.png",
+          "rel": "LDC/710954571003_TD_LDC_INV2.png",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/LDC/710954571003_TD_LDC_INV2.png",
+          "bytes": 207917,
+          "sha": "6aef007ba87ec38f"
+        },
+        {
+          "tier": "1.Cotton Trader",
+          "actor": "ldc",
+          "name": "710954571003_TD_LDC_PO.pdf",
+          "rel": "LDC/710954571003_TD_LDC_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/1.Cotton%20Trader/LDC/710954571003_TD_LDC_PO.pdf",
+          "bytes": 4165034,
+          "sha": "9d47efebf465f7df"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_BL.pdf",
+          "rel": "XDD/710954571003_SP_XDD_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_BL.pdf",
+          "bytes": 770449,
+          "sha": "6f9d25046a48e4ef"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_CD1.pdf",
+          "rel": "XDD/710954571003_SP_XDD_CD1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_CD1.pdf",
+          "bytes": 50340,
+          "sha": "3fde11e711d55bd7"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_CD2.pdf",
+          "rel": "XDD/710954571003_SP_XDD_CD2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_CD2.pdf",
+          "bytes": 195405,
+          "sha": "cd2e2eaccbff95f8"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_CO.pdf",
+          "rel": "XDD/710954571003_SP_XDD_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_CO.pdf",
+          "bytes": 399956,
+          "sha": "6605110de5e366c0"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_INV1.pdf",
+          "rel": "XDD/710954571003_SP_XDD_INV1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_INV1.pdf",
+          "bytes": 91664,
+          "sha": "1585f28838396d97"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_INV2.pdf",
+          "rel": "XDD/710954571003_SP_XDD_INV2.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_INV2.pdf",
+          "bytes": 51927,
+          "sha": "4679eea31f937b10"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_PO.pdf",
+          "rel": "XDD/710954571003_SP_XDD_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_PO.pdf",
+          "bytes": 2537356,
+          "sha": "f70c7f329e490aa4"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "xdd",
+          "name": "710954571003_SP_XDD_TR.pdf",
+          "rel": "XDD/710954571003_SP_XDD_TR.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/710954571003/2.Spinner/XDD/710954571003_SP_XDD_TR.pdf",
+          "bytes": 84785,
+          "sha": "58512fab974ee41e"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_BL.pdf",
+          "rel": "YVN/710954571003_SP_YVN_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_BL.pdf",
+          "bytes": 341649,
+          "sha": "9977ec6e2d268d54"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_CD1.1.pdf",
+          "rel": "YVN/710954571003_SP_YVN_CD1.1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_CD1.1.pdf",
+          "bytes": 83131,
+          "sha": "41ea165e3ef4d179"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_CD1.2.pdf",
+          "rel": "YVN/710954571003_SP_YVN_CD1.2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_CD1.2.pdf",
+          "bytes": 204120,
+          "sha": "43178f1a86564fb6"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_CO.pdf",
+          "rel": "YVN/710954571003_SP_YVN_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_CO.pdf",
+          "bytes": 241435,
+          "sha": "12479005398b610c"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_INV1.pdf",
+          "rel": "YVN/710954571003_SP_YVN_INV1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_INV1.pdf",
+          "bytes": 99802,
+          "sha": "2f8391b0c9463bd6"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_INV2.pdf",
+          "rel": "YVN/710954571003_SP_YVN_INV2.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_INV2.pdf",
+          "bytes": 51689,
+          "sha": "4c2a71d601e191e7"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_PO.pdf",
+          "rel": "YVN/710954571003_SP_YVN_PO.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_PO.pdf",
+          "bytes": 2227560,
+          "sha": "b385399f6f720801"
+        },
+        {
+          "tier": "2.Spinner",
+          "actor": "yvn",
+          "name": "710954571003_SP_YVN_TR.pdf",
+          "rel": "YVN/710954571003_SP_YVN_TR.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/710954571003/2.Spinner/YVN/710954571003_SP_YVN_TR.pdf",
+          "bytes": 92727,
+          "sha": "37ba26c5ffd35fd2"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_BIR.pdf",
+          "rel": "710954571003_KW_PTG_BIR.pdf",
+          "codes": [
+            "BIR"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_BIR.pdf",
+          "bytes": 108043,
+          "sha": "7e3eeb49b5f1817c"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_BL.pdf",
+          "rel": "710954571003_KW_PTG_BL.pdf",
+          "codes": [
+            "BL"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_BL.pdf",
+          "bytes": 140181,
+          "sha": "20f60467afdbb49a"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_CD1.pdf",
+          "rel": "710954571003_KW_PTG_CD1.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_CD1.pdf",
+          "bytes": 13832,
+          "sha": "dd8730e34417f670"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_CD2.pdf",
+          "rel": "710954571003_KW_PTG_CD2.pdf",
+          "codes": [
+            "CD"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_CD2.pdf",
+          "bytes": 13409,
+          "sha": "5048134fc4862a8e"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_CO.pdf",
+          "rel": "710954571003_KW_PTG_CO.pdf",
+          "codes": [
+            "CO"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_CO.pdf",
+          "bytes": 186511,
+          "sha": "f604c7350e1d77de"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_INV1.pdf",
+          "rel": "710954571003_KW_PTG_INV1.pdf",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_INV1.pdf",
+          "bytes": 208656,
+          "sha": "d0b3fa1d1f78ad41"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_INV2.PDF",
+          "rel": "710954571003_KW_PTG_INV2.PDF",
+          "codes": [
+            "INV"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_INV2.PDF",
+          "bytes": 221630,
+          "sha": "e72a5845688f544f"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_PO1.pdf",
+          "rel": "710954571003_KW_PTG_PO1.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_PO1.pdf",
+          "bytes": 194166,
+          "sha": "96f38593c4db61ba"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_PO2.pdf",
+          "rel": "710954571003_KW_PTG_PO2.pdf",
+          "codes": [
+            "PO"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_PO2.pdf",
+          "bytes": 217229,
+          "sha": "c6aac8d592699e7b"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_TR.pdf",
+          "rel": "710954571003_KW_PTG_TR.pdf",
+          "codes": [
+            "TR"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_TR.pdf",
+          "bytes": 44484,
+          "sha": "c061d289b1950c76"
+        },
+        {
+          "tier": "3.Knitter_Weaver",
+          "actor": "ptg",
+          "name": "710954571003_KW_PTG_WO.pdf",
+          "rel": "710954571003_KW_PTG_WO.pdf",
+          "codes": [
+            "WO"
+          ],
+          "href": "/documents/710954571003/3.Knitter_Weaver/710954571003_KW_PTG_WO.pdf",
+          "bytes": 235454,
+          "sha": "6d027e5a628e5f8f"
+        },
+        {
+          "tier": "root",
+          "actor": "root",
+          "name": "710954571003_COC Documents.xlsx",
+          "rel": "710954571003_COC Documents.xlsx",
+          "codes": [
+            "COC"
+          ],
+          "label": "COC master document",
+          "href": "/documents/710954571003/710954571003_COC%20Documents.xlsx",
+          "bytes": 2192826,
+          "sha": "cf3f2f87e2329932"
+        },
+        {
+          "tier": "root",
+          "actor": "root",
+          "name": "710954571003_GM_SW_Statement Letter.pdf",
+          "rel": "710954571003_GM_SW_Statement Letter.pdf",
+          "codes": [
+            "GM"
+          ],
+          "label": "Garment manufacturer statement",
+          "href": "/documents/710954571003/710954571003_GM_SW_Statement%20Letter.pdf",
+          "bytes": 33838,
+          "sha": "64849e3c3231afb1"
+        }
+      ]
+    }
+  },
+  "upstream": [
+    {
+      "id": "upstream-aus-cotton",
+      "name": "AFF00182 AUS COTTON.pdf",
+      "rel": "澳棉/AFF00182 AUS COTTON.pdf",
+      "codes": [
+        "CO"
+      ],
+      "label": "Australian cotton origin file",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/AFF00182%20AUS%20COTTON.pdf",
+      "bytes": 557105
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "Bale_by_Bale_Packing_List.pdf",
+      "rel": "澳棉/Bale_by_Bale_Packing_List.pdf",
+      "codes": [
+        "PL"
+      ],
+      "label": "Bale-by-bale packing list",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/Bale_by_Bale_Packing_List.pdf",
+      "bytes": 1186051
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "COO Australia.pdf",
+      "rel": "澳棉/AFF00182 DOCS/COO Australia.pdf",
+      "codes": [
+        "CO"
+      ],
+      "label": "Certificate of origin — Australia",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/AFF00182%20DOCS/COO%20Australia.pdf",
+      "bytes": 384861
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "AFF00182 进口报关单.pdf",
+      "rel": "澳棉/AFF00182 进口报关单.pdf",
+      "codes": [
+        "CD"
+      ],
+      "label": "Import customs declaration",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/AFF00182%20%E8%BF%9B%E5%8F%A3%E6%8A%A5%E5%85%B3%E5%8D%95.pdf",
+      "bytes": 109668
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "AFF00182 入库报关单.pdf",
+      "rel": "澳棉/AFF00182 入库报关单.pdf",
+      "codes": [
+        "CD"
+      ],
+      "label": "Warehouse entry declaration",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/AFF00182%20%E5%85%A5%E5%BA%93%E6%8A%A5%E5%85%B3%E5%8D%95.pdf",
+      "bytes": 110984
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "DS-24036 聊城.pdf",
+      "rel": "澳棉/DS-24036 聊城.pdf",
+      "codes": [
+        "SC"
+      ],
+      "label": "Ginning / trade contract",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/DS-24036%20%E8%81%8A%E5%9F%8E.pdf",
+      "bytes": 692535
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "说明_18-03-2024_1308.pdf",
+      "rel": "澳棉/说明_18-03-2024_1308.pdf",
+      "codes": [
+        "NOTE"
+      ],
+      "label": "Supporting note",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/%E8%AF%B4%E6%98%8E_18-03-2024_1308.pdf",
+      "bytes": 406505
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "AFF00182 DOCS.pdf",
+      "rel": "澳棉/AFF00182 DOCS.pdf",
+      "codes": [
+        "NOTE"
+      ],
+      "label": "Origin document bundle",
+      "href": "/documents/upstream/aus-cotton/%E6%BE%B3%E6%A3%89/AFF00182%20DOCS.pdf",
+      "bytes": 2950090
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "142403738965-正本.pdf",
+      "rel": "卓茂 GTI/142403738965-正本.pdf",
+      "codes": [
+        "INV"
+      ],
+      "label": "Invoice — original",
+      "href": "/documents/upstream/aus-cotton/%E5%8D%93%E8%8C%82%20GTI/142403738965-%E6%AD%A3%E6%9C%AC.pdf",
+      "bytes": 110183
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "COO.pdf",
+      "rel": "卓茂 GTI/COO.pdf",
+      "codes": [
+        "CO"
+      ],
+      "label": "Certificate of origin",
+      "href": "/documents/upstream/aus-cotton/%E5%8D%93%E8%8C%82%20GTI/COO.pdf",
+      "bytes": 644472
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "CUSTOMS.pdf",
+      "rel": "卓茂 GTI/CUSTOMS.pdf",
+      "codes": [
+        "CD"
+      ],
+      "label": "Customs declaration",
+      "href": "/documents/upstream/aus-cotton/%E5%8D%93%E8%8C%82%20GTI/CUSTOMS.pdf",
+      "bytes": 437579
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "INV&PL 505006705.pdf",
+      "rel": "卓茂 GTI/INV&PL 505006705.pdf",
+      "codes": [
+        "INV",
+        "PL"
+      ],
+      "label": "Invoice & packing list",
+      "href": "/documents/upstream/aus-cotton/%E5%8D%93%E8%8C%82%20GTI/INV%26PL%20505006705.pdf",
+      "bytes": 108223
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "INV&PL 505110528.pdf",
+      "rel": "卓茂 GTI/INV&PL 505110528.pdf",
+      "codes": [
+        "INV",
+        "PL"
+      ],
+      "label": "Invoice & packing list",
+      "href": "/documents/upstream/aus-cotton/%E5%8D%93%E8%8C%82%20GTI/INV%26PL%20505110528.pdf",
+      "bytes": 114497
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "SC HT0377.pdf",
+      "rel": "卓茂 GTI/SC HT0377.pdf",
+      "codes": [
+        "SC"
+      ],
+      "label": "Sales contract",
+      "href": "/documents/upstream/aus-cotton/%E5%8D%93%E8%8C%82%20GTI/SC%20HT0377.pdf",
+      "bytes": 1485147
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "Affidavit.pdf",
+      "rel": "大生 卓茂/Affidavit.pdf",
+      "codes": [
+        "AVD"
+      ],
+      "label": "Affidavit",
+      "href": "/documents/upstream/aus-cotton/%E5%A4%A7%E7%94%9F%20%E5%8D%93%E8%8C%82/Affidavit.pdf",
+      "bytes": 312839
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "contract 0332.pdf",
+      "rel": "大生 卓茂/contract 0332.pdf",
+      "codes": [
+        "SC"
+      ],
+      "label": "Sales contract",
+      "href": "/documents/upstream/aus-cotton/%E5%A4%A7%E7%94%9F%20%E5%8D%93%E8%8C%82/contract%200332.pdf",
+      "bytes": 1741537
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "INV.pdf",
+      "rel": "大生 卓茂/INV.pdf",
+      "codes": [
+        "INV"
+      ],
+      "label": "Invoice",
+      "href": "/documents/upstream/aus-cotton/%E5%A4%A7%E7%94%9F%20%E5%8D%93%E8%8C%82/INV.pdf",
+      "bytes": 136964
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "payment proof.png",
+      "rel": "大生 卓茂/payment proof.png",
+      "codes": [
+        "TT"
+      ],
+      "label": "Payment proof",
+      "href": "/documents/upstream/aus-cotton/%E5%A4%A7%E7%94%9F%20%E5%8D%93%E8%8C%82/payment%20proof.png",
+      "bytes": 40651
+    },
+    {
+      "id": "upstream-aus-cotton",
+      "name": "PL Detail.pdf",
+      "rel": "大生 卓茂/PL Detail.pdf",
+      "codes": [
+        "PL"
+      ],
+      "label": "Detailed packing list",
+      "href": "/documents/upstream/aus-cotton/%E5%A4%A7%E7%94%9F%20%E5%8D%93%E8%8C%82/PL%20Detail.pdf",
+      "bytes": 148108
+    }
+  ],
+  "verification": [
+    {
+      "id": "oritain-100027482",
+      "name": "BAU Ralph Lauren Auditing program - Oritain Booking Tracker 2026 - May - PT Golden.xlsx",
+      "codes": [
+        "VERIFICATION"
+      ],
+      "label": "Oritain booking tracker",
+      "href": "/documents/verification%2Foritain-booking-tracker-100027482.xlsx",
+      "bytes": 60013
+    }
+  ]
+}

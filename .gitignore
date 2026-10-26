@@ -38,3 +38,9 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+
+# generated DPP document blobs; refresh with `npm run dpp:import`
+/public/documents/
+
+# typescript build info
+*.tsbuildinfo
