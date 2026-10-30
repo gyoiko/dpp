@@ -1,0 +1,298 @@
+db lfops sp P_M_订单信息查询_主界面_选择查询分厂明细信息_进口棉
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+/*
+主界面:查询分厂明细信息:
+
+Exec [P_M_订单信息查询_主界面_选择查询分厂明细信息] '105951-1,','染纱'
+Exec [P_M_订单信息查询_主界面_选择查询分厂明细信息] '105951-1,','前织'
+Exec [P_M_订单信息查询_主界面_选择查询分厂明细信息] '105951-1,','织造'
+Exec [P_M_订单信息查询_主界面_选择查询分厂明细信息] '105951-1,','整理'
+Exec [P_M_订单信息查询_主界面_选择查询分厂明细信息] '105951-1,','测试'
+Exec [P_M_订单信息查询_主界面_选择查询分厂明细信息] '105951-1,','成品'
+
+Exec [P_M_订单信息查询_主界面_选择查询分厂明细信息2] '099353-2,099353-1,099359-1,099362-5,','染纱'
+
+*/
+CREATE PROC [dbo].[P_M_订单信息查询_主界面_选择查询分厂明细信息_进口棉](
+@花号 VARCHAR(max)='',
+@分厂 VARCHAR(40)='',
+@工号 VARCHAR(10)='',
+@类型 varchar(20)='大货',  -- '大货','印染','手样','外协'
+@是否汇总 varchar(2)='0',
+@lang int = 0
+)
+AS
+BEGIN
+
+	IF ISNULL(@分厂,'')=''
+	BEGIN
+		--SELECT 提示='请查询详细信息'
+		DECLARE @sMessage NVARCHAR(MAX)
+		SET @sMessage = lfsoft_idn.dbo.Fn_SM_GetSystemHint('2512130012', '', '0;' + @lang)
+		SELECT 提示=@sMessage
+		RETURN
+	END
+	
+	/*
+	DECLARE @花号 VARCHAR(20)
+	SET @花号='479553-1'
+	--*/
+	DECLARE @客单号 VARCHAR(20),@客单行 VARCHAR(20)
+	SELECT @客单号=LEFT(@花号,CHARINDEX('-',@花号)-1)
+	SELECT @客单行=RIGHT(@花号,LEN(@花号)-CHARINDEX('-',@花号))
+	PRINT @客单号
+	PRINT @客单行	
+	
+	
+	IF @分厂='染纱'
+	BEGIN
+		IF OBJECT_ID('tempdb.dbo.#染纱') IS NOT null DROP TABLE #染纱
+		SELECT 厂编号=rtrim(ISNULL(gd.跟单员+gs.客单号+'-'+cast(gs.客单行 as varchar(3))+isnull(gs.补产编号,''),gd.跟单员+@花号)),
+			--gs.产品类型,gs.能力交期,
+			gs.初排交期,
+			--gs.分厂交期,gs.排缸分厂交期,gs.排缸染台交期,
+			染批号,gs.生产单号,gs.分缸号,	gs.发料类型,
+			--gs.整经类别,
+			gs.合同数,gs.缸型,gs.染纱方式,gs.经纬信息,gs.纱支,
+			纱批=gs.纱坯,
+			gs.色名,
+			gs.重量,单位='KG',
+			gs.轴数,gs.只数,gs.轴型,gs.松筒缺色数,gs.染色缺色数,
+			--gs.络整计划时间,
+			--gs.实际净重时间,
+			--gs.化验室计划时间,gs.打样开始时间,
+			gs.配方时间,gs.染色计划时间,gs.称料时间,gs.装笼时间,gs.卸笼时间,
+			gs.入缸时间,gs.出缸时间,gs.脱水烘纱时间,
+			--gs.最终对色时间,gs.最终色差时间,gs.最终外观时间,gs.最终手感时间,gs.最终强力时间,gs.最终牢度时间,
+			gs.签卡时间,gs.筒染发纱时间,
+			--gs.轴染扫描时间,
+			--gs.倒筒计划时间,
+			--gs.倒筒时间,
+			--gs.整经计划时间,
+			--gs.整经时间,
+			gs.发轴时间
+			--gs.对色结果,gs.色差结果,gs.外观结果,gs.手感结果,gs.强力结果,gs.用染料复染次数,gs.不用染料复染次数,gs.处理总次数,gs.牢度结果,
+			--gs.退处理,gs.处理接收时间,gs.处理开始时间,gs.处理结束时间,gs.预计发纱时间
+		INTO #染纱
+		FROM V_M_公司级台账_染纱明细 gs  WITH(NOLOCK)
+		LEFT JOIN dbo.V_M_订单信息_公司级台账_跟单员 gd WITH(NOLOCK)
+		ON gs.客单号=gd.客单号 AND gs.客单行=gd.客单行 AND ISNULL(gs.补产编号,'')=ISNULL(gd.补产编号,'')
+		--ON gs.客单号+'-'+cast(gs.客单行 as varchar(3))+ISNULL(gs.补产编号,'')=gd.客单号+'-'+cast(gd.客单行 as varchar(3))+ISNULL(gd.补产编号,'')
+		WHERE gs.客单号=@客单号 AND gs.客单行=@客单行
+		--SELECT * FROM V_M_公司级台账_染纱明细 WHERE 客单号='495274'
+		
+		IF @是否汇总='0'
+			SELECT * FROM #染纱
+		ELSE
+			SELECT 厂编号,合同数,
+				--纱批,色名,
+				重量=(SELECT SUM(重量) FROM (SELECT DISTINCT 生产单号,分缸号,重量 FROM #染纱) A),单位,
+				轴数=SUM(轴数),只数=SUM(只数),
+				配方时间=MAX(配方时间),染色计划时间=MAX(染色计划时间),称料时间=MAX(称料时间),装笼时间=MAX(装笼时间),卸笼时间=MAX(卸笼时间),
+				入缸时间=MAX(入缸时间),出缸时间=MAX(出缸时间),脱水烘纱时间=MAX(脱水烘纱时间),
+				签卡时间=MAX(签卡时间),筒染发纱时间=MAX(筒染发纱时间),
+				发轴时间=MAX(发轴时间)
+			FROM #染纱
+			GROUP BY 厂编号,合同数,单位
+		
+		IF OBJECT_ID('tempdb.dbo.#染纱') IS NOT null DROP TABLE #染纱
+	END
+	
+	
+	IF @分厂='前织'
+	BEGIN
+		IF OBJECT_ID('tempdb.dbo.#前织') IS NOT null DROP TABLE #前织
+		SELECT 厂编号=rtrim(ISNULL(gd.跟单员+gs.客单号+'-'+cast(gs.客单行 as varchar(3))+isnull(gs.补单标识,''),gd.跟单员+@花号)),
+			gs.浆纱生产单号,gs.缸号,gs.回修号,gs.元件号,gs.轴型,gs.接收经轴时间,
+			--gs.退染色返修时间,gs.退染色返修原因,gs.退染色返修次数,gs.返修后接收经轴时间,
+			--gs.计划出轴时间,
+			--gs.开始浆纱时间,gs.浆纱机台号,gs.计划出轴数量,gs.计划出轴只数,
+			gs.实际出轴时间,gs.实际出轴数量,单位='MT',gs.实际出轴只数
+			--,gs.数量差异,gs.短少原因,gs.出轴只数差异原因
+		INTO #前织
+		FROM V_M_公司级台账_准备明细 gs  WITH(NOLOCK)
+		LEFT JOIN dbo.V_M_订单信息_公司级台账_跟单员 gd WITH(NOLOCK)
+		ON gs.客单号=gd.客单号 AND gs.客单行=gd.客单行 AND ISNULL(gs.补单标识,'')=ISNULL(gd.补产编号,'')
+		WHERE gs.客单号=@客单号 AND gs.客单行=@客单行		
+		
+		IF @是否汇总='0'
+			SELECT * FROM #前织
+		ELSE
+			SELECT 厂编号,浆纱生产单号,
+				接收经轴时间=MAX(接收经轴时间),
+				实际出轴时间=MAX(实际出轴时间),实际出轴数量=SUM(实际出轴数量),单位,实际出轴只数=SUM(实际出轴只数)
+			FROM #前织
+			GROUP BY 厂编号,浆纱生产单号,单位
+		IF OBJECT_ID('tempdb.dbo.#前织') IS NOT null DROP TABLE #前织
+	END
+	
+	
+	IF @分厂='织造'
+	BEGIN
+		/*
+		DECLARE @花号 VARCHAR(20),@客单号 VARCHAR(20),@客单行 VARCHAR(20)
+		SET @花号='493950-1'
+		SET @客单号='493950'
+		SET @客单行='1'
+		--*/
+		IF OBJECT_ID('tempdb.dbo.#织造') IS NOT null DROP TABLE #织造
+		SELECT 厂编号=rtrim(ISNULL(gd.跟单员+gs.客单号+'-'+cast(gs.客单行 as varchar(3))+isnull(gs.补单标志,''),gd.跟单员+@花号)),
+			gs.织轴元件号,gs.轴号,gs.计划出轴长度,gs.实际出轴长度,gs.轴长差异,gs.投产数,
+			--gs.下机数,gs.验修数,gs.验修段数,
+			gs.入库数,单位='MT',gs.入库段数,
+			--,gs.工艺织缩,gs.实际织缩
+			gs.前织出轴时间,gs.前织穿综时间,
+			--gs.调度计划安排上机时间,
+			实际上机时间=gs.调度计划实际上机时间,
+			--gs.生控部计划上机时间,
+			gs.实际机号,
+			--gs.系统预测了机时间,
+			--gs.调度计划安排了机时间,
+			--实际了机时间=gs.调度计划实际了机时间,
+			--gs.生控部计划了机时间,
+			--gs.生控部计划了机拖期时间,
+			抽检时间=gs.抽检结束时间,
+			--gs.抽检是否合格,
+			--gs.抽检合格单提供时间,
+			--gs.抽检时间,
+			--gs.调度坯布计划安排入库时间,
+			入库时间=gs.调度坯布计划实际入库时间
+			--gs.分厂坯布入库拖期时间,
+			--gs.生控部坯布计划入库时间,
+			--gs.生控部坯布入库拖期时间,
+			--gs.成品返修通知时间,
+			--gs.返修段数,gs.返修长度,gs.标准车速,
+			--gs.实际车速,gs.车速差异,gs.标准效率,gs.实际效率
+		INTO #织造
+		FROM [V_M_公司级台账_织造明细] gs  WITH(NOLOCK)
+		LEFT JOIN dbo.V_M_订单信息_公司级台账_跟单员 gd WITH(NOLOCK)
+		ON gs.客单号=gd.客单号 AND gs.客单行=gd.客单行 AND ISNULL(gs.补单标志,'')=ISNULL(gd.补产编号,'')
+		WHERE gs.客单号=@客单号 AND gs.客单行=@客单行
+		--SELECT * FROM #织造
+		--SELECT * FROM [V_M_公司级台账_织造明细] WHERE 客单号='479553' AND 客单行=1
+		
+		IF @是否汇总='0'
+			SELECT * FROM #织造
+		ELSE
+			SELECT 厂编号,投产数,
+				入库数=SUM(入库数),单位,入库段数=SUM(入库段数),
+				前织出轴时间=MAX(前织出轴时间),
+				前织穿综时间=MAX(前织穿综时间),
+				实际上机时间=MAX(实际上机时间),
+				抽检时间=MAX(抽检时间),
+				入库时间=MAX(入库时间)
+			FROM #织造
+			GROUP BY 厂编号,投产数,单位
+		
+		IF OBJECT_ID('tempdb.dbo.#织造') IS NOT null DROP TABLE #织造
+	END
+	
+	
+	IF @分厂='整理'
+	BEGIN
+		IF OBJECT_ID('tempdb.dbo.#整理明细信息') IS NOT null DROP TABLE #整理明细信息
+		SELECT 厂编号=rtrim(ISNULL(gd.跟单员+gs.客单号+'-'+cast(gs.客单行 as varchar(3))+isnull(gs.补单标志,''),gd.跟单员+@花号)),
+			批号,送整通知日期,送整通知数量,送整计划日期,送整计划数量,送整单位,送整类型,整理方式,备注,实际送整时间,
+			实际送整数量,坯布送整段数,坯布仓库入库时间,打卡数量,整理计划日期,整理计划数量,实际投产时间,
+			--缝合时间,烧毛时间,烧毛数量,退浆时间,退浆数量,丝光时间,丝光数量,丝光后水洗时间,丝光后水洗数量,
+			--液氨时间,液氨数量,液氨后水洗时间,液氨后水洗数量,定型时间,定型数量,潮交联出卷水洗时间,潮交联出卷水洗数量,
+			--焙烘后水洗时间,焙烘后水洗数量,轧光时间,轧光数量,磨毛时间,磨毛数量,碳素时间,碳素数量,抓毛时间,抓毛数量,
+			--焙烘时间,焙烘数量,预缩时间,预缩数量,
+			缝合时间=convert(varchar(20),缝合时间,120),
+			烧毛时间=convert(varchar(20),烧毛时间,120),烧毛数量=cast(烧毛数量 as varchar(20)),
+			退浆时间=convert(varchar(20),退浆时间,120),退浆数量=cast(退浆数量 as varchar(20)),
+			丝光时间=convert(varchar(20),丝光时间,120),丝光数量=cast(丝光数量 as varchar(20)),
+			丝光后水洗时间=convert(varchar(20),丝光后水洗时间,120),丝光后水洗数量=cast(丝光后水洗数量 as varchar(20)),
+			液氨时间=convert(varchar(20),液氨时间,120),液氨数量=cast(液氨数量 as varchar(20)),
+			液氨后水洗时间=convert(varchar(20),液氨后水洗时间,120),液氨后水洗数量=cast(液氨后水洗数量 as varchar(20)),
+			定型时间=convert(varchar(20),定型时间,120),定型数量=cast(定型数量 as varchar(20)),
+			潮交联出卷水洗时间=convert(varchar(20),潮交联出卷水洗时间,120),潮交联出卷水洗数量=cast(潮交联出卷水洗数量 as varchar(20)),
+			焙烘后水洗时间=convert(varchar(20),焙烘后水洗时间,120),焙烘后水洗数量=cast(焙烘后水洗数量 as varchar(20)),
+			轧光时间=convert(varchar(20),轧光时间,120),轧光数量=cast(轧光数量 as varchar(20)),
+			磨毛时间=convert(varchar(20),磨毛时间,120),磨毛数量=cast(磨毛数量 as varchar(20)),
+			碳素时间=convert(varchar(20),碳素时间,120),碳素数量=cast(碳素数量 as varchar(20)),
+			抓毛时间=convert(varchar(20),抓毛时间,120),抓毛数量=cast(抓毛数量 as varchar(20)),
+			焙烘时间=convert(varchar(20),焙烘时间,120),焙烘数量=cast(焙烘数量 as varchar(20)),
+			预缩时间=convert(varchar(20),预缩时间,120),预缩数量=cast(预缩数量 as varchar(20)),
+			取样送测试时间,物测报告时间,取样时间,复验时间,复验结果,制卡时间,
+			送把关时间,色光把关结果,成品把关时间,把关放行时间,把关不合格信息接受时间,把关不合格处理意见时间,计划交成品时间,
+			大货交接时间,物测最终判定
+		into #整理明细信息
+		FROM [V_M_公司级台账_整理明细] gs WITH(NOLOCK)
+		LEFT JOIN dbo.V_M_订单信息_公司级台账_跟单员 gd WITH(NOLOCK)
+		ON gs.客单号=gd.客单号 AND gs.客单行=gd.客单行 AND ISNULL(gs.补单标志,'')=ISNULL(gd.补产编号,'')
+		WHERE gs.客单号=@客单号 AND gs.客单行=@客单行
+		
+		SELECT 厂编号,
+			批号,送整通知日期,送整通知数量,送整计划日期,送整计划数量,送整单位,送整类型,整理方式,备注,实际送整时间,
+			实际送整数量,坯布送整段数,坯布仓库入库时间,打卡数量,整理计划日期,整理计划数量,实际投产时间,
+			缝合时间=case when 缝合时间='1900-01-01 00:00:00' then '/' else 缝合时间 end,
+			烧毛时间=case when 烧毛时间='1900-01-01 00:00:00' then '/' else 烧毛时间 end,烧毛数量=case when 烧毛数量='-1.00' then '/' else 烧毛数量 end,
+			退浆时间=case when 退浆时间='1900-01-01 00:00:00' then '/' else 退浆时间 end,退浆数量=case when 退浆数量='-1.00' then '/' else 退浆数量 end,
+			丝光时间=case when 丝光时间='1900-01-01 00:00:00' then '/' else 丝光时间 end,丝光数量=case when 丝光数量='-1.00' then '/' else 丝光数量 end,
+			丝光后水洗时间=case when 丝光后水洗时间='1900-01-01 00:00:00' then '/' else 丝光后水洗时间 end,丝光后水洗数量=case when 丝光后水洗数量='-1.00' then '/' else 丝光后水洗数量 end,
+			液氨时间=case when 液氨时间='1900-01-01 00:00:00' then '/' else 液氨时间 end,液氨数量=case when 液氨数量='-1.00' then '/' else 液氨数量 end,
+			液氨后水洗时间=case when 液氨后水洗时间='1900-01-01 00:00:00' then '/' else 液氨后水洗时间 end,液氨后水洗数量=case when 液氨后水洗数量='-1.00' then '/' else 液氨后水洗数量 end,
+			定型时间=case when 定型时间='1900-01-01 00:00:00' then '/' else 定型时间 end,定型数量=case when 定型数量='-1.00' then '/' else 定型数量 end,
+			潮交联出卷水洗时间=case when 潮交联出卷水洗时间='1900-01-01 00:00:00' then '/' else 潮交联出卷水洗时间 end,潮交联出卷水洗数量=case when 潮交联出卷水洗数量='-1.00' then '/' else 潮交联出卷水洗数量 end,
+			焙烘后水洗时间=case when 焙烘后水洗时间='1900-01-01 00:00:00' then '/' else 焙烘后水洗时间 end,焙烘后水洗数量=case when 焙烘后水洗数量='-1.00' then '/' else 焙烘后水洗数量 end,
+			轧光时间=case when 轧光时间='1900-01-01 00:00:00' then '/' else 轧光时间 end,轧光数量=case when 轧光数量='-1.00' then '/' else 轧光数量 end,
+			磨毛时间=case when 磨毛时间='1900-01-01 00:00:00' then '/' else 磨毛时间 end,磨毛数量=case when 磨毛数量='-1.00' then '/' else 磨毛数量 end,
+			碳素时间=case when 碳素时间='1900-01-01 00:00:00' then '/' else 碳素时间 end,碳素数量=case when 碳素数量='-1.00' then '/' else 碳素数量 end,
+			抓毛时间=case when 抓毛时间='1900-01-01 00:00:00' then '/' else 抓毛时间 end,抓毛数量=case when 抓毛数量='-1.00' then '/' else 抓毛数量 end,
+			焙烘时间=case when 焙烘时间='1900-01-01 00:00:00' then '/' else 焙烘时间 end,焙烘数量=case when 焙烘数量='-1.00' then '/' else 焙烘数量 end,
+			预缩时间=case when 预缩时间='1900-01-01 00:00:00' then '/' else 预缩时间 end,预缩数量=case when 预缩数量='-1.00' then '/' else 预缩数量 end,
+			取样送测试时间,物测报告时间,取样时间,复验时间,复验结果,制卡时间,
+			送把关时间,色光把关结果,成品把关时间,把关放行时间,把关不合格信息接受时间,把关不合格处理意见时间,计划交成品时间,
+			大货交接时间,物测最终判定
+		from #整理明细信息
+	END	 
+	
+	
+	IF @分厂='测试'
+	BEGIN
+		SELECT 厂编号=rtrim(ISNULL(gd.跟单员+gs.客单号+'-'+cast(gs.客单行 as varchar(3))+isnull(gs.补单标志,''),gd.跟单员+@花号)),gs.批号,
+			gs.缩水率,gs.非氯漂牢度,gs.缝线强力,gs.水洗牢度,gs.氯漂牢度,gs.pH值,gs.汗渍牢度,gs.防油性能,gs.甲醛含量,
+			gs.线圈密度,gs.水渍牢度,gs.拉伸强力,gs.接缝滑移,gs.撕破强力,gs.防水性能,gs.门幅,gs.日晒牢度
+		FROM [V_M_公司级台账_整理明细] gs WITH(NOLOCK)
+		LEFT JOIN dbo.V_M_订单信息_公司级台账_跟单员 gd WITH(NOLOCK)
+		ON gs.客单号=gd.客单号 AND gs.客单行=gd.客单行 AND ISNULL(gs.补单标志,'')=ISNULL(gd.补产编号,'')
+		WHERE gs.客单号=@客单号 AND gs.客单行=@客单行
+	END	
+	
+	
+	IF @分厂='成品'
+	BEGIN
+		SELECT 厂编号=rtrim(ISNULL(gd.跟单员+gs.客单号+'-'+cast(gs.客单行 as varchar(3))+isnull(gs.补单标志,''),gd.跟单员+@花号)),
+			接收编号,交成品数量,交成品段数,验收时间统计,验收开始时间,验收结束时间,验收退返工布时间,
+			验收退返工布段数,验收退返工布数量,整理接受返工布时间,返工处理意见时间,返工开始时间,返工生产结束时间,
+			已返工完成数,返工布验收时间,验收大货数量,成件前时间统计,成件时间,计划入库时间,入库时间,入库数量,入库清时间
+		FROM T_M_整理分厂台账_成品_活动表 gs WITH(NOLOCK)
+		LEFT JOIN dbo.V_M_订单信息_公司级台账_跟单员 gd WITH(NOLOCK)
+		ON gs.客单号=gd.客单号 AND gs.客单行=gd.客单行 AND ISNULL(gs.补单标志,'')=ISNULL(gd.补产编号,'')
+		WHERE gs.客单号=@客单号 AND gs.客单行=@客单行
+		UNION
+		SELECT 厂编号=rtrim(ISNULL(gd.跟单员+gs.客单号+'-'+cast(gs.客单行 as varchar(3))+isnull(gs.补单标志,''),gd.跟单员+@花号)),
+			接收编号,交成品数量,交成品段数,验收时间统计,验收开始时间,验收结束时间,验收退返工布时间,
+			验收退返工布段数,验收退返工布数量,整理接受返工布时间,返工处理意见时间,返工开始时间,返工生产结束时间,
+			已返工完成数,返工布验收时间,验收大货数量,成件前时间统计,成件时间,计划入库时间,入库时间,入库数量,入库清时间
+		FROM T_M_整理分厂台账_成品_历史表 gs WITH(NOLOCK)
+		LEFT JOIN dbo.V_M_订单信息_公司级台账_跟单员 gd WITH(NOLOCK)
+		ON gs.客单号=gd.客单号 AND gs.客单行=gd.客单行 AND ISNULL(gs.补单标志,'')=ISNULL(gd.补产编号,'')
+		WHERE gs.客单号=@客单号 AND gs.客单行=@客单行
+	END	
+	
+	IF OBJECT_ID('tempdb.dbo.#花号表') IS NOT NULL DROP TABLE #花号表
+	IF OBJECT_ID('tempdb.dbo.#整理明细信息') IS NOT NULL DROP TABLE #整理明细信息
+	
+END
+
+
+GO
+
+sp 

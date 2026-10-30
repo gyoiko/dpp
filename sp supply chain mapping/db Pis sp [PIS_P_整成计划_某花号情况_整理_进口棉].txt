@@ -1,0 +1,866 @@
+db Pis sp [PIS_P_整成计划_某花号情况_整理_进口棉]
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+/******************************************************************************
+
+  创 建 人：刘礼钧
+  创建日期：2008年07月25日
+  主要功能：根据花号查询整成计划情况
+  注意事项：
+
+  主要算法：PIS_P_整成计划_某花号情况_整理 '01','208145','01' 
+
+  ---------------------------------------------------------------------------
+
+  修改日期：20110516
+  修 改 人：gaoh 
+  修改内容：因后整理相关程序调整,修改数据读取源.原存储过程备份与:dbo.PIS_P_整成计划_某花号情况_整理_20110516
+
+******************************************************************************/
+CREATE proc [dbo].[PIS_P_整成计划_某花号情况_整理_进口棉](
+  @分区号   char(2),
+  @客单号   char(6),
+  @客单行号 varchar(3),
+  @是否汇总 varchar(2)='0'
+) 
+as
+begin
+/*
+declare @分区号 char(2), @客单号 char(6),@客单行号 varchar(3),@是否汇总 varchar(2)
+set @分区号='01'
+set @客单号='500162'
+set @客单行号='01'
+set @是否汇总='0'
+--*/
+
+ if object_id('tempdb.dbo.#整理工艺 ') is not null 	    drop table #整理工艺 
+ if object_id('tempdb.dbo.#整理数据') is not null 	    drop table #整理数据
+ if object_id('tempdb.dbo.#整理信息') is not null 	    drop table #整理信息
+ if object_id('tempdb.dbo.#物测信息') is not null 	    drop table #物测信息
+ if object_id('tempdb.dbo.#成品信息') is not null 	    drop table #成品信息
+ if object_id('tempdb.dbo.#成品信息B') is not null 	    drop table #成品信息B
+ if object_id('tempdb.dbo.#最终数据') is not null 	    drop table #最终数据
+ if object_id('tempdb.dbo.#远程数据') is not null 	    drop table #远程数据
+ declare 
+    @客单行    int,
+    @行号      varchar(3)
+
+ set @客单行=cast(@客单行号 as int)
+ set @行号=right(cast(100+@客单行 as varchar(3)),2)
+ 
+/*gaoh 20110516 
+select 厂编号,小花号,生产单号,批号,max(工序流程) 工序流程 ,max(版本号) 版本号
+into #整理工艺
+from  report.dbo.PDM_T_整理_TIM信息表 a (nolock)
+where 分区=@分区号 and 厂编号=@客单号 and 小花号=@客单行
+group by 厂编号,小花号,生产单号,批号
+*/ 
+
+
+--   select * from #整理工艺
+select  
+  厂编号=客单号,小花号=客单行,后整号,批号,工序流程='',版本号='',生产单=min(生产单),后整号数量
+into #整理工艺
+from tesdatt5.dbo.T_仓库_坯布后整号表 with (nolock)
+where 客单号=@客单号 and 客单行=@客单行 and 删除标志=0 AND ISNULL(备注信息,'')<>'杂纱'
+group by 客单号,客单行,后整号,批号,后整号数量
+UNION
+SELECT 厂编号=客单号,小花号=客单行,后整号=RIGHT(后整号,LEN(后整号)-1),批号,工序流程='',版本号='',生产单='0000000',后整号数量=数量
+FROM FIS.[dbo].[T_plan_印染送整后整号表] WITH(NOLOCK)
+WHERE  客单号=@客单号 and 客单行=@客单行
+--select * from tesdatt5.dbo.T_仓库_坯布后整号表 where 客单号='479553'
+
+
+--增加印染后整号的读取 
+--insert into  select * from #整理工艺
+--select 客单号=@客单号,
+--	   客单行=@客单行,
+--       后整号=right(sht,len(sht)-1),
+--       批号=replace(substring(prj,1,charindex('-',prj)-1),substring(prj,charindex('-',prj)-6,6),'') ,'','','',
+--       后整号数量=qty
+--     
+--from  [192.168.7.19].dc_lf.dbo.pp_yun with(nolock)
+--where prj like @客单号+'-'+convert(varchar(10),@客单行)+'%'
+
+
+
+SELECT     CASE WHEN 工序 IN ('摊布', '放卷', '缝头') THEN '缝合'
+ when  机台号 like '61%' then '烧毛'
+ ELSE 工序 END AS type, 删除标志, '01' AS 分区, LEFT(后整号, 7) AS 生产单号, 批号, 
+                      0 AS 回修号, 总长度 AS 产量, 扫描时间 AS 开始时间, 结束时间, 机台号, 扫描时间 AS 录入时间, 后整号 AS 后整理号,厂区='一厂'
+into #整理信息
+FROM         fis.dbo.V_作业记录_扫描主表   WITH (nolock)
+where 客单号=@客单号 and 客单行号=cast(@客单行号 as int)
+union all 
+SELECT     CASE WHEN 工序 IN ('摊布', '放卷', '缝头') THEN '缝合'
+ when  机台号 like '61%' then '烧毛'
+ ELSE 工序 END AS type, 删除标志, '01' AS 分区, LEFT(后整号, 7) AS 生产单号, 批号, 
+                      0 AS 回修号, 总长度 AS 产量, 扫描时间 AS 开始时间, 结束时间, 机台号, 扫描时间 AS 录入时间, 后整号 AS 后整理号,'二厂'
+FROM         fis2.dbo.T_作业记录_扫描主表   WITH (nolock)
+where 客单号=@客单号 and 客单行号=cast(@客单行号 as int)
+UNION  all
+SELECT     工序 AS type, 删除标志, '01' AS 分区, LEFT(后整号, 7) AS 生产单号, 批号, 0 AS 回修号, 总长度 AS 产量, 扫描时间 AS 开始时间, 结束时间, 机台号, 
+                      扫描时间 AS 录入时间, 后整号 AS 后整理号,'一厂'
+FROM          fis.dbo.V_作业记录_扫描主表   WITH (nolock)
+WHERE   客单号=@客单号 and 客单行号=cast(@客单行号 as int) and    (工序 IN ('摊布', '放卷', '缝头'))
+
+select  distinct
+  a.厂编号,
+  a.小花号,
+  生产单号=a.生产单,
+  a.批号,
+  a.工序流程,
+  b.[type] 机型,
+  a.后整号数量 产量,
+  max(b.开始时间) 开始时间,
+  max(b.结束时间) 结束时间,
+--  b.后整理号 后整号
+  a.后整号,厂区=min(b.厂区)
+ into #整理数据
+ from #整理工艺 a 
+left join   #整理信息 b (nolock)
+--left join reportreport.V_PDM_整理作业记录 b (nolock)
+
+-- on a.生产单号=b.生产单号
+ on a.后整号=b.后整理号
+ and  b.删除标志=0
+ group by  
+  a.厂编号,
+  a.小花号,
+  a.生产单,
+  a.批号,
+  a.工序流程,
+  b.[type],
+  a.后整号,
+  a.后整号数量
+
+
+---   select * from #整理数据
+/*
+SELECT   厂编号, 小花号,  max(终审时间) 物测最晚终审,min(终审时间) 物测最早终审
+into #物测信息
+FROM   report.dbo.PDM_T_LabTestReportHD (nolock)
+where 厂编号=@客单号 and 小花号=@客单行
+group by   厂编号, 小花号
+*/
+
+--SELECT  
+--	   a.厂编号, a.小花号, b.生产单号,b.分批号, max(a.终审时间) 物测最晚终审,min(a.终审时间) 物测最早终审
+--into #物测信息  
+--FROM   PhysicalTest.dbo.T_PH_测试_主表 a (nolock) left join t_基础信息表 b(nolock)
+--		   on a.取样布卷号=b.布卷号
+--where a.厂编号=@客单号 and a.小花号=@客单行 
+--group by a.厂编号, a.小花号, b.生产单号, b.分批号
+
+
+
+ select   
+  a.厂编号,
+  a.小花号,
+  a.生产单号,
+  a.批号,
+  a.工序流程,
+  a.机型,
+  a.产量,
+  a.开始时间,
+  a.结束时间,
+  a.后整号,
+  min(b.交接时间) 交接时间,
+  厂区=min(a.厂区)
+ into #成品信息
+ from #整理数据 a left join V_管理_收付表  b (nolock) on a.后整号=b.后整号
+  and b.客单号=@客单号 and b.客单行号=@行号 and  a.生产单号=b.生产单号 and a.批号=b.分批号 and b.接收编号<>''
+ group by 
+--  a.厂区,
+  a.厂编号,
+  a.小花号,
+  a.生产单号,
+  a.批号,
+  a.工序流程,
+  a.机型,
+  a.产量,
+  a.开始时间,
+  a.结束时间,
+  a.后整号
+
+--   select * from #成品信息
+
+select   厂区=min(a.厂区),
+  a.厂编号,
+  a.小花号,
+  a.批号,
+  a.生产单号,
+  a.后整号,
+  状态=case when substring(a.后整号,7,1)='F' then '返工' 
+            when substring(a.后整号,7,1)='K' then '普通.' 
+            else '普通'
+        end,
+  a.工序流程,
+  缝头=max(case a.机型 when '缝头' then convert(varchar(30),a.结束时间,120)  else '' end),
+  摊布=max(case a.机型 when '摊布' then convert(varchar(30),a.结束时间,120)  else '' end),
+  放卷=max(case a.机型 when '放卷' then convert(varchar(30),a.结束时间,120)  else '' end),
+  打卷=max(case a.机型 when '打卷' then convert(varchar(30),a.结束时间,120)  else '' end),
+  烧毛=max(case a.机型 when '烧毛' then convert(varchar(30),a.结束时间,120)  else '' end),
+  退浆=max(case a.机型 when '退浆' then convert(varchar(30),a.结束时间,120)  else '' end),
+  丝光=max(case a.机型 when '丝光' then convert(varchar(30),a.结束时间,120)  else '' end),
+  水洗=max(case a.机型 when '水洗' then convert(varchar(30),a.结束时间,120)  else '' end), 
+  液氨=max(case a.机型 when '液氨' then convert(varchar(30),a.结束时间,120)  else '' end), 
+  定型=max(case a.机型 when '定型' then convert(varchar(30),a.结束时间,120)  else '' end),
+  预缩=max(case a.机型 when '预缩' then convert(varchar(30),a.结束时间,120)  else '' end),
+  a.交接时间
+ into #成品信息B
+ from #成品信息 a
+ group by  
+  a.厂编号,
+  a.小花号,
+  a.生产单号,
+  a.批号,
+  a.后整号,
+  a.工序流程,
+  a.交接时间
+--  ,a.厂区
+--   select * from #成品信息B
+
+declare @织厂类别 varchar(20)
+select @织厂类别 =织厂类别 
+from mycrmlf.dbo.v_OrdOfAllSts
+where 客单号=@客单号
+
+declare @后整号数量信息表 table(
+                                后整号 varchar(20),
+                                数量 numeric(9,2),
+                                段数 int 
+                               )
+insert into @后整号数量信息表
+select a.后整号,sum(a.布卷长度),count(a.布卷号)
+ 
+from dbo.V_坯布_后整号信息 a 
+INNER JOIN #成品信息B b 
+ON a.后整号 = b.后整号
+--WHERE 打印时间>=GETDATE()-60
+group by a.后整号
+--union
+--
+--select 
+--       后整号=right(sht,len(sht)-1),
+--       后整号数量=qty,pqty 
+--     
+--from  [192.168.7.19].dc_lf.dbo.pp_yun with(nolock)
+--where prj like  @客单号+'-'+convert(varchar(10),@客单行)+'%'
+--and @织厂类别='印染'
+
+
+-- select * from dbo.V_坯布_后整号信息
+--select * from dbo.T_后整理与成品交接_信息维护表 where 后整号<>''客单号='084973' and 客单行='01' and 分批号='01' and 
+--update dbo.T_后整理与成品交接_信息维护表 set 后整号='1713740F002' where id=22327
+/*
+
+select distinct a.客单号,a.客单行,a.后整号,b.后整号,a.批号,a.后整号数量 from tesdatt5.dbo.T_仓库_坯布后整号表 a (nolock)
+inner join dbo.T_后整理与成品交接_信息维护表 b (nolock)
+on a.客单号=b.客单号 and a.客单行=cast(b.客单行 as int) and a.批号=b.分批号 and a.后整号数量=b.数量 and b.后整号<>'' and
+
+update dbo.T_后整理与成品交接_信息维护表 set 后整号=a.后整号 
+from T_后整理与成品交接_信息维护表 b 
+inner join tesdatt5.dbo.T_仓库_坯布后整号表 a
+on a.客单号=b.客单号 and a.客单行=cast(b.客单行 as int) and a.批号=b.分批号 and a.后整号数量=b.数量 
+where b.后整号<>''
+
+select top 1 * from tesdatt5.dbo.T_仓库_坯布后整号表 a (nolock) where 后整号='1511876F002' 
+select  * from dbo.T_后整理与成品交接_信息维护表  (nolock) where 后整号<>''
+update dbo.T_后整理与成品交接_信息维护表 set 分批号='01' where id=22265
+
+*/
+--获取远程数据 ADD BY QIUGR 2016-03-02 优化
+
+SELECT 客单号,客单行,生产单批,删除标志
+INTO #远程数据
+FROM fis.dbo.T_Plan_整理外加工计划 A
+WHERE A.客单号=@客单号 AND 客单行=CAST(@客单行号 AS INT)
+--WHERE A.客单号='242083'
+
+
+ select 
+ 	厂区=CASE WHEN EXISTS(
+		SELECT TOP 1 1 FROM FIS2.[dbo].[T_GCAD_工艺内审花号]
+		WHERE 花号=@客单号+'-'+@客单行号
+	) THEN  '一厂.' ELSE  
+ 
+	CASE when f.客单号 is not null then '一厂'
+                   when e.厂区号='02' then '二厂'
+                   when e.客单号 is null then ''
+                   else '一厂' end
+	END,
+
+	区域=PIS.DBO.[F_GCAD_获取订单所属工段](A.厂编号,A.小花号,a.批号),
+
+  a.状态,
+  a.厂编号+'-'+a.小花号+'['+a.批号+']' 花号,
+  a.生产单号,
+  a.后整号,
+  c.数量 总长,
+  c.段数  段数,
+  a.缝头 ,
+  a.摊布 ,
+  a.放卷,
+  a.打卷,
+  a.烧毛,
+  a.退浆,
+  a.丝光,
+    a.水洗,
+     a.液氨,
+  a.定型,
+  a.预缩,
+  --整理交接时间=d.确认时间 ,                                   --GAOH 20100524 添加整理交接时间 altre by zhouxw 20110725
+  --a.交接时间,
+  整理交成品时间=d.确认时间 ,                                  
+  成品接收时间=a.交接时间
+
+--  ,b.物测最早终审,
+--  b.物测最晚终审
+ INTO #最终数据
+ from #成品信息B a 
+--left join #物测信息 b 
+--     on a.厂编号=b.厂编号 and a.小花号=b.小花号 and a.生产单号=b.生产单号  and  a.批号=b.分批号
+     left join dbo.V_后整理与成品交接已确认 d                                                             --GAOH 20100524 添加整理交接时间
+     on a.厂编号=d.客单号 and a.小花号=cast(d.客单行 as int) and a.批号=d.分批号 --and a.后整号=d.后整号 and d.后整号<>'' AND D.确认标志='1'         --GAOH 20100524 添加整理交接时间
+--     left join report.dbo.RPT_T_后整号数量信息表 c (nolock)
+     left join @后整号数量信息表 c
+      on a.后整号=c.后整号  
+      left join report.dbo.PDM_T_生控部_主计划送整计划_02 e (nolock)
+      on a.厂编号=e.客单号 and a.小花号=e.客单行 and a.批号=e.生产单批
+       and e.删除标志<>'A'
+      --left join [192.168.7.6].fis.dbo.T_Plan_整理外加工计划 f (nolock)
+      LEFT JOIN #远程数据 F
+	  on a.厂编号=f.客单号 and a.小花号=f.客单行 and a.批号=f.生产单批
+       and f.删除标志<>'A'
+ order by a.批号,a.后整号;
+-- UNION
+-- select 
+--  a.状态,
+--  a.厂编号+'-'+a.小花号+'['+a.批号+']' 花号,
+--  a.生产单号,
+--  a.后整号,
+--  c.数量 总长,
+--  c.段数  段数,
+--  a.缝头 缝合 ,
+--  a.烧毛,
+--  a.退浆,
+--  a.丝光,
+--  a.定型,
+--  a.预缩,
+--  d.确认时间 整理交接时间,                                   --GAOH 20100524 添加整理交接时间
+--  a.交接时间,
+--  b.物测最早终审,
+--  b.物测最晚终审
+-- from #成品信息B a left join #物测信息 b 
+--     on a.厂编号=b.厂编号 and a.小花号=b.小花号 and a.生产单号=b.生产单号  and  a.批号=b.分批号
+--     left join dbo.T_后整理与成品交接_信息维护表 d                                                             --GAOH 20100524 添加整理交接时间
+--     on a.厂编号=d.客单号 and a.小花号=cast(d.客单行 as int) and a.批号=d.分批号 and d.后整号='' AND D.确认标志='1'             --GAOH 20100524 添加整理交接时间
+----     left join report.dbo.RPT_T_后整号数量信息表 c (nolock)
+--     left join @后整号数量信息表 c
+--      on a.后整号=c.后整号
+-- order by a.批号,a.后整号
+
+
+	/*
+		ADD BY QIUGR 2015-06-08 针对二厂的订单，
+		需要显示是否已经入二厂库存
+	*/
+	--IF EXISTS(SELECT TOP 1 1 FROM #最终数据 WHERE 厂区='二厂')
+	--BEGIN
+		--WITH 二厂入库后整号
+		--AS (SELECT DISTINCT 后整号
+		--	FROM [192.168.7.6].FIS.DBO.GWMS_出入库明细表 WITH(NOLOCK)
+		--	WHERE 客单号=@客单号 AND 客单行号=@客单行号 AND 仓库编号='02' AND 事务类型 IN ('160','170','171')
+		--)
+		--SELECT 
+		--	A.厂区,A.区域
+		--	,A.状态,A.花号,A.生产单号,A.后整号,
+		--	--二厂入库标志=CASE WHEN B.后整号 IS NULL THEN 0 ELSE 1 END,
+		--	A.总长,A.段数,A.缝头,
+		--	--A.摊布,A.放卷,
+		--	A.打卷,A.烧毛,A.退浆,
+		--	A.丝光,A.水洗,A.液氨,A.定型,A.预缩,
+		--	A.整理交成品时间,A.成品接收时间
+		--FROM #最终数据 A
+		--LEFT JOIN 二厂入库后整号 B ON A.后整号=B.后整号
+	
+	
+	DECLARE @花号 VARCHAR(20)
+	SET @花号=@客单号+'-'+@客单行号
+	--SELECT ctm,* FROM [192.168.7.19].dc_lf.dbo.SD_PRJ WHERE prjsht LIKE '%463784%'-- and right(ctm,1)='F'
+	--EXEC [192.168.7.19].dc_lf.dbo.[DC_P_生产单进度查询_业务部] '500162-1'
+	--EXEC [192.168.7.19].dc_lf.dbo.[DC_P_生产单进度查询_业务部] '499922-1'
+
+	--IF EXISTS(SELECT 1 FROM dc_lf.dbo.SD_PRJ WHERE prjsht LIKE '%'+@花号+'%')
+	--BEGIN
+	--	EXEC dc_lf.dbo.[DC_P_生产单进度查询_业务部] @花号
+	--END
+	
+	
+	IF @是否汇总='0'
+		SELECT 
+			[厂区#Finishing Section]=厂区,[区域#Working Area]=区域,
+			[状态#Fabric type]=状态,花号,[生产单号#Product Job No.]=生产单号,后整号,
+			[总长#Greige Fabric Length]=总长,[单位#Unit]='MT',
+			[段数#No. of Fabric Pieces]=段数,[缝头#Time of Sewing head & ends]=缝头,
+			[打卷#Time of Rolling]=打卷,[烧毛#Time of Singeing]=烧毛,[退浆#Time of Desizing]=退浆,
+			[丝光#Time of Mercerizing ]=丝光,[水洗#Time of Washing]=水洗,[液氨#Timeof Liquid Ammonia]=液氨,[定型# Time of Heat Setting]=定型,[预缩#Time of Preshrunk]=预缩,
+			[整理交成品时间#Time of Deliver for inspection]=整理交成品时间,[成品接收时间#Time of sign finihed fabric]=成品接收时间
+		FROM #最终数据 A
+	ELSE
+		SELECT
+			[厂区#Finishing Section]=厂区,[区域#Working Area]=区域,
+			[状态#Fabric type]=状态,[生产单号#Product Job No.]=生产单号,
+			[总长#Greige Fabric Length]=SUM(总长),[单位#Unit]='MT',段数=SUM(段数),
+			[缝头#Time of Sewing head & ends]=MAX(缝头),[打卷#Time of Rolling]=MAX(打卷),[烧毛#Time of Singeing]=MAX(烧毛),[退浆#Time of Desizing]=MAX(退浆),
+			[丝光#Time of Mercerizing ]=MAX(丝光),[水洗#Time of Washing]=MAX(水洗),[液氨#Timeof Liquid Ammonia]=MAX(液氨),[定型# Time of Heat Setting]=MAX(定型),[预缩#Time of Preshrunk]=MAX(预缩),
+			[整理交成品时间#Time of Deliver for inspection]=MAX(整理交成品时间),[成品接收时间#Time of sign finihed fabric]=MAX(成品接收时间)
+		FROM #最终数据
+		GROUP BY 厂区,区域,状态,生产单号
+		
+
+	--END
+	--ELSE
+	--BEGIN
+	--	SELECT * FROM #最终数据
+	--END
+
+
+
+	drop table #整理工艺
+	drop table #整理数据
+	--drop table #物测信息
+	drop table #成品信息
+	drop table #成品信息B
+	drop table #整理信息
+
+	IF OBJECT_ID('tempdb.dbo.#最终数据') IS NOT NULL DROP TABLE #最终数据
+	if object_id('tempdb.dbo.#远程数据') is not null 	    drop table #远程数据
+
+end
+
+GO
+
+sp PIS_P_整成计划_某花号情况_仓库_按分批_进口棉
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/******************************************************************************
+EXEC [PIS_P_整成计划_某花号情况_仓库_按分批_进口棉] '01','205676','07'
+******************************************************************************/
+CREATE proc [dbo].[PIS_P_整成计划_某花号情况_仓库_按分批_进口棉](
+  @分区号   char(2),
+  @客单号   char(6),
+  @客单行号 varchar(3),
+  @是否汇总 varchar(2)='0'
+)
+as
+begin
+	/*
+	select * from t_基础信息表 where 客单号='495288'
+	
+	declare @分区号 char(2),@客单号 char(6),@客单行号 varchar(3)
+	set @分区号='01'
+	set @客单号='117223'
+	set @客单行号='03'
+	--*/
+	declare @客单行 int,@行号 varchar(3)
+	set @客单行=cast(@客单行号 as int)
+	set @行号=right(cast(100+@客单行 as varchar(3)),2)
+
+	if object_id('tempdb.dbo.#成品基础数据 ') is not null drop table #成品基础数据
+	if object_id('tempdb.dbo.#成品抽检数据 ') is not null drop table #成品抽检数据
+	if object_id('tempdb.dbo.#仓库基础数据 ') is not null drop table #仓库基础数据
+	if object_id('tempdb.dbo.#仓库基础数据1 ') is not null drop table #仓库基础数据1
+	if object_id('tempdb.dbo.#仓库基础数据A ') is not null drop table #仓库基础数据A
+	if object_id('tempdb.dbo.#仓库基础数据B ') is not null drop table #仓库基础数据B
+	if object_id('tempdb.dbo.#仓库基础数据C ') is not null drop table #仓库基础数据C
+	if object_id('tempdb.dbo.#基础信息表 ') is not null drop table #基础信息表
+	SELECT a.客单号,a.客单行号,a.分批号,a.后整号,a.布卷号,A.分区号,A.最新写入时间
+	INTO #基础信息表
+	FROM t_基础信息表 A WITH(NOLOCK)
+	WHERE a.分区号=CAST(@分区号 AS NVARCHAR(10)) and a.客单号=CAST(@客单号 AS NVARCHAR(10)) and a.客单行号=CAST(@行号 AS NVARCHAR(10))
+		AND A.最新写入时间>CASE WHEN A.客单号='117223' THEN  DATEADD(MM,-2,GETDATE()) ELSE DATEADD(DD,-4,A.最新写入时间) END  
+	-- 杂纱花号
+
+	select a.客单号,a.客单行号,a.分批号,a.后整号,a.布卷号
+		,b.小布卷号,b.开始检验时间,b.检验员定等时间,b.实际数量,b.单位
+		,最终等级=case when ISNUMERIC(b.最终等级)=1  then  I.质量等级 else b.最终等级 end
+		,b.疵点代码,c.疵点名称
+		,事务类型=case when isnull(f.事务类型,'')='' then cast(b.事务标志ID  as varchar(10))else f.事务类型 end
+		,d.件号,e.成件时间,b.检验类型代号,b.标志
+	into #成品基础数据
+	from #基础信息表 a
+	inner join t_检验_布卷信息表 b (nolock) on A.客单号=B.客单号 AND A.客单行号=B.客单行号 AND a.布卷号=b.大布卷号 --and b.标志='1'       
+	left join T_字典_疵点表 c (nolock) on b.疵点代码=c.疵点代码
+	left join t_成件_明细表 d (nolock) on b.小布卷号=d.小布卷号 --and d.标志='1'
+	left join t_成件_主表 e (nolock) on d.件号=e.件号 --and e.标志='1'
+	left join T_字典_事务类型表 f (nolock) on b.事务标志ID=f.事务类型ID
+	left join  dbo.T_字典_等级表 I (nolock) on ISNUMERIC(b.最终等级)=1 and  b.最终等级=cast(I.质量等级代码 as varchar(10))       
+	--where a.分区号=@分区号 and a.客单号=@客单号 and a.客单行号=@行号 
+	union all
+	select a.客单号,a.客单行号,a.分批号,a.后整号,a.布卷号
+		,b.小布卷号,b.开始检验时间,b.检验员定等时间,b.实际数量,b.单位
+		,最终等级=case when ISNUMERIC(b.最终等级)=1  then  I.质量等级 else b.最终等级 end
+		,b.疵点代码,c.疵点名称
+		,事务类型=case when isnull(f.事务类型,'')='' then cast(b.事务标志ID  as varchar(10))else f.事务类型 end
+		,d.件号,e.成件时间,b.检验类型代号,b.标志
+	from #基础信息表 a
+	inner join pis2.dbo.t_检验_布卷信息表 b (nolock) on A.客单号=B.客单号 AND A.客单行号=B.客单行号 AND a.布卷号=b.大布卷号 --and b.标志='1'
+	left join T_字典_疵点表 c (nolock) on b.疵点代码=c.疵点代码
+	left join pis2.dbo.t_成件_明细表 d (nolock) on b.小布卷号=d.小布卷号 --and d.标志='1'
+	left join pis2.dbo.t_成件_主表 e (nolock) on d.件号=e.件号 --and e.标志='1'
+	left join T_字典_事务类型表 f (nolock) on b.事务标志ID=f.事务类型ID
+	left join  dbo.T_字典_等级表 I (nolock) on ISNUMERIC(b.最终等级)=1 and  b.最终等级=cast(I.质量等级代码 as varchar(10))       
+	--where a.分区号=@分区号 and a.客单号=@客单号 and a.客单行号=@行号 
+	
+	
+	declare @仓库基础数据A table(
+	花号 varchar(30),
+	客单号 varchar(10),
+	客单行号 varchar(10),
+	分批号 varchar(10),
+	开始检验时间 datetime,
+	检验员定等时间 datetime,
+	成件时间 datetime,
+	入库时间 datetime,
+	入库日期 varchar(30),
+	入库数量 numeric(12,1), 
+	单位 varchar(10),
+	米制数量 numeric(10,1),
+	实际数量 numeric(10,1)
+	)
+
+	if NOT EXISTS(select TOP 1 1 From T_管理_入成品仓库 (nolock) 
+				where 客单号=@客单号 and 客单行号=@行号 and 入库交易类型='71' ) 
+	begin
+		select a.客单号,a.客单行号,a.分批号,a.后整号,a.布卷号,
+			a.小布卷号,
+			a.事务类型,
+			a.最终等级 质量等级,
+			a.实际数量,
+			a.单位,
+			a.开始检验时间,
+			a.检验员定等时间,
+			a.疵点代码,
+			a.疵点名称,
+			a.件号,
+			a.成件时间,
+			米制数量=case when a.单位='YD' then c.库存量*0.9144 else c.库存量 end,
+			入库时间=c.确认入库时间,
+			入库数量= c.库存量
+		into #仓库基础数据
+		from #成品基础数据 a  
+		left join ima.dbo.T_仓库_元件库存表 c (nolock)
+        on c.客单号=@客单号 and c.客单行号=@行号 and (a.件号=c.容器1 or a.小布卷号=c.容器3)
+		where a.检验类型代号<>13 and a.标志='1'
+		-- select count(1) from ima.dbo.T_仓库_元件库存表
+		
+		insert into @仓库基础数据A(
+		花号,客单号,客单行号,分批号,开始检验时间,检验员定等时间,
+		成件时间,入库时间,入库日期,入库数量,单位,
+		米制数量,实际数量
+		)
+		select a.客单号+'-'+a.客单行号+'['+a.分批号+']' 花号,
+			a.客单号,a.客单行号,a.分批号,
+			a.开始检验时间,a.检验员定等时间,
+			a.成件时间,
+			入库时间=a.入库时间,
+			left(convert(varchar(30),a.入库时间,120),13) 入库日期,
+			a.入库数量,a.单位,a.米制数量,a.实际数量
+		from #仓库基础数据 a
+
+		drop table #仓库基础数据
+	end
+	else
+	begin
+		select  
+			a.客单号,
+			a.客单行号,
+			a.分批号,
+			a.后整号,
+			a.布卷号,
+			a.小布卷号,
+			a.事务类型,
+			a.最终等级 质量等级,
+			a.实际数量,
+			a.单位,
+			a.开始检验时间,
+			a.检验员定等时间,
+			a.疵点代码,
+			a.疵点名称,
+			a.件号,
+			a.成件时间,
+			b.入库时间,
+			b.米制数量,
+			b.入库数量,
+			b.入库批次
+		into #仓库基础数据1
+		from #成品基础数据 a  left join dbo.T_管理_入成品仓库 b (nolock) 
+		on b.分区号=@分区号 and b.客单号=@客单号 and b.客单行号=@行号
+			and	(a.件号=b.件号 or a.小布卷号=b.自然件号)
+			and (b.入库交易类型='71' or b.入库交易类型='76'or b.入库交易类型='77'or b.入库交易类型='78'
+				or b.入库交易类型='P0' or b.入库交易类型='P8' or b.入库交易类型='Z0'or b.入库交易类型='Z1'
+				or b.入库交易类型='Z6' )
+		where a.检验类型代号<>13 and a.标志='1'
+	
+	
+		insert into @仓库基础数据A(
+		花号  ,
+		客单号  ,
+		客单行号  ,
+		分批号    ,
+		开始检验时间 ,
+		检验员定等时间 ,
+		成件时间      ,
+		入库时间     ,
+		入库日期     ,
+		入库数量    , 
+		单位        ,
+		米制数量    ,
+		实际数量    
+		)
+		select 
+			  a.客单号+'-'+a.客单行号+'['+a.分批号+']' 花号,
+			 a.客单号,
+			 a.客单行号,
+			 a.分批号,
+			 a.开始检验时间,
+			 a.检验员定等时间,
+			 a.成件时间,
+			 入库时间=a.入库时间,
+			 left(convert(varchar(30),a.入库时间,120),13) 入库日期,
+			 a.入库数量,
+			 a.单位,
+			 a.米制数量,
+			 a.实际数量
+		from  #仓库基础数据1 a
+
+
+		drop table #仓库基础数据1
+	end
+
+
+	select * 
+	into #仓库基础数据A
+	from @仓库基础数据A
+
+	--入库数量
+	select 客单号,客单行号,分批号,sum(实际数量) 实际数量
+	--sum(distinct 实际数量) 实际数量
+	into #仓库基础数据C 
+	from #仓库基础数据A
+	where 入库时间 is not null
+	group by 客单号,客单行号,分批号   
+
+
+	--基础信息
+	select a.花号,a.客单号,a.客单行号,a.分批号,
+		min(a.开始检验时间)  开始检验时间,
+		max(a.检验员定等时间)结束检验时间,
+		检验情况=dbo.PIS_F_返回检验状态(a.客单号, a.客单行号,a.分批号),
+		min(a.成件时间) 成件时间,
+		min(a.入库时间) 最早入库时间,
+		max(a.入库时间) 最后入库时间,
+		b.实际数量 入库数量,
+		a.单位
+	into #仓库基础数据B
+	from #仓库基础数据A a left join #仓库基础数据C b 
+	on a.客单号=b.客单号 and a.客单行号=b.客单行号 and a.分批号=b.分批号
+	group by a.花号,a.客单号,a.客单行号,a.分批号,a.单位,b.实际数量
+
+
+	select a.客单号,a.客单行号,a.分批号,min(a.开始检验时间) 抽检时间
+	into #成品抽检数据 
+	from #成品基础数据 a
+	where a.检验类型代号=13
+	group by a.客单号,a.客单行号,a.分批号
+	
+	
+	/** 印染成品 Bgn */
+	/*
+	EXEC [192.168.7.19].pdpis.dbo.PIS_P_RPT_成品进度查询 '','','500333-1'
+	
+	if object_id('tempdb.dbo.#印染成品') is not null drop table #印染成品
+	create table #印染成品(
+	花号 varchar(50),开始检验时间 datetime,结束检验时间 datetime,检验情况 varchar(500),
+	成件时间 datetime,抽检时间 datetime,入库数量 numeric(18,2),单位 varchar(20),
+	最早入库时间 datetime,最后入库时间 datetime,米制数量 numeric(18,4)	
+	)
+	insert into #印染成品
+	exec [192.168.7.19].pdpis.dbo.PIS_P_RPT_成品进度查询 '','','500333-1'
+	exec [192.168.7.19].pdpis.dbo.PIS_P_RPT_送业务部外码单_按大花号 '500078'
+	
+	select * from [192.168.7.19].pdpis.dbo.T_成件_主表 where 客单号='500333'
+	
+	declare @分区号 char(2),@客单号 char(6),@客单行号 varchar(3)
+	set @分区号='01'
+	set @客单号='500078'
+	set @客单行号='01'
+	--*/
+	if object_id('tempdb.dbo.#印染成品') is not null drop table #印染成品
+	create table #印染成品(
+	花号 varchar(50),客花号 VARCHAR(50),客色号 VARCHAR(50),成件编号 VARCHAR(50),
+	自然件号 VARCHAR(50),n1 VARCHAR(50),n2 VARCHAR(50),n3 VARCHAR(50),n4 VARCHAR(50),n5 VARCHAR(50),n6 VARCHAR(50),
+	total NUMERIC(18,2),ord NUMERIC(18,2),色光 VARCHAR(50),单位 varchar(20),跟单员 varchar(50),
+	质量标识 INT,入库时间 VARCHAR(50),出库时间 VARCHAR(50),超交标志 INT,品牌开剪 INT,实际色光 VARCHAR(50),确认入库时间 VARCHAR(50)
+	)
+	insert into #印染成品
+	Exec [PIS_P_RPT_送业务部外码单_按大花号Copy] @客单号
+	--select * from #印染成品
+	
+	delete from #印染成品 where 花号<>@客单号+'-'+@行号
+	update #印染成品 set 花号=@客单号+@行号 where 花号=@客单号+'-'+@行号
+	
+	/*
+	if object_id('tempdb.dbo.#t_成件花号44444') is not null drop table #t_成件花号44444
+	select distinct 客单号,客单行号=case when 客单行号='00' then '01' else 客单行号 END
+	into #t_成件花号44444
+	from [192.168.7.19].pdpis.dbo.T_成件_主表 with(nolock)
+	where 入库状态>='1' and 入库状态<>'3'
+		and 标志='1' AND 释放记录='0'
+		and 客单号=@客单号 and CAST(客单行号 AS INT)=CAST(@客单行号 AS INT)
+		AND 登录ID<>10000---10000 代表坯布仓库直接转到成品仓库的，不算1
+	order by 1,2
+
+	
+	if object_id('tempdb.dbo.#t_成件花号') is not null drop table #t_成件花号
+	select distinct b.成件主ID,分区号,a.客单号
+		,客单行号=case when a.客单行号='00' then '01' else a.客单行号 end,b.成件编号
+		,b.件号,入库批次,入库操作时间,b.质量等级,成件时间,数量,b.单位,自然件号,c.小布卷号
+		,米制数量=case when b.单位='YD' then cast(数量*0.9144 as numeric(18,4)) else cast(数量 as numeric(18,4)) END
+		,释放记录  --,质量等级1=CAST('' AS VARCHAR(222))
+	into #t_成件花号
+	from #t_成件花号44444 a
+	inner join [192.168.7.19].pdpis.dbo.T_成件_主表 b with(nolock)
+	on a.客单号=b.客单号 and a.客单行号=b.客单行号
+	inner join [192.168.7.19].pdpis.dbo.T_成件_明细表 c with(nolock)
+	on c.件号=b.件号 
+	where 入库状态>='1' and 入库状态<>'3' and b.标志='1' and left(b.色光,1)<>'X'  
+		AND 释放记录='0' AND 登录ID<>10000
+	order by 2,3,4
+
+	DELETE FROM #t_成件花号 WHERE 自然件号>10000
+
+	update #t_成件花号
+	set 客单行号=b.客单行号
+	from #t_成件花号 a,[192.168.7.19].pdpis.dbo.T_成件_明细表 b with(nolock)
+	where a.件号=b.件号
+	
+
+	if object_id('tempdb.dbo.#t_检验布卷信息t') is not null drop table #t_检验布卷信息t
+	select distinct i.*,c.开始检验时间,c.检验员定等时间,c.检验结束备注
+	into #t_检验布卷信息t
+	from #t_成件花号 i
+	INNER join [192.168.7.19].pdpis.dbo.VV_检验_布卷信息表 c with(nolock)
+	on i.小布卷号=c.小布卷号 AND i.客单号=c.客单号 and i.客单行号=c.客单行号
+	where c.标志=1
+	
+	if object_id('tempdb.dbo.#抽检时间') is not null drop table #抽检时间
+	SELECT a.客单号,a.客单行号,抽检时间=MAX(b.抽检时间)
+	INTO #抽检时间
+	FROM #t_成件花号 a
+	LEFT JOIN [192.168.7.19].pdpis.dbo.T_抽检_结果明细表 b with(NOLOCK) ON a.客单号=b.客单号 and a.客单行号=b.客单行号
+	GROUP BY a.客单号,a.客单行号
+	
+	if object_id('tempdb.dbo.#印染成品') is not null drop table #印染成品
+	SELECT 花号=a.客单号+a.客单行号+a.成件编号,开始检验时间
+		,检验情况=CAST('' AS VARCHAR(333)),成件时间,抽检时间,入库数量=数量,单位
+		,入库操作时间,米制数量
+	into #印染成品
+	FROM #t_检验布卷信息t a
+	LEFT JOIN #抽检时间 b ON a.客单号=b.客单号 and a.客单行号=b.客单行号
+	--select * from #印染成品
+	
+	if object_id('tempdb.dbo.#t_成件花号') is not null drop table #t_成件花号
+	if object_id('tempdb.dbo.#t_成件花号44444') is not null drop table #t_成件花号44444
+	if object_id('tempdb.dbo.#t_检验布卷信息t') is not null drop table #t_检验布卷信息t
+	if object_id('tempdb.dbo.#抽检时间') is not null drop table #抽检时间
+	/** 印染成品 End */	
+	*/
+	
+
+	if @是否汇总='0'
+	begin
+		select a.花号,
+			a.开始检验时间,
+			a.结束检验时间, 
+			--a.检验情况,
+			a.成件时间,
+			b.抽检时间,
+			a.入库数量,
+			a.单位,
+			a.最早入库时间,
+			a.最后入库时间,
+			米制数量=case when a.单位='YD' then cast(a.入库数量*0.9144 as numeric(9,2)) else a.入库数量 end
+		from #仓库基础数据B a
+		left join #成品抽检数据 b
+		on a.客单号=b.客单号 and a.客单行号=b.客单行号 and a.分批号=b.分批号
+		union
+		select 花号=a.花号+a.成件编号,
+			开始检验时间=null,
+			结束检验时间=null, 
+			成件时间=null,
+			抽检时间=null,
+			入库数量=total,
+			单位,
+			最早入库时间=null,
+			最后入库时间=null,
+			米制数量=cast(case when 单位='YD' then total*0.9144 else total end as numeric(18,2))
+		from #印染成品 a
+	end
+	else
+	begin
+		select a.花号,
+			开始检验时间=min(a.开始检验时间),
+			结束检验时间=max(a.结束检验时间),
+			成件时间=max(a.成件时间),
+			抽检时间=max(b.抽检时间),
+			入库数量=sum(a.入库数量),
+			a.单位,
+			最早入库时间=min(a.最早入库时间),
+			最后入库时间=max(a.最后入库时间),
+			米制数量=sum(case when a.单位='YD' then cast(a.入库数量*0.9144 as numeric(9,2)) else a.入库数量 end)
+		from #仓库基础数据B a
+		left join #成品抽检数据 b
+		on a.客单号=b.客单号 and a.客单行号=b.客单行号 and a.分批号=b.分批号
+		group by a.花号,a.单位
+		union
+		select 花号=a.花号+a.成件编号,
+			开始检验时间=null,
+			结束检验时间=null,
+			成件时间=null,
+			抽检时间=null,
+			入库数量=sum(a.total),
+			a.单位,
+			最早入库时间=null,
+			最后入库时间=null,
+			米制数量=sum(cast(case when 单位='YD' then total*0.9144 else total end as numeric(18,2)))
+		from #印染成品 a
+		group by a.花号+a.成件编号,a.单位
+	end
+	
+	
+	--Exec [192.168.7.19].pdpis.dbo.PIS_P_RPT_成品进度查询 '2021-01-01','2021-02-01'
+	
+	if object_id('tempdb.dbo.#成品基础数据') is not null drop table #成品基础数据
+	if object_id('tempdb.dbo.#成品抽检数据') is not null drop table #成品抽检数据
+	if object_id('tempdb.dbo.#仓库基础数据A') is not null drop table #仓库基础数据A
+	if object_id('tempdb.dbo.#仓库基础数据B') is not null drop table #仓库基础数据B
+	if object_id('tempdb.dbo.#仓库基础数据C') is not null drop table #仓库基础数据C
+	if object_id('tempdb.dbo.#基础信息表') is not null drop table #基础信息表
+
+	if object_id('tempdb.dbo.#印染成品') is not null drop table #印染成品
+	
+end
+
+
+GO

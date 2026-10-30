@@ -1,0 +1,1353 @@
+db Express sp P_进口棉_配棉信息初始化
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- Exec P_进口棉_配棉信息初始化 '棉花'
+-- Exec P_进口棉_配棉信息初始化 '棉纱'
+-- =============================================
+CREATE PROCEDURE [dbo].[P_进口棉_配棉信息初始化](
+@类别 VARCHAR(20)='棉花',
+@工号 VARCHAR(20)='',
+@lang int = 0
+)
+AS
+BEGIN
+	SET NOCOUNT ON;	
+	IF @类别='棉花'
+		SET @类别='原棉'
+	ELSE IF @类别='棉纱'
+		SET @类别='原纱'
+	
+    /*
+    SELECT * FROM T_进口棉_配棉主表 WHERE 合同号='HTCT20107'
+    SELECT * FROM pss.dbo.T_棉纺销售_文件上传信息_主表 WHERE 删除标志=0 AND 合同号='HTCT20107'
+    SELECT * FROM pss.dbo.T_仓库_采购单表 where 采购单号='HTCT20107'
+    SELECT * FROM pss.dbo.T_仓库_操作明细表 where 采购单号='HTCT20107' AND 删除标志=0
+    
+    SELECT * FROM pss.dbo.T_棉纺销售_文件上传信息_主表 WHERE 删除标志=0 AND 原料='原纱' AND 合同号='BYLF201210'
+    --原纱采购单
+	select 采购计划ID,合同号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_采购单表] where 删除标志=0 AND 物料类型='1' AND 采购单号='000077258'
+	select 采购计划ID,合同号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_采购单表] where 删除标志=0 AND 物料类型='1' AND 合同号='BYLF201210'
+	--原纱入库
+	select 交易号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] where 物料类型=1 and 转仓事务代码='51' AND 采购单号='000074148'
+	select 交易号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] where 物料类型=1 and 转仓事务代码='51' AND 采购单号='000074150'
+	select 交易号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] where 物料类型=1 and 转仓事务代码='51' AND 采购单号='000074515'
+	select 交易号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] where 物料类型=1 and 转仓事务代码='51' AND 采购单号='000075454'
+	--原纱发票信息
+	select * from [192.168.7.2].[tesdatt5].[dbo].[T_发票_发票管理信息表] where 交易号='3840568'
+	select * from [192.168.7.2].[tesdatt5].[dbo].[T_发票_发票管理信息表] where 交易号='3840569'
+	select * from [192.168.7.2].[tesdatt5].[dbo].[T_发票_发票管理信息表] where 交易号='3840531'
+	
+	
+	SELECT * FROM pss.dbo.T_棉纺销售_文件上传信息_主表 WHERE 删除标志=0 AND 原料='原纱'
+    --原纱采购单
+	select * from [192.168.7.11].[RMMS].[dbo].[T_仓库_采购单表] where 删除标志=0 AND 物料类型='1' AND 采购单号='000077258'
+	--原纱入库
+	select 交易号,* from [192.168.7.11].[RMMS].[dbo].[T_仓库_操作明细表] where 物料类型=1 and 转仓事务代码='51' and 转仓日期>'2021-05-01' AND 采购单号='000077258'
+	--原纱发票信息
+	select * from [192.168.7.11].[RMMS].[dbo].[T_发票_发票管理信息表] where 交易号='3882280'
+    */
+    /*
+	DECLARE @类别 VARCHAR(20)
+	SET @类别='原纱'
+	--*/
+    IF @类别 IN ('棉花','原棉','棉纱','原纱')
+    BEGIN
+		/*
+		DECLARE @类别 VARCHAR(20)
+		SET @类别='原纱'
+		--*/
+
+		/*
+		IF OBJECT_ID('TEMPDB.DBO.#TEMP') IS NOT NULL DROP TABLE #TEMP
+		SELECT A.ID,A.公司,A.国别,A.合同号,A.合同数量,B.批号,A.可用数量,A.文件描述
+			,A.文件明细,A.提交人,A.提交时间
+			,类别=a.原料
+			,入库时间=创建时间,开票数量=原棉开票数量,发票号码
+			,纱种=CAST('' AS VARCHAR(50)),合同日期
+		INTO #TEMP
+		FROM pss.dbo.T_棉纺销售_文件上传信息_主表 A WITH(NOLOCK)
+		INNER JOIN pss.dbo.T_仓库_操作明细表 B WITH(NOLOCK)
+		ON A.合同号=B.采购单号 AND B.删除标志=0
+		WHERE A.删除标志=0 AND A.原料='原棉'
+		UNION
+		SELECT DISTINCT A.ID,A.公司,A.国别,A.合同号
+			,订单量=NULL	--B.订单量
+			,批号=''	--C.批号
+			,A.可用数量,A.文件描述
+			,A.文件明细,A.提交人,A.提交时间
+			,类别=a.原料
+			,入库时间=null	--C.创建时间
+			,开票数量=null	--开票数量=D.发票数量
+			,发票号='' --D.发票号
+			,纱种=''	--ISNULL(C.key1+'*'+C.key2+'*'+C.key3+'*'+C.key4,'')
+			,合同日期
+		FROM pss.dbo.T_棉纺销售_文件上传信息_主表 A WITH(NOLOCK)
+		LEFT JOIN [192.168.7.2].[tesdatt5].[dbo].[T_仓库_采购单表] B
+		ON A.合同号=B.合同号 AND B.删除标志=0 AND B.物料类型='1'
+		LEFT JOIN [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] C
+		ON B.采购单号=C.采购单号 AND C.删除标志=0 AND C.物料类型=1 and C.转仓事务代码='51'
+		LEFT JOIN [192.168.7.2].[tesdatt5].[dbo].[T_发票_发票管理信息表] D
+		ON C.交易号=D.交易号 AND D.删除标志=0
+		WHERE A.删除标志=0 AND A.原料='原纱'
+		UNION
+		SELECT DISTINCT A.ID,A.公司,A.国别,B.合同号
+			,订单量=NULL	--B.订单量
+			,批号=''	--C.批号
+			,可用数量=B.核销数量,A.文件描述
+			,A.文件明细,A.提交人,A.提交时间
+			,类别=a.原料
+			,入库时间=null	--C.创建时间
+			,开票数量=null	--开票数量=D.发票数量
+			,发票号='' --D.发票号
+			,纱种=''	--ISNULL(C.key1+'*'+C.key2+'*'+C.key3+'*'+C.key4,'')
+			,合同日期
+		FROM pss.dbo.T_棉纺销售_文件上传信息_主表 A WITH(NOLOCK)
+		INNER JOIN [192.168.7.2].[tesdatt5].[dbo].T_仓库_采购单进口棉文档关系 B
+		ON A.ID=B.文件上传ID
+		LEFT JOIN [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] C
+		ON B.采购单号=C.采购单号 AND C.删除标志=0 AND C.物料类型=1 and C.转仓事务代码='51'
+		LEFT JOIN [192.168.7.2].[tesdatt5].[dbo].[T_发票_发票管理信息表] D
+		ON C.交易号=D.交易号 AND D.删除标志=0
+		WHERE A.删除标志=0 AND A.原料='原纱'
+		--SELECT 原料,* FROM pss.dbo.T_棉纺销售_文件上传信息_主表 ORDER BY 提交时间 DESC
+		--SELECT * FROM [192.168.7.2].[tesdatt5].[dbo].T_仓库_采购单进口棉文档关系
+		
+		--UNION
+		--SELECT A.ID,A.公司,A.国别
+		--	,A.合同号
+		--	,B.订单量,C.批号,A.可用数量,A.文件描述
+		--	,A.文件明细,A.提交人,A.提交时间
+		--	,类别=a.原料
+		--	,入库时间=C.创建时间,开票数量=D.发票数量,D.发票号
+		--FROM pss.dbo.T_棉纺销售_文件上传信息_主表 A WITH(NOLOCK)
+		--LEFT JOIN [192.168.7.11].[RMMS].[dbo].[T_仓库_采购单表] B
+		--ON A.合同号=B.合同号 AND B.删除标志=0 AND B.物料类型='1'
+		--LEFT JOIN [192.168.7.11].[RMMS].[dbo].[T_仓库_操作明细表] C
+		--ON B.采购单号=C.采购单号 AND C.删除标志=0 AND C.物料类型=1 and C.转仓事务代码='51'
+		--LEFT JOIN [192.168.7.11].[RMMS].[dbo].[T_发票_发票管理信息表] D
+		--ON C.交易号=D.交易号 AND D.删除标志=0
+		--WHERE A.删除标志=0 AND A.原料='原纱'		
+		
+		
+		UNION
+		SELECT A.ID,A.公司,A.国别,A.合同号,A.合同数量,B.批号,A.可用数量,A.文件描述
+			,A.文件明细,A.提交人,A.提交时间
+			,类别=a.原料
+			,入库时间=创建时间,开票数量=原棉开票数量,发票号码,纱种=CAST('' AS VARCHAR(50))
+			,合同日期
+		FROM pss.dbo.T_棉纺销售_文件上传信息_主表 A WITH(NOLOCK)
+		INNER JOIN pss.dbo.T_仓库_操作明细表 B WITH(NOLOCK)
+		ON A.合同号='2020SZCZ-0828US03' AND B.采购单号='2020SNCZ-0828US03' AND B.删除标志=0
+		WHERE A.删除标志=0 AND A.原料='原棉'
+		--SELECT * FROM #TEMP WHERE 合同号='000083905'
+		--SELECT * FROM T_进口棉_配棉主表 WHERE 合同号='BYLF201210'
+		--SELECT * FROM pss.dbo.T_棉纺销售_文件上传信息_主表 WHERE 合同号='000082898'
+		--UPDATE pss.dbo.T_棉纺销售_文件上传信息_主表 SET 可用数量=3.25307 WHERE 合同号='000082898'
+	    
+	    
+		UPDATE A
+		SET 国别=B.国别,
+			公司=B.公司,
+			合同数量=B.合同数量,
+			可用数量=B.可用数量,
+			入库时间=B.入库时间,
+			发票数量=B.开票数量,
+			发票号=B.发票号码,
+			纱种=B.纱种,
+			合同日期=B.合同日期
+		/*
+		SELECT *
+		--*/
+		FROM T_进口棉_配棉主表 A
+		INNER JOIN #TEMP B
+		ON A.棉纺ID=B.ID AND A.合同号=B.合同号 AND ISNULL(A.批号,'')=ISNULL(B.批号,'') AND A.类别=B.类别
+	    
+
+	    
+		INSERT INTO T_进口棉_配棉主表(
+		棉纺ID,公司,国别,合同号,合同数量,批号,可用数量,文件描述,
+		文件明细,提交人,提交时间,类别,入库时间,发票数量,发票号,纱种,合同日期,导入时间)    
+		--SELECT * FROM #TEMP WHERE 类别='原纱' and 合同号='BYLF201231'
+		--SELECT * FROM T_进口棉_配棉主表 WHERE 类别='原纱' and 合同号='BYLF201231'
+		SELECT A.ID,A.公司,A.国别,A.合同号,A.合同数量,A.批号,A.可用数量,A.文件描述
+			,A.文件明细,A.提交人,A.提交时间
+			,A.类别
+			,A.入库时间,A.开票数量,A.发票号码,A.纱种,A.合同日期,导入时间=getdate()
+		FROM #TEMP A
+		LEFT JOIN T_进口棉_配棉主表 B WITH(NOLOCK)
+		ON A.ID=B.棉纺ID AND A.合同号=B.合同号 AND ISNULL(A.批号,'')=ISNULL(B.批号,'') AND A.类别=B.类别 AND B.删除标志=0
+		WHERE B.id IS NULL --and a.合同号='BYLF201231'
+	    
+	    
+		INSERT INTO T_进口棉_配棉主表(
+		棉纺ID,公司,国别,合同号,合同数量,批号,可用数量,文件描述,
+		文件明细,提交人,提交时间,类别,合同日期,导入时间)
+		SELECT A.ID,A.公司,A.国别,A.合同号,A.合同数量,批号,A.可用数量,A.文件描述
+			,A.文件明细,A.提交人,A.提交时间
+			,类别=CASE WHEN A.公司='棉纺' THEN '棉花' ELSE '棉纱' END,A.合同日期,导入时间=getdate()
+		FROM pss.dbo.T_棉纺销售_文件上传信息_主表 A WITH(NOLOCK)
+		LEFT JOIN T_进口棉_配棉主表 B WITH(NOLOCK)
+		ON A.ID=B.棉纺ID AND A.合同号=B.合同号 AND B.删除标志=0
+		WHERE B.id IS NULL AND A.删除标志=0 AND ISNULL(A.原料,'')=''
+	    
+	    */
+
+		exec  P_进口棉_配棉信息_信息刷入
+
+		IF OBJECT_ID('tempdb..#results1') IS NOT NULL 
+        DROP TABLE #results1
+
+		SELECT 
+			ID,
+			类别_old = 类别,        
+			类别_new = 类别,      
+			国别_old = 国别,       
+			国别_new = 国别       
+		INTO #results1
+		FROM T_进口棉_配棉主表
+		WHERE 删除标志=0 AND 类别=@类别
+
+
+		UPDATE #results1
+		SET 
+			类别_new = ISNULL(pdpis.dbo.fn_GetTranslation(类别_old, @lang), 类别_old),
+			国别_new = ISNULL(pdpis.dbo.fn_GetTranslation(国别_old, @lang), 国别_old)
+
+		SELECT A.ID,棉纺ID,
+			类别 = T.类别_new,
+			公司,
+			国别 = T.国别_new,
+			合同号,合同日期,合同数量,批号
+			,纱种
+			,可用数量=CAST(可用数量 AS NUMERIC(18,4))
+			,文件描述,文件明细,文件打开类型,入库时间
+			,发票数量=CAST(发票数量 AS NUMERIC(18,4))
+			,发票号,提交人,提交时间,删除标志,删除人,删除时间,是否关闭,关闭人,关闭时间
+			,已用数量=ISNULL((SELECT SUM(数量)/1000 FROM T_进口棉_配棉主表 MA WITH(NOLOCK)
+							INNER JOIN T_进口棉_配棉登记表 MB WITH(NOLOCK)
+							ON MA.ID=MB.MainID AND MA.删除标志=0 AND MB.删除标志=0
+							WHERE MainID=A.ID),0)
+			,剩余数量=CASE WHEN T.类别_old IN ('棉花','原棉') THEN CAST(发票数量 AS NUMERIC(18,4)) ELSE CAST(可用数量 AS NUMERIC(18,4)) END
+						-ISNULL((SELECT SUM(数量)/1000 FROM T_进口棉_配棉主表 MA WITH(NOLOCK)
+								INNER JOIN T_进口棉_配棉登记表 MB WITH(NOLOCK)
+								ON MA.ID=MB.MainID AND MA.删除标志=0 AND MB.删除标志=0
+								WHERE MainID=A.ID),0)
+		FROM T_进口棉_配棉主表 A
+		INNER JOIN #results1 T ON A.ID = T.ID
+		WHERE 删除标志=0 AND 类别=@类别
+		--SELECT * FROM T_进口棉_配棉主表 WHERE ISNUMERIC(可用数量)=0
+		--UPDATE T_进口棉_配棉主表 SET 可用数量=3.25307 WHERE ISNUMERIC(可用数量)=0
+		IF OBJECT_ID('tempdb..#results1') IS NOT NULL DROP TABLE #results1
+		
+    END
+    ELSE	--订单信息
+    BEGIN
+		/*
+		DECLARE @工号 VARCHAR(20)
+		SET @工号='022987'
+		--*/
+		IF OBJECT_ID('TEMPDB.DBO.#待选') IS NOT NULL DROP TABLE #待选
+		SELECT TOP 1000 客单号,客单行,跟单员--,工号
+			,数量,单位
+			,数量M=CASE WHEN 单位='YD' THEN 数量*0.9144 ELSE 数量 END
+			,客户代码,客户,整理方式
+			,部门,订单类别,经纱,纬纱,经密,纬密,门幅,克重要求,第一次审核时间,织厂类别
+			,品名,组织,货物类别,大货交期
+		INTO #待选
+		FROM mycrmlf.DBO.v_OrdOfAllSts WITH(NOLOCK)
+		WHERE 货物类别='大货' AND 是否使用进口纱='是'
+			AND (工号=@工号 OR @工号 IN ('008864','022987',''))
+		UNION
+		SELECT B.客单号,B.客单行,跟单员--,工号
+			,B.数量
+			,B.单位
+			,数量M=CASE WHEN B.单位='YD' THEN B.数量*0.9144 ELSE B.数量 END
+			,客户代码,客户,整理方式
+			,部门,订单类别,经纱,纬纱,经密,纬密,门幅,克重要求,第一次审核时间,织厂类别
+			,品名,组织,货物类别,大货交期
+		FROM T_进口棉_订单核销附表 A WITH(NOLOCK)
+		INNER JOIN mycrmlf.DBO.v_OrdOfAllSts B
+		ON A.客单号=B.客单号 --AND A.客单行=B.客单行
+		WHERE 货物类别='大货'
+			AND (工号=@工号 OR @工号 IN ('008864','022987',''))
+		ORDER BY 第一次审核时间 DESC
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#配棉') IS NOT NULL DROP TABLE #配棉
+		SELECT DISTINCT B.客单号,B.客单行
+		INTO #配棉
+		FROM T_进口棉_配棉主表 A WITH(NOLOCK)
+		INNER JOIN T_进口棉_配棉登记表 B WITH(NOLOCK)
+		ON A.ID=B.MainID AND A.删除标志=0 AND B.删除标志=0
+		
+		SELECT *,是否标识=CAST(ISNULL((SELECT TOP 1 1 FROM #配棉 WHERE 客单号=A.客单号 AND 客单行=A.客单行),0) AS BIT) FROM #待选 A
+		
+		IF OBJECT_ID('TEMPDB.DBO.#待选') IS NOT NULL DROP TABLE #待选
+		IF OBJECT_ID('TEMPDB.DBO.#配棉') IS NOT NULL DROP TABLE #配棉
+    END
+    
+END
+
+	
+GO
+
+
+sp P_进口棉_原棉产地查询
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE proc [dbo].[P_进口棉_原棉产地查询] 
+(@客单号 varchar(50))
+as
+begin
+  declare @织厂类别 varchar(50)
+  select @织厂类别=(select top 1 织厂类别 from [mycrmlf].[dbo].v_OrdOfAllSts with(nolock) where 客单号=@客单号)
+  if(@织厂类别='印染')
+  begin
+    select 客单号,key1,key2,key3,批号 
+    into #操作明细
+    from lfpd.[dbo].[T_仓库_操作明细表]   
+    where 物料类型=1 and 客单号=@客单号
+  
+    select a.客单号,a.key1,a.key2,a.key3,原棉产地=b.原产地,纱线产地,a.批号 
+    from #操作明细 a
+    inner join lfpd.[dbo].[T_仓库_操作明细表] b on a.key1=b.key1 and a.key2=b.key2 and a.key3=b.key3 and a.批号=b.批号  and b.转仓事务代码='51'
+    inner join [tesdatt5].dbo.T_仓库_采购单表 c on b.采购单号=c.采购单号 and b.行号=c.行号 
+  end
+  else begin
+    select distinct a.客单号,b.key1,b.key2,b.key3,原棉产地=b.原产地,b.纱线产地,b.批号,纱厂名称=b.备注
+    from [tesdatt5].[dbo].[T_仓库_操作明细表] a
+    left join [tesdatt5].[dbo].[T_仓库_物料库存表] b on a.key1=b.key1 and a.key2=b.key2 and a.key3=b.key3 and a.key4=b.key4 and a.批号=b.批号
+    where a.客单号=@客单号
+  end
+end 
+GO
+
+sp P_PSS_文件溯源_文件信息查询
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE proc [dbo].[P_PSS_文件溯源_文件信息查询] 
+(@客单号 varchar(50),
+ @客单行 varchar(10))
+ as
+ begin
+  --if object_id('tempdb.dbo.#工艺纱批') is not null drop table #工艺纱批
+  --select distinct 客单号,客单行=@客单行,工艺纱批
+  --into #工艺纱批
+  --from report.dbo.RPT_T_染色工艺信息
+  --where 客单号=@客单号 and cast(left(right(第四键,3),2) as int)=@客单行
+
+  --select distinct b.采购单号,d.ID,d.文件名称,d.附件名称,d.文件打开类型,d.文件类别,d.提交人,d.提交时间,文件描述=replace(c.文件描述,'/','')
+  --from [192.168.7.2].tesdatt5.dbo.T_仓库_留位明细表 a
+  --left join [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] b on a.key1=b.key1 and a.key2=b.key2 and a.key3=b.key3 and a.key4=b.key4 and a.批号=b.批号 and 转仓事务代码=51
+  --left join [PSS].dbo.T_棉纺销售_文件上传信息_主表 c on b.采购单号=c.采购单号
+  --left join [PSS].dbo.T_棉纺销售_文件上传信息_明细表 d on c.ID=d.主表ID 
+  --where b.采购单号 is not null and a.客单号=@客单号 and c.ID is not null and a.已发数量<>0 and a.删除时间 is null AND a.批号 in (select 工艺纱批 from #工艺纱批)
+  if object_id('tempdb.dbo.#下单信息') is not null   drop table #下单信息
+select  客单号,客单行,部门,货物类别,坯布来源,品牌印花备坯客单号,品牌印花备坯客单行
+into #下单信息
+from [mycrmlf].[dbo].v_OrdOfAllSts 
+where 客单号=@客单号
+ 
+ 
+if object_id('tempdb.dbo.#原纱明细') is not null   drop table #原纱明细 
+ 
+select 厂编号=客单号, 纱种=key1+' '+key2+' '+key3+' '+key4, 纱支=key1, 成份=key2, 特性=key3, 色号=key4 ,批号, 纱厂=cast('' as varchar(50)), 领用数量=sum(转仓数量), 领用部门=cast('' as varchar(50)), 部门=cast('' as varchar(50)),原棉产地=cast('' as varchar(50))
+,采购单号=cast('' as varchar(500) ),转仓日期=min(转仓日期),坯布来源=cast('' as varchar(50)),备坯花号=cast('' as varchar(150))
+into #原纱明细
+from [tesdatt5].[dbo].[T_仓库_操作明细表] with (nolock)
+where 客单号=@客单号
+group by 客单号,key1,key2,key3,key4,批号
+ 
+ 
+if object_id('tempdb.dbo.#采购单号') is not null   drop table #采购单号 
+ 
+select   序号 = ROW_NUMBER() OVER (PARTITION BY 纱种,a.批号 ORDER BY 交易号 desc ),纱支,成份,特性,色号,a.批号,b.采购单号
+into #采购单号
+from #原纱明细 a
+inner join [tesdatt5].[dbo].[T_仓库_操作明细表] b with (nolock)
+on a.纱支=b.key1
+and a.成份=b.key2
+and a.特性=b.key3
+and a.色号=b.key4
+and a.批号=b.批号
+where b.转仓事务代码='51'
+and b.转仓日期<=a.转仓日期
+ 
+ 
+update a
+set 采购单号=b.采购单号
+from #原纱明细 a
+inner join #采购单号 b
+on a.纱支=b.纱支
+and a.成份=b.成份
+and a.特性=b.特性
+and a.色号=b.色号
+and a.批号=b.批号
+ 
+ 
+ 
+ 
+ 
+ 
+update a
+set 纱厂=b.备注,
+原棉产地=b.原产地
+from #原纱明细 a
+inner join [tesdatt5].[dbo].[T_仓库_物料库存表] b with (nolock)
+on a.纱支=b.key1
+and a.成份=b.key2
+and a.特性=b.key3
+and a.色号=b.key4
+and a.批号=b.批号
+ 
+ 
+update a
+set 部门=b.部门,
+领用部门=b.货物类别
+from #原纱明细 a
+inner   join #下单信息  b
+on a.厂编号=b.客单号
+ 
+ 
+ 
+--declare @客单号 varchar(50)
+--set @客单号='521786'
+if object_id('tempdb.dbo.#印染原纱明细') is not null   drop table #印染原纱明细
+select 厂编号=客单号, 纱种=key1+' '+key2+' '+key3+' '+key4, 纱支=key1, 成份=key2, 特性=key3, 色号=key4 ,批号, 纱厂=cast('' as varchar(50)), 领用数量=sum(转仓数量),
+领用部门=cast('' as varchar(50)), 部门=cast('' as varchar(50)),原棉产地=cast('' as varchar(50))
+,采购单号=cast('' as varchar(500) ),转仓日期=min(转仓日期),坯布来源=cast('' as varchar(50)),备坯花号=cast('' as varchar(150))
+into #印染原纱明细
+from [LFPD].[dbo].[T_仓库_操作明细表] with (nolock)
+where 客单号=@客单号--'521786'
+group by 客单号,key1,key2,key3,key4,批号
+ 
+ 
+if object_id('tempdb.dbo.#印染采购单号') is not null   drop table #印染采购单号 
+ 
+select   序号 = ROW_NUMBER() OVER (PARTITION BY 纱种,a.批号 ORDER BY 交易号 desc ),纱支,成份,特性,色号,a.批号,b.采购单号,交易号,b.单价,发票号码=cast('' as varchar(50)),备注,留位号
+into #印染采购单号
+from #印染原纱明细 a
+inner join [lfpd].[dbo].[T_仓库_操作明细表] b with (nolock)
+on a.纱支=b.key1
+and a.成份=b.key2
+and a.特性=b.key3
+and a.色号=b.key4
+and a.批号=b.批号
+where b.转仓事务代码 in ('51' ,'Y12' )
+and b.转仓日期<=a.转仓日期
+ 
+ 
+update a
+set 发票号码=b.发票号
+from #印染采购单号 a
+inner join [lfpd].[dbo].[T_发票_发票管理信息表] b with (nolock)
+on a.交易号=b.交易号
+and a.序号=1
+ 
+update a
+set 采购单号=b.采购单号,
+纱厂=b.备注
+from #印染原纱明细 a
+inner join #印染采购单号 b
+on a.纱支=b.纱支
+and a.成份=b.成份
+and a.特性=b.特性
+and a.色号=b.色号
+and a.批号=b.批号
+and b.序号=1
+ 
+update a
+set 
+原棉产地=c.原产地
+from #印染原纱明细 a
+inner join [tesdatt5].[dbo].T_仓库_采购单表 c
+on a.采购单号=c.采购单号 
+ 
+ 
+update a
+set 部门=b.部门,
+领用部门=b.货物类别
+from #印染原纱明细 a
+inner   join #下单信息  b
+on a.厂编号=b.客单号
+ 
+ 
+ 
+insert into #原纱明细
+(
+厂编号, 纱种 ,纱支 ,成份, 特性 ,色号, 批号, 纱厂 ,领用数量, 领用部门, 部门 ,原棉产地, 采购单号 ,转仓日期 ,坯布来源 ,备坯花号
+)
+select 厂编号, 纱种 ,纱支 ,成份, 特性 ,色号, 批号, 纱厂 ,领用数量, 领用部门, 部门 ,原棉产地, 采购单号 ,转仓日期 ,坯布来源 ,备坯花号
+from #印染原纱明细 
+ 
+ 
+ 
+insert into #原纱明细
+(厂编号,纱支,领用部门,坯布来源,备坯花号,部门)
+select distinct 厂编号=客单号,纱支='',货物类别,坯布来源,备坯花号=品牌印花备坯客单号+'-'+品牌印花备坯客单行,部门
+from #下单信息 where isnull(坯布来源,'')<>''
+ --b.采购单号,d.ID,d.文件名称,d.附件名称,d.文件打开类型,d.文件类别,d.提交人,d.提交时间,文件描述=replace(c.文件描述,'/','')
+select b.采购单号,d.ID,d.文件名称,d.附件名称,文件打开类型=replace(replace(d.文件打开类型,char(10),''),char(13),''),d.文件类别,d.提交人,d.提交时间,文件描述=replace(replace(replace(c.文件描述,'/',''),char(10),''),char(13),'')
+from #原纱明细 B
+left join tesdatt5.dbo.T_棉纺销售_文件上传信息_主表 c on b.采购单号=c.合同号 and c.删除标志=0
+left join tesdatt5.dbo.T_棉纺销售_文件上传信息_明细表 d on c.ID=d.主表ID 
+END
+
+ 
+GO
+
+sp P_进口棉_配棉核销情况查询
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- Exec P_进口棉_配棉核销情况查询 '','','',1
+-- =============================================
+CREATE PROCEDURE [dbo].[P_进口棉_配棉核销情况查询](
+@类别 VARCHAR(20),
+@国别 VARCHAR(50),
+@客单号 VARCHAR(20),
+@客单行 INT,
+@lang int = 1 
+)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	/*
+	SELECT TOP 1000 * FROM mycrmlf.DBO.V_OrderKeDanJia
+	SELECT * FROM T_进口棉_配棉主表
+	SELECT * FROM T_进口棉_配棉登记表
+	
+	DECLARE @类别 VARCHAR(20),@国别 VARCHAR(50),@客单号 VARCHAR(20),@客单行 INT
+	SET @类别=''
+	SET @国别=''
+	SET @客单号='479983'
+	SET @客单行='3'	
+    --*/
+
+	 IF OBJECT_ID('tempdb..#contracts_stage') IS NOT NULL
+        DROP TABLE #contracts_stage;
+
+	 CREATE TABLE #contracts_stage (
+        客单号 VARCHAR(20),
+        客单行 INT,
+        订单数量 DECIMAL(18,2),
+        订单单位 NVARCHAR(50),
+        类别 NVARCHAR(200),     
+        国别 NVARCHAR(200),    
+        合同号 NVARCHAR(100),
+        批号 NVARCHAR(100),
+        文件描述 NVARCHAR(500),
+        文件明细 NVARCHAR(MAX),
+        纱支 NVARCHAR(100),
+        使用数量 DECIMAL(18,2),
+        使用单位 NVARCHAR(50),
+        品名 NVARCHAR(500),     
+        经纱 NVARCHAR(200),
+        纬纱 NVARCHAR(200)
+    );
+	INSERT INTO #contracts_stage
+    SELECT B.客单号,B.客单行,订单数量=C.数量,订单单位=C.单位		
+		,A.类别,国别,合同号
+		--,合同数量
+		,批号
+		--,可用数量
+		,文件描述,文件明细
+		--,入库时间
+		--,发票数量		
+		,B.纱支,使用数量=B.数量,使用单位=B.单位		
+		,C.品名,C.经纱,C.纬纱
+    FROM T_进口棉_配棉主表 A WITH(NOLOCK)
+    INNER JOIN T_进口棉_配棉登记表 B WITH(NOLOCK)
+    ON A.ID=B.MainID AND B.删除标志=0
+    INNER JOIN mycrmlf.DBO.V_OrderKeDanJia C
+    ON B.客单号=C.客单号 AND B.客单行=C.客单行
+    WHERE A.删除标志=0
+		AND A.类别=CASE WHEN @类别='' THEN A.类别 ELSE @类别 END
+		AND A.国别=CASE WHEN @国别='' THEN A.国别 ELSE @国别 END
+		AND ISNULL(B.客单号,'')=CASE WHEN @客单号='' THEN ISNULL(B.客单号,'') ELSE @客单号 END
+		AND ISNULL(B.客单行,'')=CASE WHEN @客单号='' OR @客单行='' THEN ISNULL(B.客单行,'') ELSE @客单行 END
+    
+	
+	IF @lang <>0  
+    BEGIN
+        UPDATE #contracts_stage
+        SET 
+            类别 = ISNULL(pdpis.dbo.fn_GetTranslation(类别, @lang), 类别),
+            国别 = ISNULL(pdpis.dbo.fn_GetTranslation(国别, @lang), 国别),
+			品名 = ISNULL(pdpis.dbo.fn_GetTranslation(品名, @lang), 品名),
+			文件描述 = ISNULL(pdpis.dbo.fn_GetTranslation(文件描述, @lang), 文件描述),
+			文件明细 = ISNULL(pdpis.dbo.fn_GetTranslation(文件明细, @lang), 文件明细)
+
+		 END
+
+    SELECT * FROM #contracts_stage;
+
+
+    IF OBJECT_ID('tempdb..#contracts_stage') IS NOT NULL
+        DROP TABLE #contracts_stage;
+END
+
+GO
+
+sp P_进口棉_订单生产综合查询
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- EXEC P_进口棉_订单生产综合查询 'B02610','3','原棉',1
+-- =============================================
+CREATE PROCEDURE [dbo].[P_进口棉_订单生产综合查询](
+@客单号 VARCHAR(50),
+@客单行 VARCHAR(50),
+@类别 VARCHAR(50),
+@是否汇总 VARCHAR(10)='0',
+@lang int = 0
+)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	/*
+	SELECT * FROM T_进口棉_配棉登记表 WHERE 删除标志=0 AND 客单号='512930' 
+	
+	DECLARE @客单号 VARCHAR(50),@客单行 VARCHAR(50),@类别 VARCHAR(50),@是否汇总 VARCHAR(10)
+	SET @客单号='B02610'
+	SET @客单行='3'
+	SET @类别='原棉'
+	SET @是否汇总='0'
+	--*/
+	IF OBJECT_ID('TEMPDB.DBO.#合同') IS NOT NULL DROP TABLE #合同
+	SELECT DISTINCT A.合同号,A.批号,A.棉纺ID,A.类别
+	INTO #合同
+	FROM T_进口棉_配棉主表 A WITH(NOLOCK)
+	INNER JOIN T_进口棉_配棉登记表 B WITH(NOLOCK)
+	ON A.ID=B.MainID AND B.删除标志=0
+	WHERE A.删除标志=0 --AND A.类别=@类别
+		AND ISNULL(B.客单号,'')=@客单号
+		AND ISNULL(B.客单行,'')=@客单行
+	--SELECT * FROM #合同
+	
+	
+	/*
+	--采购单
+	SELECT * FROM pss.dbo.T_仓库_采购单表 where 采购单号='S12671'
+	--入库
+	select * from pss.[dbo].[T_仓库_操作明细表] where 采购单号='S12671' and 行号='1'
+	--出库
+	select 采购单号,* from pss.[dbo].[T_仓库_操作明细表] where 物料类型='02' and 批号='190189' and 转仓事务代码 not in ('51','D+')
+	*/
+	IF OBJECT_ID('TEMPDB.DBO.#原棉') IS NOT NULL DROP TABLE #原棉
+	SELECT [合同号#Contract No. of Cotton Purchase]=A.合同号
+	    ,[批号#Cotton Batch No.]=A.批号
+		,[类别#Cotton Type]=A.类别--,B.供应商代码
+		,[采购单号#Cotton Purchase No.]=B.采购单号
+		,[采购时间#Purchase Date]=B.创建时间
+		,[采购数量#Purchase Quantity]=B.订单量
+		,[入库数量#Cotton put into storage Qty]=C.转仓数量
+		,[单位#Unit]=C.单位
+		,[棉包数量#No. of Bales]=0
+		,[入库时间#Cotton put Into Storage Time]=C.创建时间
+		,[出库数量#Cotton carry out Quantity]=CAST(0 AS NUMERIC(18,4))
+		,[出库时间#Cotton carry out time]=CAST(NULL AS DATETIME)
+		,[操作类型#In Storage#Deliver from storage]='入库'
+		,原棉产地=''
+		,领用单号=''
+	INTO #原棉
+	FROM #合同 A
+	INNER JOIN tesdatt5.dbo.T_仓库_采购单表 B WITH(NOLOCK)
+	ON B.删除标志=0 AND (A.合同号=B.采购单号 OR (A.合同号='2020SZCZ-0828US03' AND B.采购单号='2020SNCZ-0828US03'))
+	INNER JOIN tesdatt5.dbo.T_仓库_操作明细表 C WITH(NOLOCK)
+	ON B.采购单号=C.采购单号 AND A.批号=C.批号 AND C.删除标志=0
+	WHERE A.类别='原棉'
+	--UNION
+	--SELECT [合同号#Contract No. of Cotton Purchase]=A.合同号
+	--    ,[批号#Cotton Batch No.]=A.批号
+	--	,[类别#Cotton Type]=A.类别--,B.供应商代码
+	--	,[采购单号#Cotton Purchase No.]=B.采购单号
+	--	,[采购时间#Purchase Date]=B.创建时间
+	--	,[采购数量#Purchase Quantity]=B.订单量
+	--	,[入库数量#Cotton put into storage Qty]=C.转仓数量
+	--	,[单位#Unit]=C.单位
+	--	,[棉包数量#No. of Bales]=C.棉包数量
+	--	,[入库时间#Cotton put Into Storage Time]=C.创建时间
+	--	,[出库数量#Cotton carry out Quantity]=CAST(0 AS NUMERIC(18,4))
+	--	,[出库时间#Cotton carry out time]=CAST(NULL AS DATETIME)
+	--	,[操作类型#In Storage/Deliver from storage]='入库'
+	--	,C.原棉产地
+	--	,C.领用单号
+	--FROM #合同 A
+	--INNER JOIN pss.dbo.T_仓库_采购单表 B WITH(NOLOCK)
+	--ON B.删除标志=0 AND (A.合同号=B.采购单号 OR (A.合同号='2020SZCZ-0828US03' AND B.采购单号='2020SNCZ-0828US03'))
+	--INNER JOIN pss.dbo.T_仓库_操作明细表 C WITH(NOLOCK)
+	--ON A.批号=C.批号 AND C.删除标志=0 AND C.物料类型='02' AND C.转仓事务代码 not in ('51','D+')
+	--WHERE A.类别='原棉'
+	--SELECT * FROM #原棉 WHERE 操作类型='入库'
+	
+	
+	IF @类别 IN ('原棉','原纱')
+	BEGIN
+		IF @类别='原棉'
+		BEGIN
+			IF @是否汇总='0'
+			BEGIN
+				SELECT * FROM #原棉 ORDER BY ISNULL([入库时间#Cotton put Into Storage Time],[出库时间#Cotton carry out time])
+				
+				RETURN
+			END
+			ELSE
+			BEGIN
+				SELECT 
+				    [合同号#Contract No. of Cotton Purchase]
+					,[批号#Cotton Batch No.]
+					,[类别#Cotton Type]
+					,[采购单号#Cotton Purchase No.],[采购时间#Purchase Date]=MIN([采购时间#Purchase Date]),[采购数量#Purchase Quantity]=MAX([采购数量#Purchase Quantity])
+					,[入库数量#Cotton put into storage Qty]=SUM([入库数量#Cotton put into storage Qty]),[单位#Unit]
+					,[棉包数量#No. of Bales]=SUM([棉包数量#No. of Bales])
+					,[入库时间#Cotton put Into Storage Time]=MIN([入库时间#Cotton put Into Storage Time])
+					,[出库数量#Cotton carry out Quantity]=SUM([出库数量#Cotton carry out Quantity])
+					,[出库时间#Cotton carry out time]=MAX([出库时间#Cotton carry out time])
+					,[操作类型#In Storage#Deliver from storage]
+				FROM #原棉
+				GROUP BY [合同号#Contract No. of Cotton Purchase],[批号#Cotton Batch No.],[类别#Cotton Type],[采购单号#Cotton Purchase No.],
+				         [操作类型#In Storage#Deliver from storage],[单位#Unit]
+				ORDER BY ISNULL(MIN([入库时间#Cotton put Into Storage Time]),MAX([出库时间#Cotton carry out time]))
+				
+				RETURN
+			END
+		END
+	    
+
+	    
+		IF @类别='原纱'
+		BEGIN
+			/*
+			--原纱采购单
+			select 采购计划ID,合同号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_采购单表] where  删除标志=0 AND 物料类型='1' AND 采购单号='000077258'
+			--原纱入库
+			select 交易号,* from [192.168.7.2].[tesdatt5].[dbo].[T_仓库_操作明细表] where 物料类型=1 and 转仓事务代码='51' and 转仓日期>'2021-05-01' AND 采购单号='000077258'
+			--原纱发票信息
+			select * from [192.168.7.2].[tesdatt5].[dbo].[T_发票_发票管理信息表] where 交易号='3882280'
+			*/
+			SELECT A.*,B.采购单号,B.采购计划ID,C.批号,入库数量=C.转仓数量,C.单位,C.袋重,C.单据编号,入库时间=C.创建时间,C.筒管颜色
+			FROM #合同 A
+			LEFT JOIN [tesdatt5].[dbo].[T_仓库_采购单表] B
+			ON A.合同号=B.合同号 AND B.删除标志=0 AND B.物料类型='1'
+			LEFT JOIN [tesdatt5].[dbo].[T_仓库_操作明细表] C
+			ON B.采购单号=C.采购单号 AND C.删除标志=0 AND C.物料类型=1 and C.转仓事务代码='51' AND A.批号=C.批号
+			LEFT JOIN [tesdatt5].[dbo].[T_发票_发票管理信息表] D
+			ON C.交易号=D.交易号 AND D.删除标志=0
+			WHERE A.类别='原纱'
+			
+			RETURN
+		END
+    END
+    
+    
+    /*
+	DECLARE @客单号 VARCHAR(50),@客单行 VARCHAR(50)
+	SET @客单号='498650'
+	SET @客单行='4'
+	--*/
+    IF OBJECT_ID('TEMPDB.DBO.#工艺纱批') IS NOT NULL DROP TABLE #工艺纱批
+	SELECT DISTINCT 客单号,客单行=@客单行,工艺纱批
+	INTO #工艺纱批
+	FROM report.dbo.RPT_T_染色工艺信息
+	WHERE 客单号=@客单号
+		AND CAST(LEFT(RIGHT(第四键,3),2) AS INT)=@客单行
+	--SELECT * FROM #工艺纱批
+	--SELECT yarn_count,yarn_weight,* FROM [192.168.7.2].report.dbo.RPT_T_染色工艺信息 WHERE 客单号='480600'
+	
+    
+    IF @类别='原纱入库'
+    BEGIN
+		/*
+		SELECT * FROM T_进口棉_配棉主表 WHERE 删除标志=0
+		SELECT * FROM T_进口棉_配棉登记表 WHERE 删除标志=0 AND 客单号='502993'
+		SELECT * FROM T_进口棉_配棉登记表 WHERE 删除标志=0 AND MainID='2662' AND 客单号 NOT IN (SELECT 客单号 FROM T_进口棉_原纱入库生成记录表)
+		SELECT * FROM T_进口棉_原纱入库生成记录表 WHERE 客单号='502118'
+		SELECT * FROM T_进口棉_原纱入库生成记录表 ORDER BY 配棉单号 DESC
+		
+		DECLARE @客单号 VARCHAR(50),@客单行 VARCHAR(50),@类别 VARCHAR(50)
+		SET @客单号='502993'
+		SET @客单行='1'
+		SET @类别='原纱入库'
+		--*/
+		IF OBJECT_ID('TEMPDB.DBO.#合同2') IS NOT NULL DROP TABLE #合同2
+		SELECT DISTINCT A.ID,A.合同号,A.批号,A.棉纺ID,A.类别,棉花入库时间=A.入库时间,B.客单号,B.客单行
+		INTO #合同2
+		FROM T_进口棉_配棉主表 A WITH(NOLOCK)
+		INNER JOIN T_进口棉_配棉登记表 B WITH(NOLOCK)
+		ON A.ID=B.MainID AND B.删除标志=0
+		WHERE A.删除标志=0
+			AND ISNULL(B.客单号,'')=@客单号
+			AND ISNULL(B.客单行,'')=@客单行
+		--SELECT * FROM #合同2
+		
+		IF NOT EXISTS(SELECT 1 FROM #合同2)
+		BEGIN
+			--RAISERROR('无配棉/纱信息，请先确认！',16,1) 2512150002
+			DECLARE @sError NVARCHAR(MAX)
+			SET @sError = lfsoft_idn.dbo.Fn_SM_GetSystemHint('2512150002', '', '0;' + @lang)
+			RAISERROR(@sError,16,1)
+			RETURN
+		END
+		
+		IF OBJECT_ID('TEMPDB.DBO.#合同共用明细') IS NOT NULL DROP TABLE #合同共用明细
+		SELECT A.*,客单号A=B.客单号,客单行A=B.客单行
+		INTO #合同共用明细
+		FROM #合同2 A
+		INNER JOIN T_进口棉_配棉登记表 B WITH(NOLOCK)
+		ON A.ID=B.MainID AND B.删除标志=0
+		--SELECT * FROM #合同共用明细
+		
+		
+		DECLARE @棉花入库时间 DATETIME
+		SELECT @棉花入库时间=MAX(棉花入库时间) FROM #合同2
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#原纱入库') IS NOT NULL DROP TABLE #原纱入库
+		SELECT id=IDENTITY(INT,1,1),客单号,key1,key2,key3,key4,批号
+			,领用时间=MIN(留位时间),领用数量=SUM(已发数量),单位
+			,入库日期=CONVERT(VARCHAR(20),DATEADD(DAY,15,@棉花入库时间),23)
+			,生成标志=CAST(0 AS BIT)
+			,配棉单号=CAST('' AS VARCHAR(20))
+		INTO #原纱入库
+		FROM tesdatt5.dbo.T_仓库_留位明细表
+		WHERE 客单号=@客单号 AND 已发数量<>0 AND 删除时间 IS NULL
+			AND 批号 IN (SELECT 工艺纱批 FROM #工艺纱批)
+		GROUP BY 客单号,key1,key2,key3,key4,批号,单位
+		--SELECT * FROM #原纱入库
+		--SELECT * FROM #工艺纱批
+		--SELECT * FROM [192.168.7.2].tesdatt5.dbo.T_仓库_留位明细表 WHERE 客单号='502993'
+		
+		
+		UPDATE A
+		SET 入库数量=B.领用数量
+		FROM T_进口棉_原纱入库生成记录表 A WITH(NOLOCK)
+		INNER JOIN #原纱入库 B
+		ON A.客单号=B.客单号 AND A.key1=B.key1 AND A.key2=B.key2 AND A.key3=B.key3 AND A.key4=B.key4
+			AND A.批号=B.批号
+		
+		--已生成删除，不再生成
+		DELETE B
+		FROM T_进口棉_原纱入库生成记录表 A WITH(NOLOCK)
+		INNER JOIN #原纱入库 B
+		ON A.客单号=B.客单号 AND A.key1=B.key1 AND A.key2=B.key2 AND A.key3=B.key3 AND A.key4=B.key4
+			AND A.批号=B.批号
+		
+		--相同规格纱满足入库随机区间的共用配棉单
+		UPDATE A
+		SET A.配棉单号=B.配棉单号,A.入库日期=B.入库日期
+		/*
+		SELECT *
+		--*/
+		FROM #原纱入库 A
+		INNER JOIN T_进口棉_原纱入库生成记录表 B WITH(NOLOCK)
+		ON A.key1=B.key1 AND A.key2=B.key2 AND A.key3=B.key3 AND A.key4=B.key4 AND A.批号=B.批号
+		WHERE ISNULL(B.配棉单号,'')<>''
+			AND B.入库日期 BETWEEN A.入库日期 AND CONVERT(VARCHAR(20),A.领用时间,23)
+			AND B.客单号 IN (SELECT 客单号A FROM #合同共用明细)
+		
+		DELETE FROM #原纱入库 WHERE ISNULL(配棉单号,'')<>''
+		/*
+		SELECT * FROM #原纱入库
+		SELECT * FROM T_进口棉_原纱入库生成记录表 WITH(NOLOCK) WHERE 客单号='502993'
+		SELECT * FROM T_进口棉_原纱入库生成记录表 WITH(NOLOCK) WHERE 配棉单号='P22020003'
+		*/
+		
+		DECLARE @I INT,@ROUND INT,@配棉单号 VARCHAR(20)
+		SET @I=1
+		WHILE @I<=(SELECT COUNT(1) FROM #原纱入库)
+		BEGIN
+			SET @配棉单号=''			
+						
+			SELECT @ROUND=CEILING(RAND()*DATEDIFF(DAY,入库日期,领用时间)) FROM #原纱入库 WHERE ID=@I
+			EXEC P_进口棉_编号生成 '前缀+年+月+4位流水号','P',@配棉单号 OUTPUT
+			
+			UPDATE #原纱入库
+			SET 入库日期=CONVERT(VARCHAR(20),DATEADD(DAY,@ROUND,入库日期),23),配棉单号=@配棉单号
+			WHERE ID=@I
+			--PRINT @ROUND
+			--SELECT CONVERT(VARCHAR(20),DATEADD(DAY,@ROUND,入库日期),23) FROM #原纱入库 WHERE ID=@I
+			
+			--SELECT * FROM T_进口棉_原纱入库生成记录表 WITH(NOLOCK)
+			INSERT INTO T_进口棉_原纱入库生成记录表(客单号,key1,key2,key3,key4,批号,入库数量,单位,入库日期,配棉单号)
+			SELECT A.客单号,A.key1,A.key2,A.key3,A.key4,A.批号,入库数量=A.领用数量,A.单位,A.入库日期,A.配棉单号
+			FROM #原纱入库 A
+			LEFT JOIN T_进口棉_原纱入库生成记录表 B WITH(NOLOCK)
+			ON A.客单号=B.客单号 AND A.key1=B.key1 AND A.key2=B.key2 AND A.key3=B.key3 AND A.key4=B.key4
+				AND A.批号=B.批号
+			WHERE A.ID=@I AND B.id IS NULL
+			
+			SET @I=@I+1
+		END
+		
+		
+		IF @是否汇总='0'
+		BEGIN
+			SELECT [棉花合同号/批号#Contract No. of Cotton Purchase/Batch No.]=STUFF((SELECT DISTINCT 合同号+'('+批号+');' FROM #合同2 t FOR XML PATH('')),1,1,'')
+				,key1,key2,key3,key4,[原纱批号#Yarn Batch No.]=批号,[入库数量#Qty of Put into Yarn storage]=入库数量,[单位#Unit]=单位,入库日期
+			FROM T_进口棉_原纱入库生成记录表
+			WHERE 客单号=@客单号
+		END
+		ELSE
+		BEGIN
+			SELECT [棉花合同号/批号#Contract No. of Cotton Purchase/Batch No.]=STUFF((SELECT DISTINCT 合同号+'('+批号+');' FROM #合同2 t FOR XML PATH('')),1,1,'')
+				,key1,key2,key3,key4,[原纱批号#Yarn Batch No.]=批号,[入库数量#Qty of Put into Yarn storage]=SUM(入库数量),[单位#Unit]=单位
+			FROM T_进口棉_原纱入库生成记录表
+			WHERE 客单号=@客单号
+			GROUP BY key1,key2,key3,key4,批号,单位
+		END
+		
+		IF OBJECT_ID('TEMPDB.DBO.#合同2') IS NOT NULL DROP TABLE #合同2
+		IF OBJECT_ID('TEMPDB.DBO.#原纱入库') IS NOT NULL DROP TABLE #原纱入库
+		
+		RETURN
+    END    
+    
+    
+    /*
+	DECLARE @客单号 VARCHAR(50),@客单行 VARCHAR(50),@类别 VARCHAR(50)
+	SET @客单号='479553'
+	SET @客单行='1'
+	SET @类别='原棉'
+	--*/
+	IF OBJECT_ID('TEMPDB.DBO.#原纱领用') IS NOT NULL DROP TABLE #原纱领用
+	SELECT GID,客单号,生产单号,key1,key2,key3,key4,原纱批号=批号,领用时间=留位时间,领用数量=已发数量,单位
+	INTO #原纱领用
+	FROM tesdatt5.dbo.T_仓库_留位明细表
+	WHERE 客单号=@客单号 AND 已发数量<>0 AND 删除时间 IS NULL
+		AND 批号 IN (SELECT 工艺纱批 FROM #工艺纱批)
+	
+	
+    IF @类别='原纱领用'
+    BEGIN				
+		IF @是否汇总='0'
+		BEGIN
+			SELECT GID,[客单号#Mill Art No.]=客单号,生产单号,key1,key2,key3,key4,[原纱批号#Yarn batch no.]=原纱批号,[领用时间#Time of pick up yarn]=领用时间,[领用数量#Qty of pick up yarn]=领用数量,[单位#Unit ]=单位
+			FROM #原纱领用
+		END
+		ELSE
+		BEGIN
+			SELECT [客单号#Mill Art No.]=客单号,key1,key2,key3,key4,[原纱批号#Yarn batch no.]=原纱批号,[领用数量#Qty of pick up yarn]=SUM(领用数量),[单位#Unit ]=单位,
+			       [领用时间#Time of pick up yarn]=MAX(领用时间)
+			FROM #原纱领用
+			GROUP BY 客单号,key1,key2,key3,key4,原纱批号,单位
+		END
+		IF OBJECT_ID('TEMPDB.DBO.#原纱领用') IS NOT NULL DROP TABLE #原纱领用
+    END
+    
+    
+    IF @类别='开票'
+    BEGIN
+		IF OBJECT_ID('TEMPDB.DBO.#开票') IS NOT NULL DROP TABLE #开票
+		SELECT 开票ID,发票号码,开票通知编码,跟单员BM,客单号,客单行,客户,客户代码,付款客户代码,
+			付款客户全称,付款客户,客户税号,服装厂,合同号,客合同号,合同性质,价格条款,运输方式,付款方式,
+			跟单员,部门,出货时间,进仓编号,客花号,色号,品名,组织,规格,
+			出货数量=计划出货,创建时间,审核人,审核时间,当月汇率,ETD,
+			开票净重,开票毛重,开票体积,门幅,克重,货物类别,提单信息,提单信息2,申报确认号
+		INTO #开票
+		FROM mycrmlf.DBO.V_开票通知
+		WHERE 客单号1=@客单号 AND 客单行1=@客单行
+		--SELECT 客单号1,客单行1,* FROM mycrmlf.DBO.V_开票通知 WHERE 客单号1='482841'
+		--Translation
+		IF OBJECT_ID('TEMPDB.DBO.#结果') IS NOT NULL DROP TABLE #结果
+		SELECT * 
+		INTO #结果
+		FROM #开票
+    
+		-- Translation
+		UPDATE #结果
+		SET 
+			货物类别 = pdpis.dbo.fn_GetTranslation(货物类别, @lang),
+			付款方式 = pdpis.dbo.fn_GetTranslation(付款方式, @lang),
+			品名 = pdpis.dbo.fn_GetTranslation(品名, @lang),
+			组织 = pdpis.dbo.fn_GetTranslation(组织, @lang)
+		--end translate
+
+		IF @是否汇总='0'
+		BEGIN
+			SELECT 开票ID,发票号码,开票通知编码,跟单员BM,[客单号#Mill Art No.]=客单号,[客单行#Mill Art No.]=客单行,[客户#Customer Name]=客户,[客户代码#Customer ID]=客户代码,付款客户代码,
+			付款客户全称,付款客户,客户税号,服装厂,合同号,客合同号,合同性质,价格条款,运输方式,付款方式,
+			[跟单员#Merchandiser]=跟单员,[部门#Sales Dept]=部门,出货时间,进仓编号,[客花号#Style No.]=客花号,[色号#Color No.]=色号,[品名#Fabrication]=品名,[组织#Weaving Structure]=组织,[规格#Construction]=规格,
+			[出货数量#Shipment Qty yds]=出货数量,创建时间,审核人,审核时间,当月汇率,ETD,
+			[开票净重#Net Weight(kg)]=开票净重,[开票毛重#Gross Weight(kg)]=开票毛重,[开票体积#Volume]=开票体积,[门幅#Fabric width]=门幅,[克重#Fabric Weight(g/m2)]=克重,
+			[货物类别#Type of goods]=货物类别,提单信息,提单信息2,申报确认号 
+			--FROM #开票
+			FROM #结果
+		END
+		ELSE
+		BEGIN
+			SELECT 开票ID=cast('' as varchar(50)),
+			    [客单号#Mill Art No.]=客单号,[客单行#Mill Art No.]=客单行,[客户#Customer Name]=客户,[客户代码#Customer ID]=客户代码,
+				[跟单员#Merchandiser]=跟单员,[部门#Sales Dept]=部门,[客花号#Style No.]=客花号,[色号#Color No.]=色号,[品名#Fabrication]=品名,[组织#Weaving Structure]=组织,[规格#Construction]=规格,
+				[出货数量#Shipment Qty yds]=SUM(出货数量),
+				[开票净重#Net Weight(kg)]=SUM(开票净重),[开票毛重#Gross Weight(kg)]=SUM(开票毛重),[开票体积#Volume]=SUM(开票体积),
+				[门幅#Fabric width]=门幅,[克重#Fabric Weight(g/m2)]=克重,[货物类别#Type of goods]=货物类别
+			--FROM #开票
+			FROM #结果
+			GROUP BY 客单号,客单行,客户,客户代码,跟单员,部门,客花号,色号,品名,组织,规格,门幅,克重,货物类别
+		END
+		IF OBJECT_ID('TEMPDB.DBO.#开票') IS NOT NULL DROP TABLE #开票
+		IF OBJECT_ID('TEMPDB.DBO.#结果') IS NOT NULL DROP TABLE #结果
+    END
+    
+    
+    IF @类别='平衡表'
+    BEGIN
+		/*
+		DECLARE @客单号 VARCHAR(50),@客单行 VARCHAR(50),@类别 VARCHAR(50),@是否汇总 VARCHAR(10)
+		SET @客单号='496360'
+		SET @客单行='1'
+		SET @类别='平衡表'
+		SET @是否汇总='0'
+		--*/
+		IF OBJECT_ID('TEMPDB.DBO.#合同PH') IS NOT NULL DROP TABLE #合同PH
+		SELECT DISTINCT A.合同号,A.批号,A.棉纺ID,A.类别,B.客单号,B.客单行
+		INTO #合同PH
+		FROM T_进口棉_配棉主表 A WITH(NOLOCK)
+		INNER JOIN T_进口棉_配棉登记表 B WITH(NOLOCK)
+		ON A.ID=B.MainID AND B.删除标志=0
+		WHERE A.删除标志=0 --AND A.类别=@类别
+			AND ISNULL(B.客单号,'')=@客单号
+		--SELECT * FROM #合同PH
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#合同_平衡表') IS NOT NULL DROP TABLE #合同_平衡表
+		SELECT DISTINCT 合同号,批号,棉纺ID,类别
+		INTO #合同_平衡表
+		FROM #合同PH A
+		--SELECT * FROM #合同_平衡表
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#原棉合同') IS NOT NULL DROP TABLE #原棉合同
+		SELECT A.合同号,C.批号,A.类别--,B.供应商代码
+			,B.采购单号,采购时间=B.创建时间,采购数量=B.订单量
+			,入库数量=C.转仓数量,出库数量=CAST(0 AS NUMERIC(18,4)),C.单位
+			,棉包数量=0,原棉产地=''
+			,入库时间=C.创建时间,出库时间=CAST(NULL AS DATETIME),领用单号=''
+			,操作类型='入库'
+		INTO #原棉合同
+		FROM #合同_平衡表 A
+		INNER JOIN tesdatt5.dbo.T_仓库_采购单表 B WITH(NOLOCK)
+		ON B.删除标志=0 AND (A.合同号=B.采购单号 OR (A.合同号='2020SZCZ-0828US03' AND B.采购单号='2020SNCZ-0828US03'))
+		INNER JOIN tesdatt5.dbo.T_仓库_操作明细表 C WITH(NOLOCK)
+		ON B.采购单号=C.采购单号 AND C.删除标志=0 --AND A.批号=C.批号
+		WHERE A.类别='原棉'
+		UNION
+		SELECT A.合同号,A.批号,A.类别--,B.供应商代码
+			,采购单号=A.合同号,采购时间=B.创建时间,采购数量=B.订单量
+			,入库数量=CAST(0 AS NUMERIC(18,4)),出库数量=C.转仓数量,C.单位
+			,棉包数量=0,原棉产地=''
+			,入库时间=CAST(NULL AS DATETIME),出库时间=C.创建时间,领用单号=''
+			,操作类型='出库'
+		FROM #合同_平衡表 A
+		INNER JOIN tesdatt5.dbo.T_仓库_采购单表 B WITH(NOLOCK)
+		ON B.删除标志=0 AND (A.合同号=B.采购单号 OR (A.合同号='2020SZCZ-0828US03' AND B.采购单号='2020SNCZ-0828US03'))
+		INNER JOIN tesdatt5.dbo.T_仓库_操作明细表 C WITH(NOLOCK)
+		ON A.批号=C.批号 AND C.删除标志=0 AND C.物料类型='02' AND C.转仓事务代码 not in ('51','D+')
+		WHERE A.类别='原棉'
+		--SELECT * FROM #原棉合同 WHERE 操作类型='入库'
+		
+		
+		/*
+		DECLARE @客单号 VARCHAR(50),@客单行 VARCHAR(50),@类别 VARCHAR(50),@是否汇总 VARCHAR(10)
+		SET @客单号='496360'
+		SET @客单行='1'
+		SET @类别='平衡表'
+		SET @是否汇总='0'
+		--*/
+		IF OBJECT_ID('TEMPDB.DBO.#工艺纱批_平衡表') IS NOT NULL DROP TABLE #工艺纱批_平衡表
+		SELECT DISTINCT 客单号,客单行=CAST(LEFT(RIGHT(第四键,3),2) AS INT),工艺纱批,yarn_count,yarn_weight=CAST(yarn_weight AS NUMERIC(18,4)),key1
+		INTO #工艺纱批_平衡表
+		FROM report.dbo.RPT_T_染色工艺信息
+		WHERE 客单号=@客单号
+			AND yarn_colorname NOT LIKE '边纱'
+			--AND CAST(LEFT(RIGHT(第四键,3),2) AS INT)=@客单行
+		--SELECT * FROM #工艺纱批_平衡表
+		--SELECT yarn_count,yarn_weight,* FROM [192.168.7.2].report.dbo.RPT_T_染色工艺信息 WHERE 客单号='487610'
+		--SELECT 订量,投产数,* FROM [192.168.7.2].report.dbo.RPT_T_工艺信息 WHERE 客单号='487610'
+		--SELECT * FROM mycrmlf.dbo.V_OrderKeDanJia WHERE 客单号='495526' ORDER BY 客单行
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#原纱留位_平衡表') IS NOT NULL DROP TABLE #原纱留位_平衡表
+		SELECT GID,留位号,客单号,生产单号,key1,key2,key3,key4,原纱批号=批号,领用时间=留位时间,领用数量=已发数量,单位
+		INTO #原纱留位_平衡表
+		FROM tesdatt5.dbo.T_仓库_留位明细表
+		WHERE 已发数量<>0 AND 删除时间 IS NULL
+			AND 客单号 IN (SELECT 客单号 FROM #工艺纱批_平衡表)
+			AND 批号 IN (SELECT 工艺纱批 FROM #工艺纱批_平衡表)
+		--SELECT * FROM #原纱留位_平衡表
+		--SELECT * FROM [192.168.7.2].tesdatt5.dbo.T_仓库_留位明细表 WHERE 客单号='482816' AND 已发数量<>0 AND 删除时间 IS NULL
+		
+		IF OBJECT_ID('TEMPDB.DBO.#原纱留位_平衡表HZ') IS NOT NULL DROP TABLE #原纱留位_平衡表HZ
+		SELECT 客单号,key1,key2,key3,key4,原纱批号
+			,领用数量=SUM(领用数量)
+			,留位号=STUFF((SELECT DISTINCT '/'+留位号 FROM #原纱留位_平衡表 t WHERE key1=A.key1 AND key2=A.key2 AND key3=A.key3 AND key4=A.key4 AND 原纱批号=A.原纱批号 FOR XML PATH('')),1,1,'')
+			,留位日期=STUFF((SELECT DISTINCT '/'+CONVERT(VARCHAR(20),领用时间,23) FROM #原纱留位_平衡表 t
+							WHERE key1=A.key1 AND key2=A.key2 AND key3=A.key3 AND key4=A.key4 AND 原纱批号=A.原纱批号 FOR XML PATH('')),1,1,'')
+			,损耗数量=CASE WHEN key3='P' THEN SUM(领用数量)*0.14
+							WHEN key3='J' THEN SUM(领用数量)*0.38
+							ELSE 0 END
+		INTO #原纱留位_平衡表HZ
+		FROM #原纱留位_平衡表 A
+		GROUP BY 客单号,key1,key2,key3,key4,原纱批号
+		--SELECT * FROM #原纱留位_平衡表HZ
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#订单工艺') IS NOT NULL DROP TABLE #订单工艺
+		SELECT 客单号,客单行号,订量=CASE WHEN 合同单位 IN ('码','YD') THEN 订量*0.9144 ELSE 订量 END
+			,投产数,成份比
+			,损耗数量=投产数-CASE WHEN 合同单位 IN ('码','YD') THEN 订量*0.9144 ELSE 订量 END
+		INTO #订单工艺
+		FROM report.dbo.RPT_T_工艺信息
+		WHERE 客单号 IN (SELECT 客单号 FROM #工艺纱批_平衡表)
+		--SELECT * FROM #订单工艺
+		--SELECT * FROM [192.168.7.2].report.dbo.RPT_T_工艺信息 where 客单号='496360'
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#订单出货') IS NOT NULL DROP TABLE #订单出货
+		SELECT 客单号,客单行号,可用量,单位,[数量M]=可用量*CASE WHEN 单位='YD' THEN 0.9144 ELSE 1 END,确认出库时间
+		INTO #订单出货
+		FROM WAL.dbo.T_仓库_元件库存表 WITH(NOLOCK)
+		WHERE 确认出库标志=1 AND 客单号 IN (SELECT 客单号 FROM #工艺纱批_平衡表)
+		UNION ALL
+		SELECT 客单号,客单行号,可用量,单位,[数量M]=可用量*CASE WHEN 单位='YD' THEN 0.9144 ELSE 1 END,确认出库时间
+		FROM PDIMA.dbo.T_仓库_元件库存表
+		WHERE 确认出库标志=1 AND 客单号 IN (SELECT 客单号 FROM #工艺纱批_平衡表)
+		/*
+		SELECT * FROM #订单出货
+		SELECT * FROM WAL.dbo.T_仓库_元件库存表 WHERE 客单号='496360' AND 确认出库标志=1
+		SELECT * FROM [192.168.7.2].IMA.dbo.T_仓库_元件库存表 WHERE 客单号='496360' AND 确认出库标志=1
+		*/
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#数据显示') IS NOT NULL DROP TABLE #数据显示
+		SELECT DISTINCT 合同号,客单号,客单行
+			,纱线供应商名和地址=''
+			,棉花购买数量=(SELECT TOP 1 采购数量 FROM #原棉合同 WHERE 合同号=A.合同号)
+			,棉花收货数量=(SELECT SUM(入库数量) FROM #原棉合同 WHERE 合同号=A.合同号 AND 操作类型='入库')
+			,棉花收货日期=STUFF((SELECT DISTINCT '/'+CONVERT(VARCHAR(20),入库时间,23) FROM #原棉合同 t WHERE 合同号=A.合同号 AND 操作类型='入库' FOR XML PATH('')),1,1,'')
+			,棉花收货包号=(SELECT SUM(棉包数量) FROM #原棉合同 WHERE 合同号=A.合同号 AND 操作类型='入库')
+			,棉花领用单号=STUFF((SELECT DISTINCT '/'+领用单号 FROM #原棉合同 t WHERE 合同号=A.合同号 AND 操作类型='出库' FOR XML PATH('')),1,1,'')
+			,棉花领用日期=(SELECT MIN(CONVERT(VARCHAR(20),出库时间,23)) FROM #原棉合同 t WHERE 合同号=A.合同号 AND 操作类型='出库')
+			,棉花领用数量=(SELECT SUM(出库数量) FROM #原棉合同 WHERE 合同号=A.合同号 AND 操作类型='出库')
+			,棉花领用包号=(SELECT SUM(棉包数量) FROM #原棉合同 WHERE 合同号=A.合同号 AND 操作类型='出库')
+		INTO #数据显示
+		FROM #合同PH A
+		--SELECT * FROM #数据显示
+		--SELECT * FROM T_进口棉_临时表
+		
+		
+		SELECT
+			[No.序号]=													STUFF((SELECT DISTINCT 序号+';' FROM T_进口棉_临时表 t WHERE 合同号=A.合同号 FOR XML PATH('')),1,1,'')
+			,[Cotton Certificate Of Origin NO#棉花原产地证号#	]=		STUFF((SELECT DISTINCT 原产地证号+';' FROM T_进口棉_临时表 t WHERE 合同号=A.合同号 FOR XML PATH('')),1,1,'')
+			,[Import Cotton Purchase Order NO#进口棉花合同号#]=		A.合同号
+			,[Import Cotton Commercial Invoice NO#进口棉花发票号#]=	STUFF((SELECT DISTINCT 发票号+';' FROM T_进口棉_临时表 t WHERE 合同号=A.合同号 FOR XML PATH('')),1,1,'')
+			,[Import Cotton Bill Of Lading NO#进口棉花提单号#]=		STUFF((SELECT DISTINCT 提单号+';' FROM T_进口棉_临时表 t WHERE 合同号=A.合同号 FOR XML PATH('')),1,1,'')
+			,[Yarn Supplier Name & Location纱线供应商名和地址]=		A.纱线供应商名和地址
+			,[Raw Material PO/Contract #棉花采购合同号#]=				A.合同号
+			,[Raw Material Invoice NO#棉花发票号#]=					STUFF((SELECT DISTINCT 发票号+';' FROM T_进口棉_临时表 t WHERE 合同号=A.合同号 FOR XML PATH('')),1,1,'')
+			,[Raw material Quantity Purchased棉花购买数量/T]=			A.棉花购买数量
+			,[Raw material Quantity received棉花收货数量/T]=			A.棉花收货数量
+			,[Raw material Date of Receipt棉花收货日期]=				A.棉花收货日期
+			,[Incoming raw material ID#/lot#/bale#棉花收货包号#]=		A.棉花收货包号
+			,[Yarn Spec#纱线支数]=										B.key1
+			,[Raw material ID#/lot#/bale#棉花包号#]=					A.棉花领用包号
+			,[Production Start Date生产开始日期]=						A.棉花领用日期
+			,[Job Card NO#操作工卡号#]=								A.棉花领用单号
+			,[Quantity in Production生产数量/KG]=						A.棉花领用数量
+			,[Wastage Quantity损耗数量]=								B.损耗数量
+			,[Yarn PO/Contract #棉纱采购合同号#]=						B.留位号
+			,[Yarn Invoice NO#棉纱发票号#]=							''
+			,[Yarn Spec#纱线支数]=										B.key1
+			,[Yarn Quantity Purchased棉纱购买数量/KG]=					B.领用数量
+			,[Yarn Quantity received棉纱收货数量/KG]=					B.领用数量
+			,[Yarn Date of Receipt棉纱收货日期]=						B.留位日期
+			,[Incoming yarn ID#/lot#/bale#棉纱收货包号#]=				''
+			,[Yarn Opening Balance期初结余]=							''
+			,[Vendor PO#面料采购合同号#]=								C.客合同号
+			,[Sales Invoice No#面料采购发票号#]=						STUFF((SELECT DISTINCT 发票号码+';' FROM mycrmlf.DBO.V_开票通知 t WHERE 客单号1=A.客单号 AND 客单行1=C.客单行 FOR XML PATH('')),1,1,'')
+			,[Quantity Purchased购买数量/M]=							(SELECT TOP 1 数量=数量*CASE WHEN 单位='YD' THEN 0.9144 ELSE 1 END FROM mycrmlf.dbo.V_OrderKeDanJia WHERE 客单号=A.客单号 AND 客单行=C.客单行)
+			,[Fabric ID# FAB/FAS面料ID#]=								A.客单号+'-'+CAST(C.客单行 AS VARCHAR(10))
+			,[Fabric Description(content,weight,construction)面料成分等信息]=(SELECT TOP 1 成份比 FROM #订单工艺 WHERE 客单号=A.客单号 AND 客单行号=C.客单行)
+			,[Production dae range生产周期]=							''
+			,[Job Card NO#操作工卡号#]=								A.客单号+'-'+CAST(C.客单行 AS VARCHAR(10))
+			,[Quantity in Production生产数量/M]=						(SELECT TOP 1 投产数 FROM #订单工艺 WHERE 客单号=A.客单号 AND 客单行号=C.客单行)
+			,[Wastage Quanttity损耗/M]=									(SELECT TOP 1 投产数 FROM #订单工艺 WHERE 客单号=A.客单号 AND 客单行号=C.客单行)-(SELECT SUM([数量M]) FROM #订单出货 WHERE 客单号=A.客单号 AND 客单行号=C.客单行)
+			,[Finished Quantity成品/M]=									(SELECT SUM([数量M]) FROM #订单出货 WHERE 客单号=A.客单号 AND 客单行号=C.客单行)
+			,[Yarn Opening Balance期初结余]=							'0'
+		FROM #数据显示 A
+		LEFT JOIN #原纱留位_平衡表HZ B
+		ON 1=1
+		LEFT JOIN mycrmlf.DBO.v_OrdOfAllSts C
+		ON A.客单号=C.客单号 AND A.客单行=C.客单行
+		ORDER BY A.合同号,B.原纱批号,[Fabric ID# FAB/FAS面料ID#]
+		
+		
+		IF OBJECT_ID('TEMPDB.DBO.#合同PH') IS NOT NULL DROP TABLE #合同PH
+		IF OBJECT_ID('TEMPDB.DBO.#合同_平衡表') IS NOT NULL DROP TABLE #合同_平衡表
+		IF OBJECT_ID('TEMPDB.DBO.#原棉合同') IS NOT NULL DROP TABLE #原棉合同
+		IF OBJECT_ID('TEMPDB.DBO.#工艺纱批_平衡表') IS NOT NULL DROP TABLE #工艺纱批_平衡表
+		IF OBJECT_ID('TEMPDB.DBO.#原纱留位_平衡表') IS NOT NULL DROP TABLE #原纱留位_平衡表
+		IF OBJECT_ID('TEMPDB.DBO.#原纱留位_平衡表HZ') IS NOT NULL DROP TABLE #原纱留位_平衡表HZ
+		IF OBJECT_ID('TEMPDB.DBO.#订单工艺') IS NOT NULL DROP TABLE #订单工艺
+		IF OBJECT_ID('TEMPDB.DBO.#订单出货') IS NOT NULL DROP TABLE #订单出货
+		IF OBJECT_ID('TEMPDB.DBO.#数据显示') IS NOT NULL DROP TABLE #数据显示
+    END
+    
+    IF @类别='坯布领用'
+    BEGIN
+		IF OBJECT_ID('TEMPDB.DBO.#坯布领用') IS NOT NULL DROP TABLE #坯布领用
+		SELECT *
+		INTO #坯布领用
+		FROM LFPD.dbo.坯布仓库_T_布卷号在库状态表
+		WHERE 客单号=@客单号 AND 客单行号=@客单行
+		--SELECT * FROM #坯布领用
+		
+		IF @是否汇总='0'
+		BEGIN
+			SELECT 客单号,客单行号,生产单,后整号,布卷号,布卷长度,整理批次,领用时间=添加时间 FROM #坯布领用
+		END
+		ELSE
+		BEGIN
+			SELECT 客单号,客单行号,生产单,后整号,整理批次,
+				布卷长度=SUM(布卷长度),
+				领用时间=MIN(添加时间)
+			FROM #坯布领用
+			GROUP BY 客单号,客单行号,生产单,后整号,整理批次
+		END
+		
+		IF OBJECT_ID('TEMPDB.DBO.#坯布领用') IS NOT NULL DROP TABLE #坯布领用		
+    END
+    
+	IF OBJECT_ID('TEMPDB.DBO.#合同') IS NOT NULL DROP TABLE #合同
+	IF OBJECT_ID('TEMPDB.DBO.#原棉') IS NOT NULL DROP TABLE #原棉
+    
+END
+GO
+
+sp P_PSS_棉纺销售_文件上传_明细查询
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE proc [dbo].[P_PSS_棉纺销售_文件上传_明细查询](
+@主表ID int
+)
+as
+begin 
+	
+	select ID,文件名称,附件名称,文件打开类型,文件类别,提交人,提交时间
+		,文件描述=(select replace(文件描述,'/','')  from tesdatt5.dbo.T_棉纺销售_文件上传信息_主表 where ID=a.主表ID)
+	from tesdatt5.dbo.T_棉纺销售_文件上传信息_明细表 a with(nolock)
+	where 主表ID=@主表ID
+		and 删除标志=0 
+		and isnull(文件名称,'')<>''
+	order by ID DESC
+
+end 
+
+
+--SELECT * FROM  tesdatt5.dbo.T_棉纺销售_文件上传信息_明细表 
+GO
+
+sp P_进口棉_配棉核销明细查询
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- Exec [P_进口棉_配棉核销明细查询] 114
+-- =============================================
+CREATE PROCEDURE [dbo].[P_进口棉_配棉核销明细查询](
+@ID INT,
+@lang int = 0
+)
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	--Translation
+	 IF OBJECT_ID('tempdb..#results1') IS NOT NULL DROP TABLE #results1
+	 SELECT 
+        ID,
+        MainID,
+        客单号,
+        客单行,
+        类别,      
+        纱支,
+        数量,
+        单位,
+        新增人,
+        新增时间,
+        品名,      
+        经纱,
+        纬纱
+    INTO #results1
+    FROM (
+	--SELECT TOP 1000 * FROM mycrmlf.DBO.v_OrdOfAllSts WITH(NOLOCK)
+    
+    SELECT ID,MainID,A.客单号,A.客单行,A.类别,A.纱支,A.数量,A.单位,A.新增人,A.新增时间,B.品名,B.经纱,B.纬纱
+    FROM T_进口棉_配棉登记表 A WITH(NOLOCK)
+    LEFT JOIN mycrmlf.DBO.v_OrdOfAllSts B WITH(NOLOCK)
+    ON A.客单号=B.客单号 AND A.客单行=B.客单行
+    WHERE A.删除标志=0 AND MainID=@ID
+    ) AS SourceData
+
+	UPDATE #results1
+    SET 
+        类别 = pdpis.dbo.fn_GetTranslation(类别, @lang),    
+        品名 = pdpis.dbo.fn_GetTranslation(品名, @lang)
+
+	SELECT 
+        ID,
+        MainID,
+        客单号,
+        客单行,
+        类别,     
+        纱支,
+        数量,
+        单位,
+        新增人,
+        新增时间,
+        品名,      
+        经纱,
+        纬纱
+    FROM #results1
+    
+    -- Cleanup
+    IF OBJECT_ID('tempdb..#results1') IS NOT NULL DROP TABLE #results1
+END
+
+GO
+
+

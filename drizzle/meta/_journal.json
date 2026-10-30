@@ -1,5 +1,27 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793281874444,
+      "tag": "0000_magenta_mystique",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793284083680,
+      "tag": "0001_true_bill_hollister",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793284741979,
+      "tag": "0002_complete_silvermane",
+      "breakpoints": true
+    }
+  ]
 }

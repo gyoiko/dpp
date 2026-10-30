@@ -102,6 +102,7 @@ export type DppProduct = {
   fiber: string;
   orderUnits: string;
   manufacturer: string;
+  brand?: string;
   factory: string;
   factoryId: string;
   country: string;
@@ -309,6 +310,7 @@ type ProductSeed = {
   fiber: string;
   orderUnits: string;
   manufacturer: string;
+  brand?: string;
   factory: string;
   factoryId: string;
   country: string;
@@ -510,6 +512,7 @@ function buildProduct(seed: ProductSeed): DppProduct {
     fiber: seed.fiber,
     orderUnits: seed.orderUnits,
     manufacturer: seed.manufacturer,
+    brand: seed.brand,
     factory: seed.factory,
     factoryId: seed.factoryId,
     country: seed.country,
@@ -681,6 +684,7 @@ const PRODUCT_B: ProductSeed = {
   fiber: "100% Cotton",
   orderUnits: "1,870 pcs",
   manufacturer: "PT Golden Tekstil Indonesia",
+  brand: "Ralph Lauren",
   factory: "PT Samwon Busana Indonesia (Semarang)",
   factoryId: "200040880",
   country: "Indonesia",

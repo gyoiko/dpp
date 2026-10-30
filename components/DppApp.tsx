@@ -133,17 +133,24 @@ function JourneyTab({
   product,
   openStages,
   selectStage,
+  heading,
+  intro,
 }: {
   product: DppProduct;
   openStages: Set<string>;
   selectStage: (stage: DppStage) => void;
+  heading?: string;
+  intro?: string;
 }) {
   return (
     <div className="tab-content">
       <header className="section-intro">
         <span className="eyebrow">FOLLOW THE MAKING</span>
-        <h1>From fibre to finished piece.</h1>
-        <p>{product.fiber} · material {product.material} · PO {product.po}. Traced across {product.source.actors} verified supply-chain facilities.</p>
+        <h1>{heading || "From fibre to finished piece."}</h1>
+        <p>
+          {intro ||
+            `${product.fiber} · material ${product.material} · PO ${product.po}. Traced across ${product.source.actors} verified supply-chain facilities.`}
+        </p>
       </header>
       <div className="section-label"><span>Steps &amp; processes</span><span>{product.stages.length}</span></div>
       <div className="timeline">
@@ -162,8 +169,22 @@ function JourneyTab({
   );
 }
 
+function CompositionRow({ item, defaultOpen }: { item: DppProduct["composition"][number]; defaultOpen: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div>
+      <button className="composition" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <span className="material-swatch"><Sprout size={22} /></span>
+        <span><strong>{item.percentage}%</strong><small>{item.material}</small></span>
+        {open ? <X size={17} /> : <ChevronDown size={18} />}
+      </button>
+      {open && item.note ? <p className="composition-note">{item.note}</p> : null}
+    </div>
+  );
+}
+
 function ProductTab({ product }: { product: DppProduct }) {
-  const [openComposition, setOpenComposition] = useState(true);
   return (
     <div className="tab-content product-tab">
       <div className="product-visual">
@@ -186,15 +207,12 @@ function ProductTab({ product }: { product: DppProduct }) {
         <div><dt>Country of origin</dt><dd>{product.country}</dd></div>
         <div><dt>Ex-factory date</dt><dd>{product.exFactoryDate}</dd></div>
         <div><dt>Delivery country</dt><dd>{product.deliveryCountry}</dd></div>
-        <div><dt>Brand</dt><dd>Ralph Lauren</dd></div>
+        <div><dt>Brand</dt><dd>{product.brand ?? "—"}</dd></div>
       </dl>
-      <div className="section-label composition-label"><span>Material composition</span><span>1</span></div>
-      <button className="composition" onClick={() => setOpenComposition(!openComposition)} aria-expanded={openComposition}>
-        <span className="material-swatch"><Sprout size={22} /></span>
-        <span><strong>100%</strong><small>Cotton</small></span>
-        {openComposition ? <X size={17} /> : <ChevronDown size={18} />}
-      </button>
-      {openComposition && <p className="composition-note">{product.composition[0].note}</p>}
+      <div className="section-label composition-label"><span>Material composition</span><span>{product.composition.length}</span></div>
+      {product.composition.map((item, index) => (
+        <CompositionRow key={`${item.material}-${index}`} item={item} defaultOpen={index === 0} />
+      ))}
       <div className="care-card" style={{ marginTop: "24px" }}>
         <Leaf size={22} />
         <div><strong>Designed for a longer life</strong><p>Wash cool, repair when possible, and pass it on when you are done.</p></div>
@@ -272,7 +290,15 @@ function BadgesTab({ product, onOpen }: { product: DppProduct; onOpen: (badge: D
   );
 }
 
-export default function DppApp({ product }: { product: DppProduct }) {
+export default function DppApp({
+  product,
+  heading,
+  intro,
+}: {
+  product: DppProduct;
+  heading?: string;
+  intro?: string;
+}) {
   const first = product.stages.find((stage) => stage.actors.length > 0) ?? product.stages[0];
   const [activeStageId, setActiveStageId] = useState(first.id);
   const [openStages, setOpenStages] = useState<Set<string>>(() => new Set([first.id]));
@@ -313,7 +339,7 @@ export default function DppApp({ product }: { product: DppProduct }) {
             coordinates: actor.coordinates,
             verified: true,
           }))
-        : [{ id: stage.id, label: `${stage.location} (location not documented)`, coordinates: stage.coordinates, verified: false }],
+        : [],
     };
   }), [product]);
 
@@ -331,7 +357,7 @@ export default function DppApp({ product }: { product: DppProduct }) {
           {detailBadge ? (
             <BadgeDetail badge={detailBadge} onBack={() => setDetailBadge(null)} />
           ) : tab === "journey" ? (
-            <JourneyTab product={product} openStages={openStages} selectStage={selectStage} />
+            <JourneyTab product={product} openStages={openStages} selectStage={selectStage} heading={heading} intro={intro} />
           ) : tab === "product" ? (
             <ProductTab product={product} />
           ) : (
@@ -341,7 +367,7 @@ export default function DppApp({ product }: { product: DppProduct }) {
         <footer>
           <BrandMark />
           <p>Digital Product Passport · {product.passportId}</p>
-          <small>Imported from COC archive · Updated {product.lastUpdated}</small>
+          <small>Source: {product.source.sourcePath} · Updated {product.lastUpdated}</small>
         </footer>
       </section>
     </main>
