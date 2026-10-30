@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  ArrowLeft,
-  ArrowRight,
   BadgeCheck,
   Boxes,
   ChevronDown,
@@ -10,12 +8,10 @@ import {
   Droplets,
   Factory,
   FileCheck2,
-  FileText,
   Leaf,
   Layers,
   MapPin,
   Route,
-  ScanLine,
   Shirt,
   ShoppingBag,
   Sprout,
@@ -23,9 +19,9 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { DPP_CERTIFICATIONS } from "@/data/certifications";
 import {
   type DppActor,
-  type DppBadge,
   type DppProduct,
   type DppStage,
 } from "@/data/dppData";
@@ -44,10 +40,6 @@ const stageIcons: Record<string, typeof Sprout> = {
   customer: ShoppingBag,
   other: Boxes,
 };
-
-function badgeStatusClass(status: DppBadge["status"]) {
-  return status === "Supported" ? "supported" : status === "Partial" ? "partial" : status === "Pending" ? "pending" : "not-documented";
-}
 
 function BrandMark() {
   return (
@@ -218,69 +210,21 @@ function ProductTab({ product }: { product: DppProduct }) {
   );
 }
 
-function BadgeDetail({ badge, onBack }: { badge: DppBadge; onBack: () => void }) {
-  return (
-    <div className="detail-view">
-      <button className="back-button" onClick={onBack}><ArrowLeft size={18} /> Back to badges</button>
-      <div className={`badge-hero ${badge.tone}`}><BadgeCheck size={38} /><span>{badge.eyebrow}</span></div>
-      <span className={`badge-status ${badgeStatusClass(badge.status)}`}>{badge.status}</span>
-      <h1>{badge.title}</h1>
-      <p className="lead">{badge.description}</p>
-      <div className="detail-rule" />
-      <span className="eyebrow">WHAT THIS IS BASED ON</span>
-      <p>{badge.basis}</p>
-      <div className="evidence-list">
-        {badge.evidence.map((item, index) => (
-          <div className="evidence-actor" key={`${item.actorName}-${index}`}>
-            <strong>{item.actorName}</strong>
-            <div className="evidence-docs">
-              {item.documents.map((document, documentIndex) =>
-                document.href ? (
-                  <a key={`${document.fileName}-${documentIndex}`} className="evidence-doc" href={document.href} target="_blank" rel="noreferrer">
-                    <FileText size={10} /> {document.codes.join("+")}
-                  </a>
-                ) : (
-                  <span key={`${document.fileName}-${documentIndex}`} className="evidence-doc">
-                    {document.codes.join("+")} · {document.inherited ? "shared" : "archive"}
-                  </span>
-                ),
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="evidence-box">
-        <FileCheck2 size={21} />
-        <div><strong>Evidence status</strong><p>Derived from the archived COC document set. This is not a third-party certification unless a verification file is listed above.</p></div>
-      </div>
-    </div>
-  );
-}
-
-function BadgesTab({ product, onOpen }: { product: DppProduct; onOpen: (badge: DppBadge) => void }) {
+function BadgesTab() {
   return (
     <div className="tab-content">
       <header className="section-intro">
         <span className="eyebrow">PRODUCT SIGNALS</span>
-        <h1>What the evidence can support.</h1>
-        <p>Signals are derived from archived documents, not marketing claims. Missing evidence stays visible.</p>
+        <h1>Certifications on file.</h1>
+        <p>Certification marks referenced by this product passport.</p>
       </header>
-      <div className="prototype-banner">
-        <ScanLine size={18} />
-        <span>{product.badges.filter((badge) => badge.status === "Supported").length} supported · {product.badges.filter((badge) => badge.status === "Partial").length} partial · {product.badges.filter((badge) => badge.status === "Pending").length} pending</span>
-      </div>
-      <div className="badge-grid">
-        {product.badges.map((badge, index) => (
-          <button key={badge.id} className="badge-card" onClick={() => onOpen(badge)}>
-            <span className={`badge-art ${badge.tone}`}><BadgeCheck size={25} /><i>0{index + 1}</i></span>
-            <span className="badge-copy">
-              <small>{badge.eyebrow}</small>
-              <strong>{badge.title}</strong>
-              <p>{badge.description}</p>
-              <span className={`badge-status ${badgeStatusClass(badge.status)}`}>{badge.status}</span>
+      <div className="certification-grid">
+        {DPP_CERTIFICATIONS.map((certification) => (
+          <div key={certification.id} className="certification-card">
+            <span className="certification-logo">
+              <img src={certification.logo} alt={certification.label} />
             </span>
-            <ArrowRight className="badge-arrow" size={18} />
-          </button>
+          </div>
         ))}
       </div>
     </div>
@@ -300,7 +244,6 @@ export default function DppApp({
   const [activeStageId, setActiveStageId] = useState(first.id);
   const [openStages, setOpenStages] = useState<Set<string>>(() => new Set([first.id]));
   const [tab, setTab] = useState<Tab>("journey");
-  const [detailBadge, setDetailBadge] = useState<DppBadge | null>(null);
 
   const selectStage = useCallback((stage: DppStage, forceOpen = false) => {
     setActiveStageId(stage.id);
@@ -348,17 +291,15 @@ export default function DppApp({
         <header className="topbar">
           <BrandMark />
         </header>
-        {!detailBadge && tab === "journey" && <TrackMap stages={mapStages} activeId={activeStageId} onSelect={selectStageFromMap} />}
-        {!detailBadge && <Navigation tab={tab} setTab={(next) => { setTab(next); setDetailBadge(null); }} />}
+        {tab === "journey" && <TrackMap stages={mapStages} activeId={activeStageId} onSelect={selectStageFromMap} />}
+        <Navigation tab={tab} setTab={setTab} />
         <div className="content-panel">
-          {detailBadge ? (
-            <BadgeDetail badge={detailBadge} onBack={() => setDetailBadge(null)} />
-          ) : tab === "journey" ? (
+          {tab === "journey" ? (
             <JourneyTab product={product} openStages={openStages} selectStage={selectStage} heading={heading} intro={intro} />
           ) : tab === "product" ? (
             <ProductTab product={product} />
           ) : (
-            <BadgesTab product={product} onOpen={setDetailBadge} />
+            <BadgesTab />
           )}
         </div>
         <footer>

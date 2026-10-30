@@ -29,10 +29,16 @@ type Tier = {
 };
 
 const TIERS: Tier[] = [
-  { id: "tier3", label: "Tier 3 Supplier", stages: ["farm", "ginner", "trader"] },
-  { id: "tier2", label: "Tier 2 Supplier", stages: ["spinner", "yarn_trader", "fabric", "dyeing"] },
-  { id: "factory", label: "Factory", stages: ["garment"] },
-  { id: "market", label: "Customer / Other", stages: ["customer", "other"] },
+  { id: "tier4", label: "Tier 4", stages: ["farm", "ginner"] },
+  { id: "tier3", label: "Tier 3", stages: ["spinner"] },
+  { id: "tier2", label: "Tier 2", stages: ["fabric"] },
+  { id: "tier1", label: "Tier 1", stages: ["garment"] },
+  { id: "brand", label: "Brand / Retailer", stages: ["customer", "other"] },
+];
+
+const SUPPORTING_GROUPS: Tier[] = [
+  { id: "trader", label: "Trader / Broker / Agent", stages: ["trader", "yarn_trader"] },
+  { id: "value-adding", label: "Value adding process", stages: ["dyeing"] },
 ];
 
 const CARD_WIDTH = 290;
@@ -76,6 +82,10 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
   const columns = TIERS.map((tier) => ({
     ...tier,
     entries: mapped.filter((entry) => tier.stages.includes(entry.stage)),
+  }));
+  const supporting = SUPPORTING_GROUPS.map((group) => ({
+    ...group,
+    entries: mapped.filter((entry) => group.stages.includes(entry.stage)),
   }));
 
   const maxRows = Math.max(1, ...columns.map((column) => column.entries.length));
@@ -192,6 +202,18 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
                 backgroundSize: "18px 18px",
               }}
             >
+              {columns.map((column, columnIndex) => (
+                <div
+                  key={`${column.id}-tier-box`}
+                  className="pointer-events-none absolute rounded-2xl border border-[#c9c5b4] bg-white/45"
+                  style={{
+                    left: columnX(columnIndex) - 12,
+                    top: 8,
+                    width: CARD_WIDTH + 24,
+                    height: canvasHeight - 16,
+                  }}
+                />
+              ))}
               <svg className="pointer-events-none absolute inset-0" width={canvasWidth} height={canvasHeight} aria-hidden="true">
                 {edges.map((edge) => (
                   <path
@@ -281,6 +303,47 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
                 QR code is generated on the published DPP page
               </div>
             </aside>
+
+            {supporting.some((group) => group.entries.length > 0) && (
+              <div
+                className="mt-4 rounded-2xl border border-[#cfcbb8] bg-[#fffef9] p-4"
+                style={{ width: canvasWidth }}
+              >
+                <div className="flex flex-wrap gap-5">
+                  {supporting.map((group) =>
+                    group.entries.length > 0 ? (
+                      <div key={group.id} className="min-w-[240px] flex-1">
+                        <p className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
+                          <span
+                            className={`h-2.5 w-2.5 rounded-full ${
+                              group.id === "trader" ? "bg-[#2c6a9a]" : "bg-[#4f8a3d]"
+                            }`}
+                          />
+                          {group.label}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {group.entries.map((entry) => (
+                            <span
+                              key={entry.node.id}
+                              className={`inline-flex max-w-full items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold ${
+                                group.id === "trader"
+                                  ? "bg-[#e8f0f7] text-[#2c5f86]"
+                                  : "bg-[#eef4e7] text-[#174f3a]"
+                              }`}
+                            >
+                              <span className="truncate">{entry.node.supplier ?? entry.node.role ?? "Unnamed"}</span>
+                              <span className="truncate font-normal opacity-70">
+                                {entry.draft.process || entry.node.role}
+                              </span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null,
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
