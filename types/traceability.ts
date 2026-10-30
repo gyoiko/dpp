@@ -54,17 +54,32 @@ export interface TraceabilityDocument {
   reviewTime: string | null;
 }
 
-export const DPP_STAGES = ["farm", "ginner", "trader", "spinner", "fabric", "garment"] as const;
+export const DPP_STAGES = [
+  "farm",
+  "ginner",
+  "trader",
+  "spinner",
+  "yarn_trader",
+  "fabric",
+  "dyeing",
+  "garment",
+  "customer",
+  "other",
+] as const;
 
 export type DppStage = (typeof DPP_STAGES)[number];
 
 export const DPP_STAGE_LABELS: Record<DppStage, string> = {
-  farm: "Farm",
+  farm: "Farmer / Grower",
   ginner: "Ginner",
-  trader: "Cotton trader",
-  spinner: "Spinner",
-  fabric: "Knitter / weaver",
-  garment: "Garment manufacturer",
+  trader: "Cotton Trader",
+  spinner: "Spinner / Yarn Manufacturer",
+  yarn_trader: "Yarn Trader / Intermediary",
+  fabric: "Weaver / Knitter",
+  dyeing: "Dyeing & Finishing",
+  garment: "Garment Manufacturer",
+  customer: "Customer",
+  other: "Other",
 };
 
 export type TraceabilityMappingStatus = "draft" | "reviewed";

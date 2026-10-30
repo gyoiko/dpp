@@ -1,11 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ExternalLink, Loader2, X } from "lucide-react";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { ExternalLink, ImagePlus, Loader2, Trash2, X } from "lucide-react";
+import { parseCompositionNotes } from "@/data/compositionNotes";
 import type { DppPage, DppPageStatus } from "@/types/dppPage";
+import type { TraceabilityFibre, TraceabilityRecord } from "@/types/traceability";
 
 const fieldClass =
   "h-10 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10";
+const MAX_PHOTO_DATA_LENGTH = 1_500_000;
+
+async function compressPhoto(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const maxDimension = 1400;
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    bitmap.close();
+    throw new Error("Browser tidak mendukung kompresi foto.");
+  }
+
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  let dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+
+  if (dataUrl.length > MAX_PHOTO_DATA_LENGTH) {
+    dataUrl = canvas.toDataURL("image/jpeg", 0.65);
+  }
+
+  if (dataUrl.length > MAX_PHOTO_DATA_LENGTH) {
+    throw new Error("Foto masih terlalu besar setelah dikompres. Pilih foto lain.");
+  }
+
+  return dataUrl;
+}
 
 interface DppPageSettingsDrawerProps {
   milRef: string;
@@ -23,6 +58,10 @@ export default function DppPageSettingsDrawer({
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState(defaultTitle);
   const [intro, setIntro] = useState("");
+  const [photoData, setPhotoData] = useState<string | null>(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [fibres, setFibres] = useState<TraceabilityFibre[]>([]);
+  const [compositionNotes, setCompositionNotes] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<DppPageStatus>("draft");
   const [traceabilityAvailable, setTraceabilityAvailable] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -31,6 +70,7 @@ export default function DppPageSettingsDrawer({
 
   const canPublish = traceabilityAvailable && mappedNodeCount > 0;
   const publishBlocked = status === "published" && !canPublish;
+  const compositionTotal = fibres.reduce((sum, fibre) => sum + (fibre.percentage ?? 0), 0);
 
   useEffect(() => {
     let active = true;
@@ -51,20 +91,35 @@ export default function DppPageSettingsDrawer({
           throw new Error(payload.error ?? "Gagal memuat halaman DPP.");
         }
 
+        let record: TraceabilityRecord | null = null;
+
+        if (traceabilityResponse?.ok) {
+          try {
+            record = (await traceabilityResponse.json()) as TraceabilityRecord;
+          } catch {
+            record = null;
+          }
+        }
+
         if (!active) {
           return;
         }
 
-        setTraceabilityAvailable(Boolean(traceabilityResponse?.ok));
+        setTraceabilityAvailable(Boolean(record));
+        setFibres(record?.fibres ?? []);
 
         if (payload.page) {
           setTitle(payload.page.title || defaultTitle);
           setIntro(payload.page.intro);
+          setPhotoData(payload.page.photoData ?? null);
+          setCompositionNotes(parseCompositionNotes(payload.page.compositionNotes));
           setStatus(payload.page.status);
           setSavedPage(payload.page);
         } else {
           setTitle(defaultTitle);
           setIntro("");
+          setPhotoData(null);
+          setCompositionNotes({});
           setStatus("draft");
         }
       } catch (loadError) {
@@ -93,7 +148,7 @@ export default function DppPageSettingsDrawer({
       const response = await fetch("/api/dpp/pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ milRef, title, intro, status }),
+        body: JSON.stringify({ milRef, title, intro, status, photoData, compositionNotes }),
       });
 
       const payload = (await response.json()) as { page?: DppPage; error?: string };
@@ -107,6 +162,31 @@ export default function DppPageSettingsDrawer({
       setError(saveError instanceof Error ? saveError.message : "Gagal menyimpan halaman DPP.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Pilih file gambar (JPG, PNG, atau WebP).");
+      return;
+    }
+
+    setPhotoLoading(true);
+    setError(null);
+
+    try {
+      setPhotoData(await compressPhoto(file));
+    } catch (photoError) {
+      setError(photoError instanceof Error ? photoError.message : "Gagal memproses foto.");
+    } finally {
+      setPhotoLoading(false);
     }
   }
 
@@ -172,6 +252,104 @@ export default function DppPageSettingsDrawer({
                   placeholder="Short introduction shown on the public DPP page"
                   className="w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
                 />
+              </div>
+
+              <div>
+                <span className="mb-1.5 block text-xs font-bold text-[#173127]">Product photo</span>
+                <div className="rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-3">
+                  {photoData ? (
+                    <img
+                      src={photoData}
+                      alt="Selected product"
+                      className="h-44 w-full rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-[#c7d0bd] text-xs font-semibold text-[#7a8c80]">
+                      No product photo yet
+                    </div>
+                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <label
+                      htmlFor="product-photo"
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[#174f3a] px-3 text-[11px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] ${
+                        photoLoading ? "pointer-events-none opacity-60" : ""
+                      }`}
+                    >
+                      {photoLoading ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={14} />}
+                      {photoData ? "Replace photo" : "Upload photo"}
+                    </label>
+                    <input
+                      id="product-photo"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handlePhotoChange}
+                      className="sr-only"
+                    />
+                    {photoData && (
+                      <button
+                        type="button"
+                        onClick={() => setPhotoData(null)}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e8c5ad] px-3 text-[11px] font-extrabold text-[#8a4b3a] transition hover:bg-[#f4ded6]"
+                      >
+                        <Trash2 size={13} /> Remove
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-2 text-[10px] leading-4 text-[#7a8c80]">
+                    JPG, PNG, or WebP. The image is resized and compressed automatically.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                  <span className="text-xs font-bold text-[#173127]">Material composition</span>
+                  {fibres.length > 0 && (
+                    <span className="text-[10px] font-bold text-[#7a8c80]">
+                      {fibres.length} item{fibres.length === 1 ? "" : "s"} · {compositionTotal}%
+                    </span>
+                  )}
+                </div>
+                {fibres.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-[#d8dfcf] px-4 py-3 text-xs text-[#7a8c80]">
+                    No fibre composition data from the ERP for this MilRef.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-[10px] leading-4 text-[#7a8c80]">
+                      Setiap baris fibre di ERP otomatis muncul di sini. Tambah baris di ERP untuk menambah komposisi.
+                    </p>
+                    {compositionTotal !== 100 && (
+                      <div className="rounded-lg border border-[#e8d9b0] bg-[#faf3d8] px-3 py-2 text-[10px] font-medium text-[#6b5722]">
+                        Total komposisi {compositionTotal}% — periksa kembali data fibre di ERP.
+                      </div>
+                    )}
+                    {fibres.map((fibre, index) => {
+                      const key = String(fibre.seqNo ?? index);
+
+                      return (
+                        <div key={key} className="rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-3">
+                          <div className="flex items-baseline justify-between gap-3">
+                            <p className="text-xs font-bold text-[#173127]">{fibre.fibreType ?? "Fibre"}</p>
+                            <p className="text-xs font-extrabold text-[#174f3a]">{fibre.percentage ?? 0}%</p>
+                          </div>
+                          {fibre.sourceLot ? (
+                            <p className="mt-0.5 text-[10px] text-[#7a8c80]">Source lot {fibre.sourceLot}</p>
+                          ) : null}
+                          <textarea
+                            value={compositionNotes[key] ?? ""}
+                            onChange={(event) =>
+                              setCompositionNotes((current) => ({ ...current, [key]: event.target.value }))
+                            }
+                            rows={2}
+                            placeholder="Describe this material (origin, process, certification...)"
+                            className="mt-2 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-xs font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -248,7 +426,7 @@ export default function DppPageSettingsDrawer({
           <button
             type="button"
             onClick={save}
-            disabled={saving || loading || publishBlocked}
+            disabled={saving || loading || photoLoading || publishBlocked}
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d] disabled:opacity-60"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}

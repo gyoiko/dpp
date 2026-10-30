@@ -62,6 +62,8 @@ export const dppPages = sqliteTable(
     keDanHang: text("ke_dan_hang").notNull(),
     title: text("title").notNull().default(""),
     intro: text("intro").notNull().default(""),
+    photoData: text("photo_data"),
+    compositionNotes: text("composition_notes"),
     status: text("status").notNull().default("draft"),
     publishedAt: text("published_at"),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),

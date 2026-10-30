@@ -7,6 +7,8 @@ export interface DppPage {
   keDanHang: string;
   title: string;
   intro: string;
+  photoData: string | null;
+  compositionNotes: string | null;
   status: DppPageStatus;
   publishedAt: string | null;
   createdAt: string;

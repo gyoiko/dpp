@@ -1,0 +1,1 @@
+ALTER TABLE `dpp_pages` ADD `composition_notes` text;

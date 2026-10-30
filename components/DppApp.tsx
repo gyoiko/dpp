@@ -4,18 +4,22 @@ import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  Boxes,
   ChevronDown,
   Cog,
+  Droplets,
   Factory,
   FileCheck2,
   FileText,
   Leaf,
-  MapPin,
   Layers,
+  MapPin,
   Route,
   ScanLine,
   Shirt,
+  ShoppingBag,
   Sprout,
+  Truck,
   X,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
@@ -28,7 +32,18 @@ import {
 import TrackMap, { type MapStage } from "@/components/TrackMap";
 
 type Tab = "journey" | "product" | "badges";
-const stageIcons = [Sprout, Factory, Route, Cog, Layers, Shirt];
+const stageIcons: Record<string, typeof Sprout> = {
+  farm: Sprout,
+  ginner: Factory,
+  trader: Route,
+  spinner: Cog,
+  yarn_trader: Truck,
+  fabric: Layers,
+  dyeing: Droplets,
+  garment: Shirt,
+  customer: ShoppingBag,
+  other: Boxes,
+};
 
 function badgeStatusClass(status: DppBadge["status"]) {
   return status === "Supported" ? "supported" : status === "Partial" ? "partial" : status === "Pending" ? "pending" : "not-documented";
@@ -90,7 +105,7 @@ function ActorCard({ actor }: { actor: DppActor }) {
 }
 
 function StageCard({ stage, index, open, onToggle }: { stage: DppStage; index: number; open: boolean; onToggle: () => void }) {
-  const Icon = stageIcons[index] ?? Route;
+  const Icon = stageIcons[stage.id] ?? Route;
   return (
     <article id={`stage-${stage.id}`} className={`stage ${open ? "open" : ""}`}>
       <div className="timeline-node"><span>{index + 1}</span></div>
@@ -169,17 +184,14 @@ function JourneyTab({
   );
 }
 
-function CompositionRow({ item, defaultOpen }: { item: DppProduct["composition"][number]; defaultOpen: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
-
+function CompositionRow({ item }: { item: DppProduct["composition"][number] }) {
   return (
     <div>
-      <button className="composition" onClick={() => setOpen(!open)} aria-expanded={open}>
+      <div className="composition composition-static">
         <span className="material-swatch"><Sprout size={22} /></span>
         <span><strong>{item.percentage}%</strong><small>{item.material}</small></span>
-        {open ? <X size={17} /> : <ChevronDown size={18} />}
-      </button>
-      {open && item.note ? <p className="composition-note">{item.note}</p> : null}
+      </div>
+      {item.note ? <p className="composition-note">{item.note}</p> : null}
     </div>
   );
 }
@@ -187,36 +199,21 @@ function CompositionRow({ item, defaultOpen }: { item: DppProduct["composition"]
 function ProductTab({ product }: { product: DppProduct }) {
   return (
     <div className="tab-content product-tab">
-      <div className="product-visual">
-        <div className="shirt-art"><span /><i /><b /></div>
+      <div className={`product-visual${product.photo ? " has-photo" : ""}`}>
+        {product.photo ? (
+          <img className="product-photo" src={product.photo} alt={product.name} />
+        ) : (
+          <div className="shirt-art"><span /><i /><b /></div>
+        )}
       </div>
       <header className="section-intro product-heading">
         <span className="eyebrow">PRODUCT PROFILE</span>
         <h1>{product.name}</h1>
       </header>
-      <div className="section-label"><span>Product details</span></div>
-      <dl className="product-specs">
-        <div><dt>Material number</dt><dd>{product.material}</dd></div>
-        <div><dt>Purchase order</dt><dd>{product.po}</dd></div>
-        <div><dt>Style</dt><dd>{product.style}</dd></div>
-        <div><dt>Fibre</dt><dd>{product.fiber}</dd></div>
-        <div><dt>Order units</dt><dd>{product.orderUnits}</dd></div>
-        <div><dt>Supplier</dt><dd>{product.manufacturer}</dd></div>
-        <div><dt>Garment factory</dt><dd>{product.factory}</dd></div>
-        <div><dt>Factory ID</dt><dd>{product.factoryId}</dd></div>
-        <div><dt>Country of origin</dt><dd>{product.country}</dd></div>
-        <div><dt>Ex-factory date</dt><dd>{product.exFactoryDate}</dd></div>
-        <div><dt>Delivery country</dt><dd>{product.deliveryCountry}</dd></div>
-        <div><dt>Brand</dt><dd>{product.brand ?? "—"}</dd></div>
-      </dl>
-      <div className="section-label composition-label"><span>Material composition</span><span>{product.composition.length}</span></div>
+      <div className="section-label"><span>Material composition</span><span>{product.composition.length}</span></div>
       {product.composition.map((item, index) => (
-        <CompositionRow key={`${item.material}-${index}`} item={item} defaultOpen={index === 0} />
+        <CompositionRow key={`${item.material}-${index}`} item={item} />
       ))}
-      <div className="care-card" style={{ marginTop: "24px" }}>
-        <Leaf size={22} />
-        <div><strong>Designed for a longer life</strong><p>Wash cool, repair when possible, and pass it on when you are done.</p></div>
-      </div>
     </div>
   );
 }

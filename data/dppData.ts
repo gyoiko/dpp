@@ -110,6 +110,7 @@ export type DppProduct = {
   exFactoryDate: string;
   season: string;
   name: string;
+  photo?: string;
   color: string;
   passportId: string;
   lastUpdated: string;

@@ -22,6 +22,20 @@
       "when": 1793284741979,
       "tag": "0002_complete_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793329373978,
+      "tag": "0003_funny_mercury",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793330095978,
+      "tag": "0004_absurd_sugar_man",
+      "breakpoints": true
     }
   ]
 }

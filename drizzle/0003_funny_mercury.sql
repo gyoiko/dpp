@@ -1,0 +1,1 @@
+ALTER TABLE `dpp_pages` ADD `photo_data` text;

@@ -1,9 +1,12 @@
 import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
+import { serialiseCompositionNotes } from "@/data/compositionNotes";
 import { dppPages, traceabilityNodeMappings } from "@/db/schema";
 import type { DppPage, DppPageStatus } from "@/types/dppPage";
 
 const STATUSES: readonly DppPageStatus[] = ["draft", "published"];
+const MAX_PHOTO_DATA_LENGTH = 1_500_000;
+const PHOTO_DATA_PATTERN = /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/;
 
 function text(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -54,7 +57,22 @@ export async function GET(request: Request) {
       return Response.json({ page: page ?? null });
     }
 
-    const pages = await db.select().from(dppPages).orderBy(desc(dppPages.updatedAt)).limit(200);
+    const pages = await db
+      .select({
+        id: dppPages.id,
+        milRef: dppPages.milRef,
+        keDanHao: dppPages.keDanHao,
+        keDanHang: dppPages.keDanHang,
+        title: dppPages.title,
+        intro: dppPages.intro,
+        status: dppPages.status,
+        publishedAt: dppPages.publishedAt,
+        createdAt: dppPages.createdAt,
+        updatedAt: dppPages.updatedAt,
+      })
+      .from(dppPages)
+      .orderBy(desc(dppPages.updatedAt))
+      .limit(200);
     return Response.json({ pages });
   } catch (error) {
     return Response.json({ error: toRouteErrorMessage(error) }, { status: 500 });
@@ -68,9 +86,34 @@ export async function POST(request: Request) {
     const status = payload.status ?? "draft";
     const title = text(payload.title);
     const intro = text(payload.intro);
+    const photoData = text(payload.photoData) || null;
+    let compositionNotes: string | null;
+
+    try {
+      compositionNotes = serialiseCompositionNotes(payload.compositionNotes);
+    } catch (compositionError) {
+      return Response.json(
+        { error: compositionError instanceof Error ? compositionError.message : "Invalid composition notes." },
+        { status: 400 },
+      );
+    }
 
     if (!parsed) {
       return Response.json({ error: "milRef must be KeDanHao-KeDanHang, e.g. B02345-1" }, { status: 400 });
+    }
+
+    if (photoData && !PHOTO_DATA_PATTERN.test(photoData)) {
+      return Response.json(
+        { error: "photoData must be a PNG, JPEG, or WebP image data URL." },
+        { status: 400 },
+      );
+    }
+
+    if (photoData && photoData.length > MAX_PHOTO_DATA_LENGTH) {
+      return Response.json(
+        { error: "photoData is too large. Compress the product photo before uploading." },
+        { status: 400 },
+      );
     }
 
     if (!STATUSES.includes(status as DppPageStatus)) {
@@ -137,6 +180,8 @@ export async function POST(request: Request) {
         keDanHang: parsed.keDanHang,
         title: title || parsed.milRef,
         intro,
+        photoData,
+        compositionNotes,
         status: status as DppPageStatus,
         publishedAt: status === "published" ? now : null,
       })
@@ -145,6 +190,8 @@ export async function POST(request: Request) {
         set: {
           title: title || parsed.milRef,
           intro,
+          photoData,
+          compositionNotes,
           status: status as DppPageStatus,
           publishedAt: status === "published" ? now : null,
           updatedAt: now,

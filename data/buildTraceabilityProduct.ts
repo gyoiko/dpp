@@ -7,6 +7,7 @@ import type {
   DocumentCode,
   Tone,
 } from "@/data/dppData";
+import { parseCompositionNotes } from "@/data/compositionNotes";
 import type { DppPage } from "@/types/dppPage";
 import type {
   DppStage as TraceStage,
@@ -15,14 +16,15 @@ import type {
   TraceabilityNodeMapping,
   TraceabilityRecord,
 } from "@/types/traceability";
+import { DPP_STAGES } from "@/types/traceability";
 
 const REQUIRED_CODES: DocumentCode[] = ["PO", "INV", "CO", "BL", "TR", "CD"];
-const STAGE_ORDER: TraceStage[] = ["farm", "ginner", "trader", "spinner", "fabric", "garment"];
+const STAGE_ORDER: TraceStage[] = [...DPP_STAGES];
 const DEFAULT_COORDINATES: [number, number] = [110.2663, -6.9263];
 
 const STAGE_META: Record<TraceStage, { title: string; subtitle: string; description: string; tone: Tone; countryCode: string }> = {
   farm: {
-    title: "Farm",
+    title: "Farmer / Grower",
     subtitle: "Cotton origin",
     description: "Seed cotton is grown and harvested at the origin farm documented in the traceability record.",
     tone: "lime",
@@ -36,30 +38,58 @@ const STAGE_META: Record<TraceStage, { title: string; subtitle: string; descript
     countryCode: "—",
   },
   trader: {
-    title: "Cotton trader",
+    title: "Cotton Trader",
     subtitle: "Trader & export",
     description: "Cotton traders move the bales between origin, processing, and export destinations.",
     tone: "sky",
     countryCode: "—",
   },
   spinner: {
-    title: "Spinner",
+    title: "Spinner / Yarn Manufacturer",
     subtitle: "Spinning",
     description: "Cotton is spun into yarn and the material identity is carried forward by lot.",
     tone: "sand",
     countryCode: "—",
   },
+  yarn_trader: {
+    title: "Yarn Trader / Intermediary",
+    subtitle: "Yarn distribution",
+    description: "Yarn traders and intermediaries move spun yarn between spinning, fabric production, and finishing tiers.",
+    tone: "sky",
+    countryCode: "—",
+  },
   fabric: {
-    title: "Knitter / weaver",
-    subtitle: "Knitting, weaving & finishing",
-    description: "Yarn is knitted or woven into fabric and finished for the garment tier.",
+    title: "Weaver / Knitter",
+    subtitle: "Knitting & weaving",
+    description: "Yarn is knitted or woven into greige fabric for the finishing and garment tiers.",
+    tone: "clay",
+    countryCode: "—",
+  },
+  dyeing: {
+    title: "Dyeing & Finishing",
+    subtitle: "Colour & finish",
+    description: "Greige fabric is dyed, washed, and finished before it is cut and assembled into the final product.",
     tone: "clay",
     countryCode: "—",
   },
   garment: {
-    title: "Garment manufacturer / finished goods",
+    title: "Garment Manufacturer",
     subtitle: "Cut, make & trim",
     description: "The finished fabric is cut, made, and trimmed into the final product.",
+    tone: "stone",
+    countryCode: "—",
+  },
+  customer: {
+    title: "Customer",
+    subtitle: "End market",
+    description: "The customer or retail channel that receives the finished product documented in this passport.",
+    tone: "stone",
+    countryCode: "—",
+  },
+  other: {
+    title: "Other",
+    subtitle: "Additional tier",
+    description: "An additional supply-chain tier recorded as Other in the ERP and specified by its role description.",
     tone: "stone",
     countryCode: "—",
   },
@@ -254,7 +284,12 @@ function initials(value: string): string {
     .toUpperCase();
 }
 
-function buildActor(node: TraceabilityNode, stage: TraceStage, documents: TraceabilityDocument[]): DppActor {
+function buildActor(
+  node: TraceabilityNode,
+  stage: TraceStage,
+  documents: TraceabilityDocument[],
+  mapping?: TraceabilityNodeMapping,
+): DppActor {
   const actorDocuments = documents.map(mapDocument);
   const covered = coveredCodes(actorDocuments);
   const coverage = covered.length;
@@ -269,7 +304,7 @@ function buildActor(node: TraceabilityNode, stage: TraceStage, documents: Tracea
   return {
     id: `node-${node.id}`,
     short: initials(node.supplier ?? node.role ?? "NA"),
-    role: node.role ?? STAGE_META[stage].title,
+    role: mapping?.process || node.role || STAGE_META[stage].title,
     name: node.supplier ?? "Unnamed supplier",
     country: node.country ?? "—",
     coordinates: coordinatesFor(node.country),
@@ -366,13 +401,14 @@ export function buildTraceabilityProduct(
   const mappingByNodeId = new Map(mappings.map((mapping) => [mapping.nodeId, mapping]));
   let lastCoordinates: [number, number] = DEFAULT_COORDINATES;
 
-  const stages: DppStage[] = STAGE_ORDER.map((stage) => {
+  const builtStages: DppStage[] = STAGE_ORDER.map((stage) => {
     const nodes = record.nodes.filter((node) => mappingByNodeId.get(node.id)?.stage === stage);
     const actors = nodes.map((node) =>
       buildActor(
         node,
         stage,
         record.documents.filter((document) => document.nodeId === node.id),
+        mappingByNodeId.get(node.id),
       ),
     );
     const located = actors.find((actor) => actor.coordinates);
@@ -409,6 +445,8 @@ export function buildTraceabilityProduct(
       status,
     };
   });
+  const populated = builtStages.filter((stage) => stage.actors.length > 0);
+  const stages = populated.length > 0 ? populated : builtStages;
 
   const allActors = stages.flatMap((stage) => stage.actors);
   const documentedActors = allActors.filter((actor) => actor.documents.length > 0 && actor.covered.length > 0);
@@ -429,12 +467,19 @@ export function buildTraceabilityProduct(
   const fibreText = record.fibres
     .map((fibre) => `${fibre.fibreType ?? "Fibre"}${fibre.percentage === null ? "" : ` ${fibre.percentage}%`}`)
     .join(" · ");
+  const compositionNotes = parseCompositionNotes(page.compositionNotes);
   const compositions = record.fibres.length
-    ? record.fibres.map((fibre) => ({
-        percentage: fibre.percentage ?? 0,
-        material: fibre.fibreType ?? "Fibre",
-        note: fibre.sourceLot ? `Source lot ${fibre.sourceLot}` : `Documented from ${record.milRef}.`,
-      }))
+    ? record.fibres.map((fibre, index) => {
+        const key = String(fibre.seqNo ?? index);
+
+        return {
+          percentage: fibre.percentage ?? 0,
+          material: fibre.fibreType ?? "Fibre",
+          note:
+            compositionNotes[key] ||
+            (fibre.sourceLot ? `Source lot ${fibre.sourceLot}` : `Documented from ${record.milRef}.`),
+        };
+      })
     : [{ percentage: 0, material: "Not documented", note: "No fibre composition recorded for this MilRef." }];
 
   const quantities = record.nodes
@@ -462,6 +507,7 @@ export function buildTraceabilityProduct(
     exFactoryDate: "—",
     season: "DPP traceability",
     name: record.header?.style ?? page.milRef,
+    photo: page.photoData ?? undefined,
     color: record.header?.productForm ?? "—",
     passportId: page.milRef,
     lastUpdated: formatDate(page.updatedAt),

@@ -5,6 +5,7 @@ import { Loader2, X } from "lucide-react";
 import type {
   DppStage,
   TraceabilityMappingStatus,
+  TraceabilityNode,
   TraceabilityNodeMapping,
   TraceabilityRecord,
 } from "@/types/traceability";
@@ -24,17 +25,43 @@ interface NodeDraft {
 const fieldClass =
   "h-9 w-full rounded-lg border border-[#d8dfcf] bg-white px-2.5 text-xs font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10";
 
+const ROLE_STAGE_MAP: Record<string, DppStage> = {
+  "farmer / grower": "farm",
+  farmer: "farm",
+  grower: "farm",
+  ginner: "ginner",
+  "cotton trader": "trader",
+  "spinner / yarn manufacturer": "spinner",
+  spinner: "spinner",
+  "yarn manufacturer": "spinner",
+  "yarn trader / intermediary": "yarn_trader",
+  "yarn trader": "yarn_trader",
+  "weaver / knitter": "fabric",
+  weaver: "fabric",
+  knitter: "fabric",
+  "dyeing & finishing": "dyeing",
+  "dyeing / finishing": "dyeing",
+  dyeing: "dyeing",
+  "garment manufacturer": "garment",
+  garment: "garment",
+  customer: "customer",
+  other: "other",
+};
+
+function normaliseRole(role: string | null): string {
+  return (role ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
 function inferStage(role: string | null): DppStage | "" {
-  const value = role?.toLowerCase() ?? "";
+  return ROLE_STAGE_MAP[normaliseRole(role)] ?? "";
+}
 
-  if (value.includes("farm")) return "farm";
-  if (value.includes("gin")) return "ginner";
-  if (value.includes("trader")) return "trader";
-  if (value.includes("spinner") || value.includes("yarn")) return "spinner";
-  if (value.includes("knit") || value.includes("weav") || value.includes("fabric") || value.includes("dye")) return "fabric";
-  if (value.includes("garment") || value.includes("cut") || value.includes("cmt")) return "garment";
+function defaultProcess(node: TraceabilityNode): string {
+  if (normaliseRole(node.role) === "other") {
+    return node.roleDescription || node.processDescription || node.role || "";
+  }
 
-  return "";
+  return node.role || "";
 }
 
 function buildDrafts(
@@ -49,7 +76,7 @@ function buildDrafts(
 
     drafts[node.id] = {
       stage: mapping?.stage ?? inferStage(node.role),
-      process: mapping?.process ?? node.role ?? "",
+      process: mapping?.process ?? defaultProcess(node),
       notes: mapping?.notes ?? "",
     };
   }
@@ -172,6 +199,7 @@ export default function TraceabilityMappingDrawer({
                   <div>
                     <p className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
                       #{node.seqNo ?? "—"} · {node.role ?? "Unnamed role"}
+                      {node.roleDescription ? ` · ${node.roleDescription}` : ""}
                     </p>
                     <p className="mt-1 text-sm font-bold text-[#173127]">{node.supplier ?? "—"}</p>
                     <p className="mt-0.5 text-xs text-[#6f7f77]">

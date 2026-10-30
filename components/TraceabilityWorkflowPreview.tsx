@@ -30,8 +30,9 @@ type Tier = {
 
 const TIERS: Tier[] = [
   { id: "tier3", label: "Tier 3 Supplier", stages: ["farm", "ginner", "trader"] },
-  { id: "tier2", label: "Tier 2 Supplier", stages: ["spinner", "fabric"] },
+  { id: "tier2", label: "Tier 2 Supplier", stages: ["spinner", "yarn_trader", "fabric", "dyeing"] },
   { id: "factory", label: "Factory", stages: ["garment"] },
+  { id: "market", label: "Customer / Other", stages: ["customer", "other"] },
 ];
 
 const CARD_WIDTH = 290;

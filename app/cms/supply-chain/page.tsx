@@ -260,6 +260,7 @@ export default function SupplyChainMappingPage() {
                           <div className="min-w-0">
                             <p className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
                               #{node.seqNo ?? "—"} · {node.role ?? "Unnamed role"}
+                              {node.roleDescription ? ` · ${node.roleDescription}` : ""}
                             </p>
                             <p className="mt-1 truncate text-sm font-bold text-[#173127]">{node.supplier ?? "—"}</p>
                             <p className="mt-0.5 text-xs text-[#6f7f77]">
