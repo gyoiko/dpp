@@ -2,6 +2,9 @@
 
 import { useEffect, useState, type ChangeEvent } from "react";
 import { ExternalLink, ImagePlus, Loader2, Trash2, X } from "lucide-react";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import DppQrCode from "@/components/DppQrCode";
+import { useDialogA11y } from "@/components/useDialogA11y";
 import { parseCompositionNotes } from "@/data/compositionNotes";
 import type { DppPage, DppPageStatus } from "@/types/dppPage";
 import type { TraceabilityFibre, TraceabilityRecord } from "@/types/traceability";
@@ -46,6 +49,7 @@ interface DppPageSettingsDrawerProps {
   milRef: string;
   defaultTitle: string;
   mappedNodeCount: number;
+  onNotify: (message: string) => void;
   onClose: () => void;
 }
 
@@ -53,6 +57,7 @@ export default function DppPageSettingsDrawer({
   milRef,
   defaultTitle,
   mappedNodeCount,
+  onNotify,
   onClose,
 }: DppPageSettingsDrawerProps) {
   const [loading, setLoading] = useState(true);
@@ -67,6 +72,8 @@ export default function DppPageSettingsDrawer({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedPage, setSavedPage] = useState<DppPage | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   const canPublish = traceabilityAvailable && mappedNodeCount > 0;
   const publishBlocked = status === "published" && !canPublish;
@@ -122,6 +129,7 @@ export default function DppPageSettingsDrawer({
           setCompositionNotes({});
           setStatus("draft");
         }
+        setDirty(false);
       } catch (loadError) {
         if (active) {
           setError(loadError instanceof Error ? loadError.message : "Gagal memuat halaman DPP.");
@@ -158,6 +166,8 @@ export default function DppPageSettingsDrawer({
       }
 
       setSavedPage(payload.page);
+      setDirty(false);
+      onNotify(`Page settings saved (${payload.page.status}).`);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Gagal menyimpan halaman DPP.");
     } finally {
@@ -183,6 +193,7 @@ export default function DppPageSettingsDrawer({
 
     try {
       setPhotoData(await compressPhoto(file));
+      setDirty(true);
     } catch (photoError) {
       setError(photoError instanceof Error ? photoError.message : "Gagal memproses foto.");
     } finally {
@@ -190,12 +201,26 @@ export default function DppPageSettingsDrawer({
     }
   }
 
+  function requestClose() {
+    if (saving) return;
+    if (!dirty) {
+      onClose();
+      return;
+    }
+    setConfirmClose(true);
+  }
+
+  const dialogRef = useDialogA11y<HTMLElement>({ open: !confirmClose, onEscape: requestClose });
+
   const publicUrl = `/dpp/${encodeURIComponent(milRef)}`;
+  const absolutePublicUrl = typeof window === "undefined" ? publicUrl : `${window.location.origin}${publicUrl}`;
 
   return (
     <div className="fixed inset-0 z-50">
-      <button type="button" aria-label="Close page settings" className="absolute inset-0 bg-[#173127]/40" onClick={onClose} />
+      <button type="button" aria-label="Close page settings" className="absolute inset-0 bg-[#173127]/40" onClick={requestClose} />
       <aside
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="page-settings-title"
@@ -203,7 +228,7 @@ export default function DppPageSettingsDrawer({
       >
         <header className="flex items-start justify-between gap-4 border-b border-[#dfe3da] px-6 py-5">
           <div>
-            <p className="text-[10px] font-extrabold tracking-[0.16em] text-[#7a8c80]">DPP PAGE SETTINGS</p>
+            <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-[#7a8c80]">DPP PAGE SETTINGS</p>
             <h2 id="page-settings-title" className="mt-1 font-[family-name:var(--font-manrope)] text-xl font-bold tracking-[-0.02em]">
               {milRef}
             </h2>
@@ -211,7 +236,7 @@ export default function DppPageSettingsDrawer({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="Close"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#dfe3da] text-[#174f3a] transition hover:bg-[#eef1e7]"
           >
@@ -234,7 +259,10 @@ export default function DppPageSettingsDrawer({
                 <input
                   id="page-title"
                   value={title}
-                  onChange={(event) => setTitle(event.target.value)}
+                  onChange={(event) => {
+                    setTitle(event.target.value);
+                    setDirty(true);
+                  }}
                   placeholder="Product / passport title"
                   className={fieldClass}
                 />
@@ -247,7 +275,10 @@ export default function DppPageSettingsDrawer({
                 <textarea
                   id="page-intro"
                   value={intro}
-                  onChange={(event) => setIntro(event.target.value)}
+                  onChange={(event) => {
+                    setIntro(event.target.value);
+                    setDirty(true);
+                  }}
                   rows={4}
                   placeholder="Short introduction shown on the public DPP page"
                   className="w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
@@ -271,7 +302,7 @@ export default function DppPageSettingsDrawer({
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <label
                       htmlFor="product-photo"
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[#174f3a] px-3 text-[11px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[#174f3a] px-3 text-xs sm:text-[11px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] ${
                         photoLoading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -288,14 +319,17 @@ export default function DppPageSettingsDrawer({
                     {photoData && (
                       <button
                         type="button"
-                        onClick={() => setPhotoData(null)}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e8c5ad] px-3 text-[11px] font-extrabold text-[#8a4b3a] transition hover:bg-[#f4ded6]"
+                        onClick={() => {
+                          setPhotoData(null);
+                          setDirty(true);
+                        }}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e8c5ad] px-3 text-xs sm:text-[11px] font-extrabold text-[#8a4b3a] transition hover:bg-[#f4ded6]"
                       >
                         <Trash2 size={13} /> Remove
                       </button>
                     )}
                   </div>
-                  <p className="mt-2 text-[10px] leading-4 text-[#7a8c80]">
+                  <p className="mt-2 text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
                     JPG, PNG, or WebP. The image is resized and compressed automatically.
                   </p>
                 </div>
@@ -305,7 +339,7 @@ export default function DppPageSettingsDrawer({
                 <div className="mb-1.5 flex items-baseline justify-between gap-3">
                   <span className="text-xs font-bold text-[#173127]">Material composition</span>
                   {fibres.length > 0 && (
-                    <span className="text-[10px] font-bold text-[#7a8c80]">
+                    <span className="text-[11px] sm:text-[10px] font-bold text-[#7a8c80]">
                       {fibres.length} item{fibres.length === 1 ? "" : "s"} · {compositionTotal}%
                     </span>
                   )}
@@ -316,11 +350,11 @@ export default function DppPageSettingsDrawer({
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-[10px] leading-4 text-[#7a8c80]">
+                    <p className="text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
                       Setiap baris fibre di ERP otomatis muncul di sini. Tambah baris di ERP untuk menambah komposisi.
                     </p>
                     {compositionTotal !== 100 && (
-                      <div className="rounded-lg border border-[#e8d9b0] bg-[#faf3d8] px-3 py-2 text-[10px] font-medium text-[#6b5722]">
+                      <div className="rounded-lg border border-[#e8d9b0] bg-[#faf3d8] px-3 py-2 text-[11px] sm:text-[10px] font-medium text-[#6b5722]">
                         Total komposisi {compositionTotal}% — periksa kembali data fibre di ERP.
                       </div>
                     )}
@@ -334,13 +368,15 @@ export default function DppPageSettingsDrawer({
                             <p className="text-xs font-extrabold text-[#174f3a]">{fibre.percentage ?? 0}%</p>
                           </div>
                           {fibre.sourceLot ? (
-                            <p className="mt-0.5 text-[10px] text-[#7a8c80]">Source lot {fibre.sourceLot}</p>
+                            <p className="mt-0.5 text-[11px] sm:text-[10px] text-[#7a8c80]">Yarn Count {fibre.sourceLot}</p>
                           ) : null}
                           <textarea
                             value={compositionNotes[key] ?? ""}
-                            onChange={(event) =>
-                              setCompositionNotes((current) => ({ ...current, [key]: event.target.value }))
-                            }
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              setCompositionNotes((current) => ({ ...current, [key]: value }));
+                              setDirty(true);
+                            }}
                             rows={2}
                             placeholder="Describe this material (origin, process, certification...)"
                             className="mt-2 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-xs font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
@@ -359,7 +395,10 @@ export default function DppPageSettingsDrawer({
                 <select
                   id="page-status"
                   value={status}
-                  onChange={(event) => setStatus(event.target.value as DppPageStatus)}
+                  onChange={(event) => {
+                    setStatus(event.target.value as DppPageStatus);
+                    setDirty(true);
+                  }}
                   className={fieldClass}
                 >
                   <option value="draft">Draft — not publicly accessible</option>
@@ -378,7 +417,7 @@ export default function DppPageSettingsDrawer({
 
               {traceabilityAvailable && mappedNodeCount === 0 && (
                 <div className="rounded-xl border border-[#e8d9b0] bg-[#faf3d8] px-4 py-3 text-xs font-medium leading-5 text-[#6b5722]">
-                  Map at least one journey node to a DPP stage before publishing.
+                  Open Map DPP Journey and click Save draft to enable publishing. Journey stages are derived from ERP roles.
                 </div>
               )}
 
@@ -390,21 +429,31 @@ export default function DppPageSettingsDrawer({
               )}
 
               <div className="rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-4">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#8a978f]">Public URL</p>
+                <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#8a978f]">Public URL</p>
                 <p className="mt-1 break-all text-xs font-semibold text-[#174f3a]">{publicUrl}</p>
                 {savedPage?.status === "published" ? (
                   <a
                     href={publicUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#174f3a] underline-offset-2 hover:underline"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-[11px] font-extrabold text-[#174f3a] underline-offset-2 hover:underline"
                   >
                     Open public page <ExternalLink size={13} />
                   </a>
                 ) : (
-                  <p className="mt-2 text-[10px] text-[#7a8c80]">Publish the page to make this URL live.</p>
+                  <p className="mt-2 text-[11px] sm:text-[10px] text-[#7a8c80]">Publish the page to make this URL live.</p>
                 )}
               </div>
+
+              <DppQrCode
+                value={absolutePublicUrl}
+                fileName={milRef}
+                note={
+                  savedPage?.status === "published"
+                    ? "QR ini mengarah ke halaman publik yang sudah live."
+                    : "Publish halaman ini agar QR dapat dibuka."
+                }
+              />
 
               {error && (
                 <div role="alert" className="rounded-xl border border-[#e8c5ad] bg-[#f4ded6] px-4 py-3 text-sm font-medium text-[#8a4b3a]">
@@ -418,7 +467,7 @@ export default function DppPageSettingsDrawer({
         <footer className="sticky bottom-0 flex items-center justify-end gap-2 border-t border-[#dfe3da] bg-[#fffef9] px-6 py-4">
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             className="h-10 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-[#173127] transition hover:bg-[#f6f8ef]"
           >
             Close
@@ -434,6 +483,19 @@ export default function DppPageSettingsDrawer({
           </button>
         </footer>
       </aside>
+
+      <ConfirmDialog
+        open={confirmClose}
+        title="Discard unsaved changes?"
+        message="Perubahan pada page settings belum disimpan. Menutup panel akan membuang semua perubahan."
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        onConfirm={() => {
+          setConfirmClose(false);
+          onClose();
+        }}
+        onCancel={() => setConfirmClose(false)}
+      />
     </div>
   );
 }

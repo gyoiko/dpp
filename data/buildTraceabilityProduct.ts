@@ -295,9 +295,11 @@ function buildActor(
   const coverage = covered.length;
   const noteParts = [
     node.processDescription,
-    node.branchLabel ? `Branch ${node.branchLabel}` : null,
-    node.inputLot || node.outputLot ? `Lot ${node.inputLot ?? "—"} → ${node.outputLot ?? "—"}` : null,
-    node.quantity === null ? null : `${node.quantity.toLocaleString("en-US")} ${node.unit ?? ""}`.trim(),
+    node.branchLabel ? `Consignee ${node.branchLabel}` : null,
+    node.inputLot || node.outputLot
+      ? `Quantity RAW Material ${node.inputLot ?? "—"} → Quantity Finish Good ${node.outputLot ?? "—"}`
+      : null,
+    node.quantity === null ? null : `Quantity PO ${node.quantity.toLocaleString("en-US")} ${node.unit ?? ""}`.trim(),
     node.upstreamSeqNos.length ? `Upstream #${node.upstreamSeqNos.join(", ")}` : null,
   ].filter((part): part is string => Boolean(part));
 
@@ -477,7 +479,7 @@ export function buildTraceabilityProduct(
           material: fibre.fibreType ?? "Fibre",
           note:
             compositionNotes[key] ||
-            (fibre.sourceLot ? `Source lot ${fibre.sourceLot}` : `Documented from ${record.milRef}.`),
+            (fibre.sourceLot ? `Yarn Count ${fibre.sourceLot}` : `Documented from ${record.milRef}.`),
         };
       })
     : [{ percentage: 0, material: "Not documented", note: "No fibre composition recorded for this MilRef." }];

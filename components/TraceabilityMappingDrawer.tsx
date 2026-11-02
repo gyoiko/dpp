@@ -1,29 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import type {
   DppStage,
-  TraceabilityMappingStatus,
   TraceabilityNode,
   TraceabilityNodeMapping,
   TraceabilityRecord,
 } from "@/types/traceability";
-import {
-  DPP_STAGES,
-  DPP_STAGE_LABELS,
-  traceabilityNodeMappingKey,
-} from "@/types/traceability";
+import { DPP_STAGE_LABELS, traceabilityNodeMappingKey } from "@/types/traceability";
 import TraceabilityWorkflowPreview from "@/components/TraceabilityWorkflowPreview";
+import { useDialogA11y } from "@/components/useDialogA11y";
 
-interface NodeDraft {
+interface NodeView {
   stage: DppStage | "";
   process: string;
   notes: string;
 }
-
-const fieldClass =
-  "h-9 w-full rounded-lg border border-[#d8dfcf] bg-white px-2.5 text-xs font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10";
 
 const ROLE_STAGE_MAP: Record<string, DppStage> = {
   "farmer / grower": "farm",
@@ -64,29 +57,30 @@ function defaultProcess(node: TraceabilityNode): string {
   return node.role || "";
 }
 
-function buildDrafts(
+function buildViews(
   record: TraceabilityRecord,
   existing: Record<string, TraceabilityNodeMapping>,
-): Record<number, NodeDraft> {
-  const drafts: Record<number, NodeDraft> = {};
+): Record<number, NodeView> {
+  const views: Record<number, NodeView> = {};
 
   for (const node of record.nodes) {
     const key = traceabilityNodeMappingKey(record.keDanHao, record.keDanHang, node.id);
     const mapping = existing[key];
 
-    drafts[node.id] = {
+    views[node.id] = {
       stage: mapping?.stage ?? inferStage(node.role),
       process: mapping?.process ?? defaultProcess(node),
       notes: mapping?.notes ?? "",
     };
   }
 
-  return drafts;
+  return views;
 }
 
 interface TraceabilityMappingDrawerProps {
   record: TraceabilityRecord;
   existing: Record<string, TraceabilityNodeMapping>;
+  onNotify: (message: string) => void;
   onClose: () => void;
   onSaved: (mappings: TraceabilityNodeMapping[]) => void;
 }
@@ -94,36 +88,32 @@ interface TraceabilityMappingDrawerProps {
 export default function TraceabilityMappingDrawer({
   record,
   existing,
+  onNotify,
   onClose,
   onSaved,
 }: TraceabilityMappingDrawerProps) {
-  const [drafts, setDrafts] = useState<Record<number, NodeDraft>>(() => buildDrafts(record, existing));
-  const [saving, setSaving] = useState<TraceabilityMappingStatus | null>(null);
+  const views = useMemo(() => buildViews(record, existing), [record, existing]);
+  const [saving, setSaving] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function updateDraft(nodeId: number, patch: Partial<NodeDraft>) {
-    setDrafts((current) => ({
-      ...current,
-      [nodeId]: { ...current[nodeId], ...patch },
-    }));
-  }
+  const dialogRef = useDialogA11y<HTMLElement>({ open: !previewOpen, onEscape: onClose });
 
-  async function save(status: TraceabilityMappingStatus) {
-    const mappedNodes = record.nodes.filter((node) => drafts[node.id]?.stage);
+  async function saveDraft() {
+    const mappedNodes = record.nodes.filter((node) => views[node.id]?.stage);
 
     if (mappedNodes.length === 0) {
-      setError("Pilih minimal satu DPP stage sebelum menyimpan.");
+      setError("Tidak ada node dengan DPP stage yang bisa disimpan.");
       return;
     }
 
-    setSaving(status);
+    setSaving(true);
     setError(null);
 
     try {
       const saved = await Promise.all(
         mappedNodes.map(async (node) => {
-          const draft = drafts[node.id];
+          const view = views[node.id];
 
           const response = await fetch("/api/dpp/node-mappings", {
             method: "POST",
@@ -133,35 +123,40 @@ export default function TraceabilityMappingDrawer({
               keDanHang: record.keDanHang,
               nodeId: node.id,
               nodeSeqNo: node.seqNo,
-              stage: draft.stage,
-              process: draft.process,
-              notes: draft.notes,
-              status,
+              stage: view.stage,
+              process: view.process,
+              notes: view.notes,
+              status: "draft",
             }),
           });
 
           const payload = (await response.json()) as { mapping?: TraceabilityNodeMapping; error?: string };
 
           if (!response.ok || !payload.mapping) {
-            throw new Error(payload.error ?? "Gagal menyimpan mapping.");
+            throw new Error(payload.error ?? "Gagal menyimpan journey nodes.");
           }
 
           return payload.mapping;
         }),
       );
 
+      onNotify(
+        `${saved.length} journey node${saved.length === 1 ? "" : "s"} saved. The DPP page can now be published.`,
+      );
       onSaved(saved);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Gagal menyimpan mapping.");
+      setError(saveError instanceof Error ? saveError.message : "Gagal menyimpan journey nodes.");
     } finally {
-      setSaving(null);
+      setSaving(false);
     }
   }
 
   return (
     <div className="fixed inset-0 z-50">
-      <button type="button" aria-label="Close mapping editor" className="absolute inset-0 bg-[#173127]/40" onClick={onClose} />
+      <button type="button" aria-label="Close journey view" className="absolute inset-0 bg-[#173127]/40" onClick={onClose} />
       <aside
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="traceability-mapping-title"
@@ -169,12 +164,12 @@ export default function TraceabilityMappingDrawer({
       >
         <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#dfe3da] bg-[#fffef9] px-6 py-5">
           <div>
-            <p className="text-[10px] font-extrabold tracking-[0.16em] text-[#7a8c80]">MAP TO DPP JOURNEY</p>
+            <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-[#7a8c80]">MAP TO DPP JOURNEY</p>
             <h2 id="traceability-mapping-title" className="mt-1 font-[family-name:var(--font-manrope)] text-xl font-bold tracking-[-0.02em]">
               {record.milRef}
             </h2>
             <p className="mt-1 text-xs text-[#7a8c80]">
-              Supplier, country, lot, and quantity are loaded from the ERP and cannot be edited here.
+              Read-only ERP data. Review the journey nodes, then save the draft to enable publishing this DPP page.
             </p>
           </div>
           <button
@@ -189,7 +184,7 @@ export default function TraceabilityMappingDrawer({
 
         <div className="flex-1 space-y-4 px-6 py-5">
           {record.nodes.map((node) => {
-            const draft = drafts[node.id] ?? { stage: "", process: "", notes: "" };
+            const view = views[node.id] ?? { stage: "", process: "", notes: "" };
             const key = traceabilityNodeMappingKey(record.keDanHao, record.keDanHang, node.id);
             const saved = existing[key];
 
@@ -197,31 +192,28 @@ export default function TraceabilityMappingDrawer({
               <section key={node.id} className="rounded-2xl border border-[#e2e7d8] bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#eef0e8] pb-3">
                   <div>
-                    <p className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
+                    <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
                       #{node.seqNo ?? "—"} · {node.role ?? "Unnamed role"}
                       {node.roleDescription ? ` · ${node.roleDescription}` : ""}
                     </p>
                     <p className="mt-1 text-sm font-bold text-[#173127]">{node.supplier ?? "—"}</p>
                     <p className="mt-0.5 text-xs text-[#6f7f77]">
-                      {[node.country, node.branchLabel ? `Branch ${node.branchLabel}` : null]
+                      {[node.country, node.branchLabel ? `Consignee ${node.branchLabel}` : null]
                         .filter(Boolean)
                         .join(" · ") || "—"}
                       {node.directSupplier === null ? "" : node.directSupplier ? " · Direct" : " · Indirect"}
                     </p>
                   </div>
                   <div className="text-right">
+                    <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">Quantity PO</p>
                     <p className="text-sm font-bold text-[#173127]">
                       {node.quantity === null ? "—" : `${node.quantity.toLocaleString("en-US")} ${node.unit ?? ""}`.trim()}
                     </p>
-                    <p className="mt-0.5 text-[10px] text-[#7a8c80]">
-                      Lot: {node.inputLot ?? "—"} → {node.outputLot ?? "—"}
+                    <p className="mt-0.5 text-[11px] sm:text-[10px] text-[#7a8c80]">
+                      Quantity RAW Material: {node.inputLot ?? "—"} → Quantity Finish Good: {node.outputLot ?? "—"}
                     </p>
                     {saved && (
-                      <span
-                        className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[9px] font-extrabold ${
-                          saved.status === "reviewed" ? "bg-[#d9eedf] text-[#155b3d]" : "bg-[#f3e8bf] text-[#725d24]"
-                        }`}
-                      >
+                      <span className="mt-1 inline-flex rounded-full bg-[#f3e8bf] px-2 py-0.5 text-[10px] sm:text-[9px] font-extrabold text-[#725d24]">
                         {DPP_STAGE_LABELS[saved.stage]} · {saved.status}
                       </span>
                     )}
@@ -230,48 +222,33 @@ export default function TraceabilityMappingDrawer({
 
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label htmlFor={`stage-${node.id}`} className="mb-1 block text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
+                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
                       DPP stage
-                    </label>
-                    <select
-                      id={`stage-${node.id}`}
-                      value={draft.stage}
-                      onChange={(event) => updateDraft(node.id, { stage: event.target.value as DppStage | "" })}
-                      className={fieldClass}
-                    >
-                      <option value="">Select stage…</option>
-                      {DPP_STAGES.map((stage) => (
-                        <option key={stage} value={stage}>
-                          {DPP_STAGE_LABELS[stage]}
-                        </option>
-                      ))}
-                    </select>
+                    </p>
+                    <p className="mt-1 text-sm font-bold text-[#173127]">
+                      {view.stage ? DPP_STAGE_LABELS[view.stage] : "Not mapped"}
+                    </p>
                   </div>
                   <div>
-                    <label htmlFor={`process-${node.id}`} className="mb-1 block text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
+                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
                       Process label
-                    </label>
-                    <input
-                      id={`process-${node.id}`}
-                      value={draft.process}
-                      onChange={(event) => updateDraft(node.id, { process: event.target.value })}
-                      className={fieldClass}
-                    />
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[#173127]">{view.process || "—"}</p>
                   </div>
                 </div>
 
-                <div className="mt-3">
-                  <label htmlFor={`notes-${node.id}`} className="mb-1 block text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
-                    Notes
-                  </label>
-                  <input
-                    id={`notes-${node.id}`}
-                    value={draft.notes}
-                    onChange={(event) => updateDraft(node.id, { notes: event.target.value })}
-                    placeholder="Optional reviewer note"
-                    className={fieldClass}
-                  />
-                </div>
+                {view.notes ? (
+                  <div className="mt-3">
+                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
+                      Notes
+                    </p>
+                    <p className="mt-1 text-xs text-[#6f7f77]">{view.notes}</p>
+                  </div>
+                ) : null}
+
+                <p className="mt-3 text-[10px] sm:text-[9px] leading-4 text-[#7a8c80]">
+                  DPP stage and process label are derived automatically from the ERP role. ERP values are read-only.
+                </p>
               </section>
             );
           })}
@@ -283,36 +260,40 @@ export default function TraceabilityMappingDrawer({
           )}
         </div>
 
-        <footer className="sticky bottom-0 flex flex-wrap items-center justify-end gap-2 border-t border-[#dfe3da] bg-[#fffef9] px-6 py-4">
+        <footer className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-[#dfe3da] bg-[#fffef9] px-6 py-4">
+          <p className="mr-auto text-[10px] sm:text-[9px] leading-4 text-[#7a8c80]">
+            Saving the draft enables the page to be published.
+          </p>
           <button
             type="button"
             onClick={onClose}
-            className="h-10 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-[#173127] transition hover:bg-[#f6f8ef]"
+            disabled={saving}
+            className="h-10 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-[#173127] transition hover:bg-[#f6f8ef] disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             type="button"
-            onClick={() => save("draft")}
-            disabled={saving !== null}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#174f3a] px-4 text-xs font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] disabled:opacity-60"
+            onClick={() => setPreviewOpen(true)}
+            disabled={saving}
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-[#173127] transition hover:bg-[#f6f8ef] disabled:opacity-60"
           >
-            {saving === "draft" && <Loader2 size={14} className="animate-spin" />}
-            Save draft
+            Preview
           </button>
           <button
             type="button"
-            onClick={() => setPreviewOpen(true)}
-            disabled={saving !== null}
+            onClick={() => void saveDraft()}
+            disabled={saving}
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d] disabled:opacity-60"
           >
-            Preview
+            {saving && <Loader2 size={14} className="animate-spin" />}
+            Save draft
           </button>
         </footer>
       </aside>
 
       {previewOpen && (
-        <TraceabilityWorkflowPreview record={record} drafts={drafts} onClose={() => setPreviewOpen(false)} />
+        <TraceabilityWorkflowPreview record={record} drafts={views} onClose={() => setPreviewOpen(false)} />
       )}
     </div>
   );

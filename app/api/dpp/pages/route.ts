@@ -43,7 +43,7 @@ function toRouteErrorMessage(error: unknown) {
     return "D1 binding `DB` belum aktif. Set `\"d1\": \"DB\"` di .openai/hosting.json lalu restart dev server.";
   }
 
-  return message;
+  return detail ? `${message}\n${detail}` : message;
 }
 
 export async function GET(request: Request) {

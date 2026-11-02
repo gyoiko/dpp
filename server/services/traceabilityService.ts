@@ -23,12 +23,19 @@ WHERE MainID = @MainID
 ORDER BY 序号`;
 
 const NODE_QUERY = `SELECT
-  ID, 序号, 角色, 角色说明, 供应商, 国家, 分支标签, 流程描述, 认证说明,
-  输入批号, 输出批号, 数量, 单位, 是否直接供应商, 上游序号
-FROM [T_溯源_流程节点表]
-WHERE MainID = @MainID
-  AND 删除标志 = 0
-ORDER BY 序号`;
+  N.ID, N.序号, N.角色, N.角色说明, N.供应商, N.国家, N.分支标签, N.流程描述, N.认证说明,
+  N.输入批号, N.输出批号, N.数量, N.单位, N.是否直接供应商, N.上游序号,
+  文件数 = (SELECT COUNT(*) FROM [T_溯源_节点文件表] F
+            WHERE F.NodeID = N.ID AND F.删除标志 = 0),
+  缺失数 = (SELECT COUNT(*) FROM [T_溯源_角色必填文件] R
+            WHERE R.角色 = N.角色 AND R.删除标志 = 0
+              AND NOT EXISTS (SELECT 1 FROM [T_溯源_节点文件表] F
+                              WHERE F.NodeID = N.ID AND F.删除标志 = 0
+                                AND F.审核状态 <> N'Rejected' AND F.文件类型 = R.文件类型))
+FROM [T_溯源_流程节点表] N
+WHERE N.MainID = @MainID
+  AND N.删除标志 = 0
+ORDER BY N.序号`;
 
 const DOCUMENT_QUERY = `SELECT
   ID, NodeID, 文件类型, 类型说明, 文件编号, 关联参考, 发行日期, 有效期至,
@@ -92,6 +99,8 @@ function mapNode(row: Record<string, unknown>): TraceabilityNode {
     directSupplier: toYesNoBoolean(row["是否直接供应商"]),
     upstreamSeqNo: toText(row["上游序号"]),
     upstreamSeqNos: parseSeqNumbers(row["上游序号"]),
+    documentCount: toNumber(row["文件数"]),
+    missingDocumentCount: toNumber(row["缺失数"]),
   };
 }
 

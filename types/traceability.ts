@@ -34,6 +34,8 @@ export interface TraceabilityNode {
   directSupplier: boolean | null;
   upstreamSeqNo: string | null;
   upstreamSeqNos: number[];
+  documentCount?: number | null;
+  missingDocumentCount?: number | null;
 }
 
 export interface TraceabilityDocument {

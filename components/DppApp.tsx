@@ -156,7 +156,7 @@ function JourneyTab({
         <h1>{heading || "From fibre to finished piece."}</h1>
         <p>
           {intro ||
-            `${product.fiber} · material ${product.material} · PO ${product.po}. Traced across ${product.source.actors} verified supply-chain facilities.`}
+            `${product.fiber} · material ${product.material} · GTI PO ${product.po}. Traced across ${product.source.actors} verified supply-chain facilities.`}
         </p>
       </header>
       <div className="section-label"><span>Steps &amp; processes</span><span>{product.stages.length}</span></div>
