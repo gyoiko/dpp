@@ -15,9 +15,11 @@
     "cms:start": "tsx server/index.ts",
     "cms:example:supply-chain": "tsx server/examples/supplyChainReadOnly.ts",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/migrate-sqlite.mjs",
     "dpp:import": "node scripts/import-dpp.mjs"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
     "d3-geo": "^3.1.1",
     "dotenv": "^18.0.9",
@@ -38,6 +40,7 @@
     "@eslint/js": "9.39.4",
     "@next/eslint-plugin-next": "16.2.6",
     "@tailwindcss/postcss": "4.2.1",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/cors": "^2.8.19",
     "@types/d3-geo": "^3.1.1",
     "@types/express": "^5.0.6",

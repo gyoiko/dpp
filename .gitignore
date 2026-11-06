@@ -43,5 +43,12 @@ yarn-error.log*
 # generated DPP document blobs; refresh with `npm run dpp:import`
 /public/documents/
 
+# runtime database and service logs
+/data/*.sqlite
+/data/*.sqlite-shm
+/data/*.sqlite-wal
+/logs/
+/scripts/service-env.cmd
+
 # typescript build info
 *.tsbuildinfo

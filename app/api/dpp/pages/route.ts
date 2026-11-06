@@ -3,6 +3,7 @@ import { getDb } from "@/db";
 import { serialiseCompositionNotes } from "@/data/compositionNotes";
 import { dppPages, traceabilityNodeMappings } from "@/db/schema";
 import type { DppPage, DppPageStatus } from "@/types/dppPage";
+import { requestIsSameOrigin, requireApiSession } from "@/lib/auth/session";
 
 const STATUSES: readonly DppPageStatus[] = ["draft", "published"];
 const MAX_PHOTO_DATA_LENGTH = 1_500_000;
@@ -47,10 +48,16 @@ function toRouteErrorMessage(error: unknown) {
 }
 
 export async function GET(request: Request) {
+  const session = await requireApiSession();
+
+  if (session instanceof Response) {
+    return session;
+  }
+
   try {
     const url = new URL(request.url);
     const milRef = text(url.searchParams.get("milRef"));
-    const db = getDb();
+    const db = await getDb();
 
     if (milRef) {
       const [page] = await db.select().from(dppPages).where(eq(dppPages.milRef, milRef)).limit(1);
@@ -80,6 +87,16 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!requestIsSameOrigin(request)) {
+    return Response.json({ error: "Cross-origin request is not allowed." }, { status: 403 });
+  }
+
+  const session = await requireApiSession();
+
+  if (session instanceof Response) {
+    return session;
+  }
+
   try {
     const payload = (await request.json()) as Record<string, unknown>;
     const parsed = parseMilRefValue(text(payload.milRef));
@@ -121,7 +138,7 @@ export async function POST(request: Request) {
     }
 
     const now = new Date().toISOString();
-    const db = getDb();
+    const db = await getDb();
 
     if (status === "published") {
       const apiBase = (process.env.DPP_API_BASE_URL ?? "http://localhost:4000").replace(/\/$/, "");

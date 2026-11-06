@@ -16,6 +16,7 @@ import {
   SearchX,
   X,
 } from "lucide-react";
+import CmsSessionBadge from "@/components/CmsSessionBadge";
 import DppPageSettingsDrawer from "@/components/DppPageSettingsDrawer";
 import DppQrCode from "@/components/DppQrCode";
 import Toast, { type ToastMessage } from "@/components/Toast";
@@ -238,9 +239,12 @@ export default function SupplyChainMappingPage() {
               Pull read-only traceability data from the DPP database by MilRef, then map each node to the DPP journey.
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3 py-2 text-xs sm:text-[11px] font-bold text-[#174f3a]">
-            <Database size={14} />
-            DPP traceability · read-only
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3 py-2 text-xs sm:text-[11px] font-bold text-[#174f3a]">
+              <Database size={14} />
+              DPP traceability · read-only
+            </div>
+            <CmsSessionBadge />
           </div>
         </header>
 

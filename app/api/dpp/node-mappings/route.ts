@@ -3,6 +3,7 @@ import { getDb } from "@/db";
 import { traceabilityNodeMappings } from "@/db/schema";
 import type { TraceabilityMappingStatus, TraceabilityNodeMapping } from "@/types/traceability";
 import { DPP_STAGES } from "@/types/traceability";
+import { requestIsSameOrigin, requireApiSession } from "@/lib/auth/session";
 
 const STATUSES: readonly TraceabilityMappingStatus[] = ["draft", "reviewed"];
 
@@ -31,10 +32,16 @@ function toRouteErrorMessage(error: unknown) {
 }
 
 export async function GET(request: Request) {
+  const session = await requireApiSession();
+
+  if (session instanceof Response) {
+    return session;
+  }
+
   try {
     const url = new URL(request.url);
     const milRef = text(url.searchParams.get("milRef"));
-    const db = getDb();
+    const db = await getDb();
 
     if (milRef) {
       const separator = milRef.indexOf("-");
@@ -72,6 +79,16 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!requestIsSameOrigin(request)) {
+    return Response.json({ error: "Cross-origin request is not allowed." }, { status: 403 });
+  }
+
+  const session = await requireApiSession();
+
+  if (session instanceof Response) {
+    return session;
+  }
+
   try {
     const payload = (await request.json()) as Record<string, unknown>;
 
@@ -81,7 +98,7 @@ export async function POST(request: Request) {
     const nodeSeqNo = payload.nodeSeqNo === null || payload.nodeSeqNo === undefined ? null : Number(payload.nodeSeqNo);
     const process = text(payload.process);
     const notes = text(payload.notes);
-    const reviewedBy = text(payload.reviewedBy) || "cms-user";
+    const reviewedBy = session.email;
     const stage = payload.stage;
     const status = payload.status ?? "draft";
 
@@ -106,7 +123,7 @@ export async function POST(request: Request) {
     }
 
     const mappingKey = [keDanHao, keDanHang, String(nodeId)].join("|");
-    const db = getDb();
+    const db = await getDb();
 
     const [mapping] = await db
       .insert(traceabilityNodeMappings)

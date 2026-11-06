@@ -36,6 +36,13 @@
       "when": 1793330095978,
       "tag": "0004_absurd_sugar_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793930779332,
+      "tag": "0005_powerful_golden_guardian",
+      "breakpoints": true
     }
   ]
 }

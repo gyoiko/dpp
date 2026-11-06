@@ -30,7 +30,7 @@ export default async function PublicDppPage({ params }: { params: Promise<{ milR
   let unavailableReason: "none" | "not-found" | "error" = "none";
 
   try {
-    const db = getDb();
+    const db = await getDb();
     const [found] = await db.select().from(dppPages).where(eq(dppPages.milRef, decodedMilRef)).limit(1);
     page = found ? (found as DppPage) : null;
 

@@ -1,6 +1,26 @@
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
+export const authUsers = sqliteTable(
+  "auth_users",
+  {
+    id: text("id").primaryKey(),
+    email: text("email").notNull(),
+    name: text("name").notNull().default(""),
+    passwordHash: text("password_hash").notNull(),
+    role: text("role").notNull().default("scm"),
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    tokenVersion: integer("token_version").notNull().default(0),
+    lastLoginAt: text("last_login_at"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [uniqueIndex("auth_users_email_idx").on(table.email)],
+);
+
+export type AuthUserRow = typeof authUsers.$inferSelect;
+export type NewAuthUser = typeof authUsers.$inferInsert;
+
 export const supplyChainMappings = sqliteTable(
   "dpp_supply_chain_mappings",
   {
