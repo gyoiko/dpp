@@ -42,7 +42,7 @@ function readRecentSearches(): string[] {
 function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
-      <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.1em] text-[#8a978f]">{label}</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-[#8a978f]">{label}</p>
       <p className="mt-1 text-sm font-semibold text-[#173127]">{value || "—"}</p>
     </div>
   );
@@ -51,11 +51,11 @@ function ReadOnlyField({ label, value }: { label: string; value: string | null }
 function MappingBadge({ mapping }: { mapping: TraceabilityNodeMapping }) {
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
-      <span className="rounded-full bg-[#eef4e7] px-2 py-0.5 text-[11px] sm:text-[10px] font-extrabold text-[#174f3a]">
+      <span className="rounded-full bg-[#eef4e7] px-2.5 py-1 text-xs font-bold text-[#174f3a]">
         {DPP_STAGE_LABELS[mapping.stage]}
       </span>
       <span
-        className={`rounded-full px-2 py-0.5 text-[10px] sm:text-[9px] font-extrabold ${
+        className={`rounded-full px-2.5 py-1 text-xs font-bold ${
           mapping.status === "reviewed" ? "bg-[#d9eedf] text-[#155b3d]" : "bg-[#f3e8bf] text-[#725d24]"
         }`}
       >
@@ -231,7 +231,7 @@ export default function SupplyChainMappingPage() {
       <div className="mx-auto w-full max-w-6xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.18em] text-[#7a8c80]">SCM CONSOLE</p>
+            <p className="text-xs font-bold tracking-widest text-[#7a8c80]">SCM CONSOLE</p>
             <h1 className="mt-2 font-[family-name:var(--font-manrope)] text-3xl font-bold leading-tight tracking-[-0.03em]">
               Supply Chain Mapping
             </h1>
@@ -240,7 +240,7 @@ export default function SupplyChainMappingPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3 py-2 text-xs sm:text-[11px] font-bold text-[#174f3a]">
+            <div className="flex items-center gap-2 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3.5 py-1.5 text-xs font-bold text-[#174f3a]">
               <Database size={14} />
               DPP traceability · read-only
             </div>
@@ -286,7 +286,7 @@ export default function SupplyChainMappingPage() {
 
           {recentSearches.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#8a978f]">Recent</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#8a978f]">Recent</span>
               {recentSearches.map((ref) => (
                 <button
                   key={ref}
@@ -295,7 +295,7 @@ export default function SupplyChainMappingPage() {
                     setMilRef(ref);
                     runSearch(ref);
                   }}
-                  className="rounded-full border border-[#d8dfcf] bg-[#f6f8ef] px-2.5 py-1 text-[11px] sm:text-[10px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7]"
+                  className="rounded-full border border-[#d8dfcf] bg-[#f6f8ef] px-3 py-1 text-xs font-bold text-[#174f3a] transition hover:bg-[#eef1e7]"
                 >
                   {ref}
                 </button>
@@ -318,14 +318,11 @@ export default function SupplyChainMappingPage() {
                   DPP traceability journey
                   <span className="ml-2 font-normal text-[#7a8c80]">· {lastSearched}</span>
                 </h2>
-                <p className="mt-1 text-xs text-[#7a8c80]">
-                  Loaded from T_溯源_*. Supplier, country, consignee, and quantities are read-only.
-                </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {pageExists ? (
                   <span
-                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[11px] sm:text-[10px] font-extrabold ${
+                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold ${
                       pageStatus === "published"
                         ? "border-[#b9d8c4] bg-[#d9eedf] text-[#155b3d]"
                         : "border-[#e2d3a2] bg-[#f3e8bf] text-[#725d24]"
@@ -339,7 +336,7 @@ export default function SupplyChainMappingPage() {
                     {pageStatus === "published" ? "DPP Published" : "DPP Draft"}
                   </span>
                 ) : (
-                  <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] bg-[#f0f2ea] px-3 text-[11px] sm:text-[10px] font-extrabold text-[#7a8c80]">
+                  <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] bg-[#f0f2ea] px-3 text-xs font-bold text-[#7a8c80]">
                     <span className="h-1.5 w-1.5 rounded-full bg-[#9aa69f]" />
                     No DPP page
                   </span>
@@ -350,7 +347,7 @@ export default function SupplyChainMappingPage() {
                     href={publicPath}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#174f3a] px-3 text-[11px] sm:text-[10px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7]"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#174f3a] px-3 text-xs font-bold text-[#174f3a] transition hover:bg-[#eef1e7]"
                   >
                     <ExternalLink size={12} /> Open page
                   </a>
@@ -359,7 +356,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => void copyPublicUrl()}
                   disabled={!absolutePublicUrl}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-[11px] sm:text-[10px] font-extrabold text-[#173127] transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-xs font-bold text-[#173127] transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Copy size={12} /> Copy URL
                 </button>
@@ -367,7 +364,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => setQrOpen(true)}
                   disabled={!absolutePublicUrl}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-[11px] sm:text-[10px] font-extrabold text-[#173127] transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-xs font-bold text-[#173127] transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <QrCode size={12} /> QR
                 </button>
@@ -375,7 +372,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => setPageSettingsOpen(true)}
                   disabled={!lastSearched}
-                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#174f3a] px-4 text-xs sm:text-[11px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#174f3a] px-4 text-xs font-bold text-[#174f3a] transition hover:bg-[#eef1e7] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Page settings
                 </button>
@@ -383,7 +380,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => setMappingOpen(true)}
                   disabled={!traceability || traceability.nodes.length === 0}
-                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs sm:text-[11px] font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs font-bold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Map DPP journey
                 </button>
@@ -464,8 +461,8 @@ export default function SupplyChainMappingPage() {
                 </div>
 
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">Journey nodes</h3>
-                  <span className="text-[11px] sm:text-[10px] font-bold text-[#7a8c80]">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#7a8c80]">Journey nodes</h3>
+                  <span className="text-xs font-semibold text-[#7a8c80]">
                     {traceability.nodes.length} node{traceability.nodes.length === 1 ? "" : "s"} · {traceability.documents.length} document
                     {traceability.documents.length === 1 ? "" : "s"}
                   </span>
@@ -485,7 +482,7 @@ export default function SupplyChainMappingPage() {
                       return (
                         <article key={node.id} className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-[#e1e5db] bg-white p-4">
                           <div className="min-w-0">
-                            <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
+                            <p className="text-xs font-bold uppercase tracking-wider text-[#7a8c80]">
                               #{node.seqNo ?? "—"} · {node.role ?? "Unnamed role"}
                               {node.roleDescription ? ` · ${node.roleDescription}` : ""}
                             </p>
@@ -496,7 +493,7 @@ export default function SupplyChainMappingPage() {
                                 .join(" · ") || "—"}
                               {node.directSupplier === null ? "" : node.directSupplier ? " · Direct" : " · Indirect"}
                             </p>
-                            <p className="mt-1 text-xs sm:text-[11px] text-[#7a8c80]">
+                            <p className="mt-1 text-xs text-[#7a8c80]">
                               Quantity RAW Material {node.inputLot ?? "—"} → Quantity Finish Good {node.outputLot ?? "—"}
                               {node.quantity === null
                                 ? ""
@@ -504,7 +501,7 @@ export default function SupplyChainMappingPage() {
                             </p>
                           </div>
                           <div className="text-right">
-                            {mapping ? <MappingBadge mapping={mapping} /> : <span className="text-[11px] sm:text-[10px] font-bold text-[#9aa69f]">Not mapped</span>}
+                            {mapping ? <MappingBadge mapping={mapping} /> : <span className="text-xs font-semibold text-[#9aa69f]">Not mapped</span>}
                           </div>
 
                           <div className="w-full border-t border-[#eef0e8] pt-2">
@@ -513,7 +510,7 @@ export default function SupplyChainMappingPage() {
                                 type="button"
                                 onClick={() => setExpandedNodeId(documentsOpen ? null : node.id)}
                                 aria-expanded={documentsOpen}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#dfe3da] px-2.5 py-1 text-[11px] sm:text-[10px] font-extrabold text-[#174f3a] transition hover:bg-[#f6f8ef]"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#dfe3da] px-2.5 py-1 text-xs font-bold text-[#174f3a] transition hover:bg-[#f6f8ef]"
                               >
                                 <FileText size={12} />
                                 {documentCount} document{documentCount === 1 ? "" : "s"}
@@ -524,12 +521,12 @@ export default function SupplyChainMappingPage() {
                               </button>
 
                               {missingCount === null ? null : missingCount > 0 ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[#f4ded6] px-2 py-0.5 text-[10px] sm:text-[9px] font-extrabold text-[#8a4b3a]">
-                                  <AlertTriangle size={10} />
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#f4ded6] px-2.5 py-1 text-xs font-bold text-[#8a4b3a]">
+                                  <AlertTriangle size={11} />
                                   {missingCount} missing required
                                 </span>
                               ) : (
-                                <span className="rounded-full bg-[#d9eedf] px-2 py-0.5 text-[10px] sm:text-[9px] font-extrabold text-[#155b3d]">
+                                <span className="rounded-full bg-[#d9eedf] px-2.5 py-1 text-xs font-bold text-[#155b3d]">
                                   Required documents complete
                                 </span>
                               )}
@@ -545,17 +542,17 @@ export default function SupplyChainMappingPage() {
                                   nodeDocuments.map((document) => (
                                     <div
                                       key={document.id}
-                                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#f8f9f3] px-2.5 py-1.5"
+                                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#f8f9f3] px-3 py-2"
                                     >
                                       <div className="min-w-0">
-                                        <p className="text-[11px] sm:text-[10px] font-bold text-[#173127]">
+                                        <p className="text-xs font-bold text-[#173127]">
                                           {document.documentType ?? "Document"}
                                           {document.typeDescription ? ` · ${document.typeDescription}` : ""}
                                         </p>
-                                        <p className="truncate text-[10px] sm:text-[9px] text-[#7a8c80]">{document.fileName ?? "—"}</p>
+                                        <p className="truncate text-xs text-[#7a8c80]">{document.fileName ?? "—"}</p>
                                       </div>
                                       <span
-                                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] sm:text-[9px] font-extrabold ${
+                                        className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
                                           document.reviewStatus === "Approved"
                                             ? "bg-[#d9eedf] text-[#155b3d]"
                                             : document.reviewStatus === "Rejected"

@@ -8,6 +8,7 @@ import type {
   Tone,
 } from "@/data/dppData";
 import { parseCompositionNotes } from "@/data/compositionNotes";
+import { certificationsFor } from "@/data/certifications";
 import type { DppPage } from "@/types/dppPage";
 import type {
   DppStage as TraceStage,
@@ -514,6 +515,7 @@ export function buildTraceabilityProduct(
     passportId: page.milRef,
     lastUpdated: formatDate(page.updatedAt),
     composition: compositions,
+    certifications: certificationsFor(page.visibleCertifications),
     stages,
     badges: buildBadges(stages, coverage),
     coverage,

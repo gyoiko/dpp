@@ -1,6 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { serialiseCompositionNotes } from "@/data/compositionNotes";
+import { serialiseVisibleCertifications } from "@/data/certifications";
 import { dppPages, traceabilityNodeMappings } from "@/db/schema";
 import type { DppPage, DppPageStatus } from "@/types/dppPage";
 import { requestIsSameOrigin, requireApiSession } from "@/lib/auth/session";
@@ -105,12 +106,27 @@ export async function POST(request: Request) {
     const intro = text(payload.intro);
     const photoData = text(payload.photoData) || null;
     let compositionNotes: string | null;
+    let visibleCertifications: string | null;
 
     try {
       compositionNotes = serialiseCompositionNotes(payload.compositionNotes);
     } catch (compositionError) {
       return Response.json(
         { error: compositionError instanceof Error ? compositionError.message : "Invalid composition notes." },
+        { status: 400 },
+      );
+    }
+
+    try {
+      visibleCertifications = serialiseVisibleCertifications(payload.visibleCertifications);
+    } catch (certificationError) {
+      return Response.json(
+        {
+          error:
+            certificationError instanceof Error
+              ? certificationError.message
+              : "Invalid visible certifications.",
+        },
         { status: 400 },
       );
     }
@@ -199,6 +215,7 @@ export async function POST(request: Request) {
         intro,
         photoData,
         compositionNotes,
+        visibleCertifications,
         status: status as DppPageStatus,
         publishedAt: status === "published" ? now : null,
       })
@@ -209,6 +226,7 @@ export async function POST(request: Request) {
           intro,
           photoData,
           compositionNotes,
+          visibleCertifications,
           status: status as DppPageStatus,
           publishedAt: status === "published" ? now : null,
           updatedAt: now,

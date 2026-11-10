@@ -9,6 +9,7 @@ export interface DppPage {
   intro: string;
   photoData: string | null;
   compositionNotes: string | null;
+  visibleCertifications: string | null;
   status: DppPageStatus;
   publishedAt: string | null;
   createdAt: string;

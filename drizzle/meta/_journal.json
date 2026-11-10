@@ -43,6 +43,13 @@
       "when": 1793930779332,
       "tag": "0005_powerful_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794275698752,
+      "tag": "0006_brainy_swarm",
+      "breakpoints": true
     }
   ]
 }

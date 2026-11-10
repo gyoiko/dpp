@@ -19,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { DPP_CERTIFICATIONS } from "@/data/certifications";
+import { type DppCertification } from "@/data/certifications";
 import {
   type DppActor,
   type DppProduct,
@@ -210,7 +210,7 @@ function ProductTab({ product }: { product: DppProduct }) {
   );
 }
 
-function BadgesTab() {
+function BadgesTab({ certifications }: { certifications: DppCertification[] }) {
   return (
     <div className="tab-content">
       <header className="section-intro">
@@ -218,15 +218,22 @@ function BadgesTab() {
         <h1>Certifications on file.</h1>
         <p>Certification marks referenced by this product passport.</p>
       </header>
-      <div className="certification-grid">
-        {DPP_CERTIFICATIONS.map((certification) => (
-          <div key={certification.id} className="certification-card">
-            <span className="certification-logo">
-              <img src={certification.logo} alt={certification.label} />
-            </span>
-          </div>
-        ))}
-      </div>
+      {certifications.length === 0 ? (
+        <div className="stage-empty">
+          <strong>No certifications selected</strong>
+          This passport does not display any certification marks.
+        </div>
+      ) : (
+        <div className="certification-grid">
+          {certifications.map((certification) => (
+            <div key={certification.id} className="certification-card">
+              <span className="certification-logo">
+                <img src={certification.logo} alt={certification.label} />
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -299,13 +306,12 @@ export default function DppApp({
           ) : tab === "product" ? (
             <ProductTab product={product} />
           ) : (
-            <BadgesTab />
+            <BadgesTab certifications={product.certifications} />
           )}
         </div>
         <footer>
           <BrandMark />
           <p>Digital Product Passport · {product.passportId}</p>
-          <small>Source: {product.source.sourcePath} · Updated {product.lastUpdated}</small>
         </footer>
       </section>
     </main>

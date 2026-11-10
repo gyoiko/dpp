@@ -6,6 +6,11 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import DppQrCode from "@/components/DppQrCode";
 import { useDialogA11y } from "@/components/useDialogA11y";
 import { parseCompositionNotes } from "@/data/compositionNotes";
+import {
+  DPP_CERTIFICATIONS,
+  DPP_CERTIFICATION_IDS,
+  parseVisibleCertifications,
+} from "@/data/certifications";
 import type { DppPage, DppPageStatus } from "@/types/dppPage";
 import type { TraceabilityFibre, TraceabilityRecord } from "@/types/traceability";
 
@@ -67,6 +72,7 @@ export default function DppPageSettingsDrawer({
   const [photoLoading, setPhotoLoading] = useState(false);
   const [fibres, setFibres] = useState<TraceabilityFibre[]>([]);
   const [compositionNotes, setCompositionNotes] = useState<Record<string, string>>({});
+  const [visibleCertifications, setVisibleCertifications] = useState<string[]>(DPP_CERTIFICATION_IDS);
   const [status, setStatus] = useState<DppPageStatus>("draft");
   const [traceabilityAvailable, setTraceabilityAvailable] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -120,6 +126,9 @@ export default function DppPageSettingsDrawer({
           setIntro(payload.page.intro);
           setPhotoData(payload.page.photoData ?? null);
           setCompositionNotes(parseCompositionNotes(payload.page.compositionNotes));
+          setVisibleCertifications(
+            parseVisibleCertifications(payload.page.visibleCertifications) ?? DPP_CERTIFICATION_IDS,
+          );
           setStatus(payload.page.status);
           setSavedPage(payload.page);
         } else {
@@ -127,6 +136,7 @@ export default function DppPageSettingsDrawer({
           setIntro("");
           setPhotoData(null);
           setCompositionNotes({});
+          setVisibleCertifications(DPP_CERTIFICATION_IDS);
           setStatus("draft");
         }
         setDirty(false);
@@ -156,7 +166,15 @@ export default function DppPageSettingsDrawer({
       const response = await fetch("/api/dpp/pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ milRef, title, intro, status, photoData, compositionNotes }),
+        body: JSON.stringify({
+          milRef,
+          title,
+          intro,
+          status,
+          photoData,
+          compositionNotes,
+          visibleCertifications,
+        }),
       });
 
       const payload = (await response.json()) as { page?: DppPage; error?: string };
@@ -173,6 +191,13 @@ export default function DppPageSettingsDrawer({
     } finally {
       setSaving(false);
     }
+  }
+
+  function toggleCertification(id: string) {
+    setVisibleCertifications((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
+    setDirty(true);
   }
 
   async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
@@ -386,6 +411,73 @@ export default function DppPageSettingsDrawer({
                     })}
                   </div>
                 )}
+              </div>
+
+              <div>
+                <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-xs font-bold text-[#173127]">Certifications</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] sm:text-[10px] font-bold text-[#7a8c80]">
+                      {visibleCertifications.length} of {DPP_CERTIFICATIONS.length} shown
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVisibleCertifications(DPP_CERTIFICATION_IDS);
+                        setDirty(true);
+                      }}
+                      className="text-[11px] sm:text-[10px] font-extrabold text-[#174f3a] underline-offset-2 hover:underline"
+                    >
+                      Select all
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVisibleCertifications([]);
+                        setDirty(true);
+                      }}
+                      className="text-[11px] sm:text-[10px] font-extrabold text-[#8a4b3a] underline-offset-2 hover:underline"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <p className="mb-2 text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
+                  Pilih sertifikasi yang ditampilkan pada tab Badges di halaman publik DPP.
+                </p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {DPP_CERTIFICATIONS.map((certification) => {
+                    const checked = visibleCertifications.includes(certification.id);
+
+                    return (
+                      <label
+                        key={certification.id}
+                        className={`flex cursor-pointer items-center gap-2 rounded-xl border p-2 transition ${
+                          checked
+                            ? "border-[#174f3a] bg-[#eef4e7]"
+                            : "border-[#e2e7d8] bg-white hover:bg-[#f6f8ef]"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleCertification(certification.id)}
+                          className="h-4 w-4 shrink-0 accent-[#174f3a]"
+                        />
+                        <span className="flex h-10 w-12 shrink-0 items-center justify-center rounded-lg bg-white p-1">
+                          <img
+                            src={certification.logo}
+                            alt=""
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        </span>
+                        <span className="min-w-0 text-[11px] sm:text-[10px] font-semibold leading-4 text-[#173127]">
+                          {certification.label}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
 
               <div>

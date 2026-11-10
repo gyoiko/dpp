@@ -1,0 +1,1 @@
+ALTER TABLE `dpp_pages` ADD `visible_certifications` text;

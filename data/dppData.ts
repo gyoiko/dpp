@@ -1,4 +1,5 @@
 import manifestJson from "./dpp-files.json";
+import { DPP_CERTIFICATIONS, type DppCertification } from "./certifications";
 
 export type DocumentCode =
   | "PO"
@@ -115,6 +116,7 @@ export type DppProduct = {
   passportId: string;
   lastUpdated: string;
   composition: { percentage: number; material: string; note: string }[];
+  certifications: DppCertification[];
   stages: DppStage[];
   badges: DppBadge[];
   coverage: number;
@@ -531,6 +533,7 @@ function buildProduct(seed: ProductSeed): DppProduct {
         note: seed.compositionNote,
       },
     ],
+    certifications: DPP_CERTIFICATIONS,
     stages,
     badges: buildBadges(stages, coverage, seed.verification),
     coverage,
