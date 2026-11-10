@@ -104,6 +104,7 @@ export async function POST(request: Request) {
     const status = payload.status ?? "draft";
     const title = text(payload.title);
     const intro = text(payload.intro);
+    const styleName = text(payload.styleName) || null;
     const photoData = text(payload.photoData) || null;
     let compositionNotes: string | null;
     let visibleCertifications: string | null;
@@ -213,6 +214,7 @@ export async function POST(request: Request) {
         keDanHang: parsed.keDanHang,
         title: title || parsed.milRef,
         intro,
+        styleName,
         photoData,
         compositionNotes,
         visibleCertifications,
@@ -224,6 +226,7 @@ export async function POST(request: Request) {
         set: {
           title: title || parsed.milRef,
           intro,
+          styleName,
           photoData,
           compositionNotes,
           visibleCertifications,

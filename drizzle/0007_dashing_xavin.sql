@@ -1,0 +1,1 @@
+ALTER TABLE `dpp_pages` ADD `style_name` text;

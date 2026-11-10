@@ -154,6 +154,7 @@ function JourneyTab({
       <header className="section-intro">
         <span className="eyebrow">FOLLOW THE MAKING</span>
         <h1>{heading || "From fibre to finished piece."}</h1>
+        <p>Digital Product Passport · {product.passportId}</p>
         <p>
           {intro ||
             `${product.fiber} · material ${product.material} · GTI PO ${product.po}. Traced across ${product.source.actors} verified supply-chain facilities.`}
@@ -311,7 +312,6 @@ export default function DppApp({
         </div>
         <footer>
           <BrandMark />
-          <p>Digital Product Passport · {product.passportId}</p>
         </footer>
       </section>
     </main>

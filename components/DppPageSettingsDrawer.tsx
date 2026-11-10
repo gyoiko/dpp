@@ -68,6 +68,7 @@ export default function DppPageSettingsDrawer({
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState(defaultTitle);
   const [intro, setIntro] = useState("");
+  const [styleName, setStyleName] = useState("");
   const [photoData, setPhotoData] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(false);
   const [fibres, setFibres] = useState<TraceabilityFibre[]>([]);
@@ -124,6 +125,7 @@ export default function DppPageSettingsDrawer({
         if (payload.page) {
           setTitle(payload.page.title || defaultTitle);
           setIntro(payload.page.intro);
+          setStyleName(payload.page.styleName ?? "");
           setPhotoData(payload.page.photoData ?? null);
           setCompositionNotes(parseCompositionNotes(payload.page.compositionNotes));
           setVisibleCertifications(
@@ -134,6 +136,7 @@ export default function DppPageSettingsDrawer({
         } else {
           setTitle(defaultTitle);
           setIntro("");
+          setStyleName("");
           setPhotoData(null);
           setCompositionNotes({});
           setVisibleCertifications(DPP_CERTIFICATION_IDS);
@@ -170,6 +173,7 @@ export default function DppPageSettingsDrawer({
           milRef,
           title,
           intro,
+          styleName,
           status,
           photoData,
           compositionNotes,
@@ -358,6 +362,25 @@ export default function DppPageSettingsDrawer({
                     JPG, PNG, or WebP. The image is resized and compressed automatically.
                   </p>
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="style-name" className="mb-1.5 block text-xs font-bold text-[#173127]">
+                  Style name
+                </label>
+                <input
+                  id="style-name"
+                  value={styleName}
+                  onChange={(event) => {
+                    setStyleName(event.target.value);
+                    setDirty(true);
+                  }}
+                  placeholder={defaultTitle}
+                  className={fieldClass}
+                />
+                <p className="mt-1.5 text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
+                  Judul yang tampil di tab Product halaman publik DPP. Kosongkan untuk memakai style dari ERP.
+                </p>
               </div>
 
               <div>

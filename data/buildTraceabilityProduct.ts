@@ -509,7 +509,7 @@ export function buildTraceabilityProduct(
     deliveryCountry: record.header?.buyer ?? "—",
     exFactoryDate: "—",
     season: "DPP traceability",
-    name: record.header?.style ?? page.milRef,
+    name: page.styleName?.trim() || record.header?.style || page.milRef,
     photo: page.photoData ?? undefined,
     color: record.header?.productForm ?? "—",
     passportId: page.milRef,

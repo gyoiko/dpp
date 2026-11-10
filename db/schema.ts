@@ -82,6 +82,7 @@ export const dppPages = sqliteTable(
     keDanHang: text("ke_dan_hang").notNull(),
     title: text("title").notNull().default(""),
     intro: text("intro").notNull().default(""),
+    styleName: text("style_name"),
     photoData: text("photo_data"),
     compositionNotes: text("composition_notes"),
     visibleCertifications: text("visible_certifications"),
