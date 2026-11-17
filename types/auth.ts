@@ -13,6 +13,8 @@ export type AuthUser = {
   email: string;
   name: string;
   role: AuthRole;
+  employeeNo: string;
+  canViewAll: boolean;
 };
 
 export type SessionPayload = {
@@ -20,6 +22,8 @@ export type SessionPayload = {
   email: string;
   name: string;
   role: AuthRole;
+  employeeNo: string;
+  canViewAll: boolean;
   tv: number;
   iat: number;
   exp: number;

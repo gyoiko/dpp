@@ -23,7 +23,7 @@ import Toast, { type ToastMessage } from "@/components/Toast";
 import TraceabilityMappingDrawer from "@/components/TraceabilityMappingDrawer";
 import { useDialogA11y } from "@/components/useDialogA11y";
 import type { DppPageStatus } from "@/types/dppPage";
-import type { TraceabilityNodeMapping, TraceabilityRecord } from "@/types/traceability";
+import type { TraceabilityNodeMapping, TraceabilityOption, TraceabilityRecord } from "@/types/traceability";
 import { DPP_STAGE_LABELS, traceabilityNodeMappingKey } from "@/types/traceability";
 
 const RECENT_SEARCHES_KEY = "dpp-cms-recent-milrefs";
@@ -42,8 +42,8 @@ function readRecentSearches(): string[] {
 function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-wider text-[#8a978f]">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-[#173127]">{value || "—"}</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-muted">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-ink">{value || "—"}</p>
     </div>
   );
 }
@@ -51,7 +51,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string | null }
 function MappingBadge({ mapping }: { mapping: TraceabilityNodeMapping }) {
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
-      <span className="rounded-full bg-[#eef4e7] px-2.5 py-1 text-xs font-bold text-[#174f3a]">
+      <span className="rounded-full bg-[#eef4e7] px-2.5 py-1 text-xs font-bold text-forest">
         {DPP_STAGE_LABELS[mapping.stage]}
       </span>
       <span
@@ -82,6 +82,10 @@ export default function SupplyChainMappingPage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [expandedNodeId, setExpandedNodeId] = useState<number | null>(null);
   const [qrOpen, setQrOpen] = useState(false);
+  const [options, setOptions] = useState<TraceabilityOption[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [selectedLine, setSelectedLine] = useState("");
+  const [selectedShipment, setSelectedShipment] = useState("");
 
   const qrDialogRef = useDialogA11y<HTMLDivElement>({ open: qrOpen, onEscape: () => setQrOpen(false) });
 
@@ -182,6 +186,97 @@ export default function SupplyChainMappingPage() {
     }
   }
 
+  function resetResultPanels() {
+    setLastSearched(null);
+    setTraceability(null);
+    setTraceabilityError(null);
+    setNodeMappings({});
+    setMappingOpen(false);
+    setPageSettingsOpen(false);
+    setExpandedNodeId(null);
+    setQrOpen(false);
+  }
+
+  function optionMilRef(option: TraceabilityOption) {
+    return [option.keDanHao, option.keDanHang, option.shipmentSerial].filter(Boolean).join("-");
+  }
+
+  async function loadOptions(millNo: string, preferredLine?: string) {
+    setOptionsLoading(true);
+    setOptions([]);
+    setSelectedLine("");
+    setSelectedShipment("");
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/dpp/traceability-options?millNo=${encodeURIComponent(millNo)}`);
+      const payload = (await response.json()) as { options?: TraceabilityOption[]; error?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Failed to load order lines.");
+      }
+
+      const list = payload.options ?? [];
+
+      if (list.length === 0) {
+        setError(`No traceability record found for Mil No ${millNo}.`);
+        return;
+      }
+
+      setOptions(list);
+
+      const line = preferredLine && list.some((item) => item.keDanHang === preferredLine)
+        ? preferredLine
+        : list[0].keDanHang;
+      const lineOptions = list.filter((item) => item.keDanHang === line);
+      setSelectedLine(line);
+
+      if (lineOptions.length === 1) {
+        setSelectedShipment(lineOptions[0].shipmentSerial ?? "");
+      }
+
+      if (list.length === 1) {
+        const ref = optionMilRef(list[0]);
+        setMilRef(ref);
+        rememberSearch(ref);
+        void loadTraceability(ref);
+      }
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Failed to load order lines.");
+    } finally {
+      setOptionsLoading(false);
+    }
+  }
+
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const query = milRef.trim();
+
+    if (!query) {
+      setError("Please enter a Mil No before searching.");
+      return;
+    }
+
+    resetResultPanels();
+    setError(null);
+
+    const [millNo, orderLine, ...rest] = query.split("-");
+    const shipmentSerial = rest.join("-").trim();
+
+    if (shipmentSerial) {
+      rememberSearch(query);
+      void loadTraceability(query);
+      return;
+    }
+
+    void loadOptions(millNo.trim(), orderLine?.trim());
+  }
+
+  function handleRecentSelect(ref: string) {
+    setMilRef(ref);
+    runSearch(ref);
+  }
+
   function runSearch(value: string) {
     const query = value.trim();
 
@@ -190,22 +285,34 @@ export default function SupplyChainMappingPage() {
       return;
     }
 
+    resetResultPanels();
     setError(null);
+    setOptions([]);
     setLastSearched(query);
-    setTraceability(null);
-    setTraceabilityError(null);
-    setNodeMappings({});
-    setMappingOpen(false);
-    setPageSettingsOpen(false);
-    setExpandedNodeId(null);
-    setQrOpen(false);
     rememberSearch(query);
     void loadTraceability(query);
   }
 
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    runSearch(milRef);
+  function applyLineSelection(line: string) {
+    setSelectedLine(line);
+    const lineOptions = options.filter((option) => option.keDanHang === line);
+    setSelectedShipment(lineOptions.length === 1 ? (lineOptions[0].shipmentSerial ?? "") : "");
+  }
+
+  function loadSelectedOption() {
+    const option = selectedOption;
+
+    if (!option) {
+      setError("Choose an order line and shipment first.");
+      return;
+    }
+
+    const ref = optionMilRef(option);
+    setMilRef(ref);
+    rememberSearch(ref);
+    resetResultPanels();
+    setLastSearched(ref);
+    void loadTraceability(ref);
   }
 
   async function copyPublicUrl() {
@@ -225,22 +332,28 @@ export default function SupplyChainMappingPage() {
       ? publicPath
       : `${window.location.origin}${publicPath}`;
   const milRefSuggestions = Array.from(new Set([...recentSearches, ...knownMilRefs])).slice(0, 20);
+  const orderLines = Array.from(new Set(options.map((option) => option.keDanHang)));
+  const shipmentsForLine = options.filter((option) => option.keDanHang === selectedLine);
+  const selectedOption = options.find(
+    (option) => option.keDanHang === selectedLine && (option.shipmentSerial ?? "") === selectedShipment,
+  );
+  const searchBusy = traceabilityLoading || optionsLoading;
 
   return (
-    <main className="min-h-screen bg-[#e8e8dd] px-4 py-8 text-[#173127] sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-canvas px-4 py-8 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-6xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-widest text-[#7a8c80]">SCM CONSOLE</p>
+            <p className="text-xs font-bold tracking-widest text-muted">SCM CONSOLE</p>
             <h1 className="mt-2 font-[family-name:var(--font-manrope)] text-3xl font-bold leading-tight tracking-[-0.03em]">
               Supply Chain Mapping
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6f7f77]">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
               Pull read-only traceability data from the DPP database by MilRef, then map each node to the DPP journey.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3.5 py-1.5 text-xs font-bold text-[#174f3a]">
+            <div className="flex items-center gap-2 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3.5 py-1.5 text-xs font-bold text-forest">
               <Database size={14} />
               DPP traceability · read-only
             </div>
@@ -248,14 +361,14 @@ export default function SupplyChainMappingPage() {
           </div>
         </header>
 
-        <section className="rounded-3xl border border-[#1731270f] bg-[#fffef9] p-5 shadow-[0_24px_80px_rgba(30,47,39,0.10)] sm:p-6">
+        <section className="rounded-3xl border border-[#1731270f] bg-paper p-5 shadow-[0_24px_80px_rgba(30,47,39,0.10)] sm:p-6">
           <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
             <div className="flex-1">
               <label htmlFor="milref" className="sr-only">
-                MilRef
+                Mil No
               </label>
               <div className="relative">
-                <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#7a8c80]" />
+                <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   id="milref"
                   type="text"
@@ -263,9 +376,9 @@ export default function SupplyChainMappingPage() {
                   value={milRef}
                   onChange={(event) => setMilRef(event.target.value)}
                   onFocus={() => setRecentSearches(readRecentSearches())}
-                  placeholder="Input MilRef, e.g., B02345-1"
+                  placeholder="Mil No, e.g., B09262 (or full MilRef B09262-1-YN2608120032)"
                   autoComplete="off"
-                  className="h-12 w-full rounded-xl border border-[#d8dfcf] bg-white pl-11 pr-4 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
+                  className="h-12 w-full rounded-xl border border-[#d8dfcf] bg-white pl-11 pr-4 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10 sm:text-sm"
                 />
                 <datalist id="milref-suggestions">
                   {milRefSuggestions.map((ref) => (
@@ -276,26 +389,74 @@ export default function SupplyChainMappingPage() {
             </div>
             <button
               type="submit"
-              disabled={traceabilityLoading}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#174f3a] px-6 text-sm font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={searchBusy}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-forest px-6 text-sm font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {traceabilityLoading ? <Loader2 size={17} className="animate-spin" /> : <Search size={17} />}
-              {traceabilityLoading ? "Loading…" : "Search / Load Data"}
+              {searchBusy ? <Loader2 size={17} className="animate-spin" /> : <Search size={17} />}
+              {searchBusy ? "Loading…" : "Search / Load Data"}
             </button>
           </form>
 
+          {options.length > 1 && (
+            <div className="mt-4 grid gap-3 rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted">Order line</span>
+                <select
+                  value={selectedLine}
+                  onChange={(event) => applyLineSelection(event.target.value)}
+                  className="h-11 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10 sm:h-10 sm:text-sm"
+                >
+                  {orderLines.map((line) => (
+                    <option key={line} value={line}>
+                      {line}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted">
+                  Delivery / shipment
+                </span>
+                <select
+                  value={selectedShipment}
+                  onChange={(event) => setSelectedShipment(event.target.value)}
+                  className="h-11 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10 sm:h-10 sm:text-sm"
+                >
+                  {shipmentsForLine.map((option) => (
+                    <option key={`${option.mainId}`} value={option.shipmentSerial ?? ""}>
+                      {option.shipmentSerial ?? "— no shipment serial —"}
+                      {option.buyerPo ? ` · PO ${option.buyerPo}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={loadSelectedOption}
+                disabled={!selectedOption || searchBusy}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-forest px-5 text-xs font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-60 sm:h-10"
+              >
+                Load selected
+              </button>
+            </div>
+          )}
+
+          {options.length > 1 && (
+            <p className="mt-2 text-xs leading-5 text-muted">
+              {options.length} traceability record(s) found for this Mil No. Pick the order line and delivery/shipment
+              to load.
+            </p>
+          )}
+
           {recentSearches.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#8a978f]">Recent</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-muted">Recent</span>
               {recentSearches.map((ref) => (
                 <button
                   key={ref}
                   type="button"
-                  onClick={() => {
-                    setMilRef(ref);
-                    runSearch(ref);
-                  }}
-                  className="rounded-full border border-[#d8dfcf] bg-[#f6f8ef] px-3 py-1 text-xs font-bold text-[#174f3a] transition hover:bg-[#eef1e7]"
+                  onClick={() => handleRecentSelect(ref)}
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#d8dfcf] bg-[#f6f8ef] px-3 py-1 text-xs font-bold text-forest transition hover:bg-[#eef1e7] sm:min-h-0"
                 >
                   {ref}
                 </button>
@@ -311,18 +472,18 @@ export default function SupplyChainMappingPage() {
         </section>
 
         {lastSearched ? (
-          <section className="mt-6 rounded-3xl border border-[#1731270f] bg-[#fffef9] p-5 shadow-[0_24px_80px_rgba(30,47,39,0.10)] sm:p-6">
+          <section className="mt-6 rounded-3xl border border-[#1731270f] bg-paper p-5 shadow-[0_24px_80px_rgba(30,47,39,0.10)] sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#dfe3da] pb-3">
               <div>
                 <h2 className="font-[family-name:var(--font-manrope)] text-sm font-bold">
                   DPP traceability journey
-                  <span className="ml-2 font-normal text-[#7a8c80]">· {lastSearched}</span>
+                  <span className="ml-2 font-normal text-muted">· {lastSearched}</span>
                 </h2>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {pageExists ? (
                   <span
-                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold ${
+                    className={`inline-flex h-11 items-center sm:h-9 gap-1.5 rounded-lg border px-3 text-xs font-bold ${
                       pageStatus === "published"
                         ? "border-[#b9d8c4] bg-[#d9eedf] text-[#155b3d]"
                         : "border-[#e2d3a2] bg-[#f3e8bf] text-[#725d24]"
@@ -336,8 +497,8 @@ export default function SupplyChainMappingPage() {
                     {pageStatus === "published" ? "DPP Published" : "DPP Draft"}
                   </span>
                 ) : (
-                  <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] bg-[#f0f2ea] px-3 text-xs font-bold text-[#7a8c80]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#9aa69f]" />
+                  <span className="inline-flex h-11 items-center sm:h-9 gap-1.5 rounded-lg border border-[#d8dfcf] bg-[#f0f2ea] px-3 text-xs font-bold text-muted">
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted" />
                     No DPP page
                   </span>
                 )}
@@ -347,7 +508,7 @@ export default function SupplyChainMappingPage() {
                     href={publicPath}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#174f3a] px-3 text-xs font-bold text-[#174f3a] transition hover:bg-[#eef1e7]"
+                    className="inline-flex h-11 items-center sm:h-9 gap-1.5 rounded-lg border border-forest px-3 text-xs font-bold text-forest transition hover:bg-[#eef1e7]"
                   >
                     <ExternalLink size={12} /> Open page
                   </a>
@@ -356,7 +517,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => void copyPublicUrl()}
                   disabled={!absolutePublicUrl}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-xs font-bold text-[#173127] transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-11 items-center sm:h-9 gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-xs font-bold text-ink transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Copy size={12} /> Copy URL
                 </button>
@@ -364,7 +525,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => setQrOpen(true)}
                   disabled={!absolutePublicUrl}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-xs font-bold text-[#173127] transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-11 items-center sm:h-9 gap-1.5 rounded-lg border border-[#d8dfcf] px-3 text-xs font-bold text-ink transition hover:bg-[#f6f8ef] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <QrCode size={12} /> QR
                 </button>
@@ -372,7 +533,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => setPageSettingsOpen(true)}
                   disabled={!lastSearched}
-                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#174f3a] px-4 text-xs font-bold text-[#174f3a] transition hover:bg-[#eef1e7] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-11 items-center sm:h-9 gap-2 rounded-lg border border-forest px-4 text-xs font-bold text-forest transition hover:bg-[#eef1e7] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Page settings
                 </button>
@@ -380,7 +541,7 @@ export default function SupplyChainMappingPage() {
                   type="button"
                   onClick={() => setMappingOpen(true)}
                   disabled={!traceability || traceability.nodes.length === 0}
-                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs font-bold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-11 items-center sm:h-9 gap-2 rounded-lg bg-forest px-4 text-xs font-bold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Map DPP journey
                 </button>
@@ -420,18 +581,18 @@ export default function SupplyChainMappingPage() {
                 <button
                   type="button"
                   onClick={() => lastSearched && void loadTraceability(lastSearched)}
-                  className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#8a4b3a] px-3 text-[11px] sm:text-[10px] font-extrabold text-[#8a4b3a] transition hover:bg-[#efd2c8]"
+                  className="mt-2 inline-flex h-11 items-center sm:h-8 gap-1.5 rounded-lg border border-[#8a4b3a] px-3 text-[11px] sm:text-[10px] font-extrabold text-[#8a4b3a] transition hover:bg-[#efd2c8]"
                 >
                   <RefreshCw size={12} /> Retry
                 </button>
               </div>
             ) : !traceability ? (
               <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eef1e7] text-[#174f3a]">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eef1e7] text-forest">
                   <SearchX size={22} />
                 </span>
-                <p className="text-sm font-semibold text-[#173127]">No DPP traceability record found for this MilRef</p>
-                <p className="max-w-md text-xs leading-5 text-[#7a8c80]">
+                <p className="text-sm font-semibold text-ink">No DPP traceability record found for this MilRef</p>
+                <p className="max-w-md text-xs leading-5 text-muted">
                   Make sure the MilRef exists in T_溯源_主表 (tesdatt5). Publishing is disabled until traceability data is
                   available.
                 </p>
@@ -440,29 +601,32 @@ export default function SupplyChainMappingPage() {
               <>
                 <div className="mt-4 grid grid-cols-2 gap-4 rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-4 sm:grid-cols-3">
                   <ReadOnlyField label="Mill No" value={traceability.header?.millNo ?? null} />
+                  <ReadOnlyField label="Order line" value={traceability.header?.orderLine ?? null} />
                   <ReadOnlyField label="Buyer" value={traceability.header?.buyer ?? null} />
                   <ReadOnlyField label="GTI PO" value={traceability.header?.buyerPo ?? null} />
                   <ReadOnlyField label="Style" value={traceability.header?.style ?? null} />
                   <ReadOnlyField label="Scope" value={traceability.header?.scope ?? null} />
                   <ReadOnlyField label="Status" value={traceability.header?.status ?? null} />
+                  <ReadOnlyField label="Customer article" value={traceability.header?.customerArticle ?? null} />
+                  <ReadOnlyField label="Shipment serial" value={traceability.header?.shipmentSerial ?? null} />
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {traceability.fibres.length > 0 ? (
                     traceability.fibres.map((fibre, index) => (
-                      <span key={`${fibre.fibreType ?? "fibre"}-${index}`} className="rounded-full bg-[#eef4e7] px-2.5 py-1 text-[11px] sm:text-[10px] font-extrabold text-[#174f3a]">
+                      <span key={`${fibre.fibreType ?? "fibre"}-${index}`} className="rounded-full bg-[#eef4e7] px-2.5 py-1 text-[11px] sm:text-[10px] font-extrabold text-forest">
                         {fibre.fibreType ?? "Fibre"} {fibre.percentage === null ? "" : `${fibre.percentage}%`}
                         {fibre.sourceLot ? ` · Yarn Count ${fibre.sourceLot}` : ""}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-[#7a8c80]">No fibre composition recorded.</span>
+                    <span className="text-xs text-muted">No fibre composition recorded.</span>
                   )}
                 </div>
 
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#7a8c80]">Journey nodes</h3>
-                  <span className="text-xs font-semibold text-[#7a8c80]">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Journey nodes</h3>
+                  <span className="text-xs font-semibold text-muted">
                     {traceability.nodes.length} node{traceability.nodes.length === 1 ? "" : "s"} · {traceability.documents.length} document
                     {traceability.documents.length === 1 ? "" : "s"}
                   </span>
@@ -470,7 +634,7 @@ export default function SupplyChainMappingPage() {
 
                 <div className="mt-2 grid gap-2">
                   {traceability.nodes.length === 0 ? (
-                    <p className="text-sm text-[#7a8c80]">No journey nodes recorded for this MilRef.</p>
+                    <p className="text-sm text-muted">No journey nodes recorded for this MilRef.</p>
                   ) : (
                     traceability.nodes.map((node) => {
                       const mapping = nodeMappings[traceabilityNodeMappingKey(traceability.keDanHao, traceability.keDanHang, node.id)];
@@ -482,18 +646,18 @@ export default function SupplyChainMappingPage() {
                       return (
                         <article key={node.id} className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-[#e1e5db] bg-white p-4">
                           <div className="min-w-0">
-                            <p className="text-xs font-bold uppercase tracking-wider text-[#7a8c80]">
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted">
                               #{node.seqNo ?? "—"} · {node.role ?? "Unnamed role"}
                               {node.roleDescription ? ` · ${node.roleDescription}` : ""}
                             </p>
-                            <p className="mt-1 truncate text-sm font-bold text-[#173127]">{node.supplier ?? "—"}</p>
-                            <p className="mt-0.5 text-xs text-[#6f7f77]">
+                            <p className="mt-1 truncate text-sm font-bold text-ink">{node.supplier ?? "—"}</p>
+                            <p className="mt-0.5 text-xs text-muted">
                               {[node.country, node.branchLabel ? `Consignee ${node.branchLabel}` : null]
                                 .filter(Boolean)
                                 .join(" · ") || "—"}
                               {node.directSupplier === null ? "" : node.directSupplier ? " · Direct" : " · Indirect"}
                             </p>
-                            <p className="mt-1 text-xs text-[#7a8c80]">
+                            <p className="mt-1 text-xs text-muted">
                               Quantity RAW Material {node.inputLot ?? "—"} → Quantity Finish Good {node.outputLot ?? "—"}
                               {node.quantity === null
                                 ? ""
@@ -501,7 +665,7 @@ export default function SupplyChainMappingPage() {
                             </p>
                           </div>
                           <div className="text-right">
-                            {mapping ? <MappingBadge mapping={mapping} /> : <span className="text-xs font-semibold text-[#9aa69f]">Not mapped</span>}
+                            {mapping ? <MappingBadge mapping={mapping} /> : <span className="text-xs font-semibold text-muted">Not mapped</span>}
                           </div>
 
                           <div className="w-full border-t border-[#eef0e8] pt-2">
@@ -510,7 +674,7 @@ export default function SupplyChainMappingPage() {
                                 type="button"
                                 onClick={() => setExpandedNodeId(documentsOpen ? null : node.id)}
                                 aria-expanded={documentsOpen}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#dfe3da] px-2.5 py-1 text-xs font-bold text-[#174f3a] transition hover:bg-[#f6f8ef]"
+                                className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#dfe3da] px-2.5 py-1 text-xs font-bold text-forest transition hover:bg-[#f6f8ef] sm:min-h-0"
                               >
                                 <FileText size={12} />
                                 {documentCount} document{documentCount === 1 ? "" : "s"}
@@ -535,7 +699,7 @@ export default function SupplyChainMappingPage() {
                             {documentsOpen && (
                               <div className="mt-2 space-y-1">
                                 {nodeDocuments.length === 0 ? (
-                                  <p className="rounded-lg bg-[#f8f9f3] px-2.5 py-2 text-[11px] sm:text-[10px] text-[#7a8c80]">
+                                  <p className="rounded-lg bg-[#f8f9f3] px-2.5 py-2 text-[11px] sm:text-[10px] text-muted">
                                     No documents attached to this node.
                                   </p>
                                 ) : (
@@ -545,11 +709,11 @@ export default function SupplyChainMappingPage() {
                                       className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#f8f9f3] px-3 py-2"
                                     >
                                       <div className="min-w-0">
-                                        <p className="text-xs font-bold text-[#173127]">
+                                        <p className="text-xs font-bold text-ink">
                                           {document.documentType ?? "Document"}
                                           {document.typeDescription ? ` · ${document.typeDescription}` : ""}
                                         </p>
-                                        <p className="truncate text-xs text-[#7a8c80]">{document.fileName ?? "—"}</p>
+                                        <p className="truncate text-xs text-muted">{document.fileName ?? "—"}</p>
                                       </div>
                                       <span
                                         className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
@@ -577,14 +741,16 @@ export default function SupplyChainMappingPage() {
             )}
           </section>
         ) : (
-          <section className="mt-6 rounded-3xl border border-[#1731270f] bg-[#fffef9] p-5 shadow-[0_24px_80px_rgba(30,47,39,0.10)] sm:p-6">
+          <section className="mt-6 rounded-3xl border border-[#1731270f] bg-paper p-5 shadow-[0_24px_80px_rgba(30,47,39,0.10)] sm:p-6">
             <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eef1e7] text-[#174f3a]">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eef1e7] text-forest">
                 <SearchX size={22} />
               </span>
-              <p className="text-sm font-semibold text-[#173127]">Search a MilRef to load the DPP traceability journey</p>
-              <p className="max-w-md text-xs leading-5 text-[#7a8c80]">
-                Example: B02345-1. The result shows the traceability journey from T_溯源_* and the DPP stage mapping.
+              <p className="text-sm font-semibold text-ink">Search a Mil No to load the DPP traceability journey</p>
+              <p className="max-w-md text-xs leading-5 text-muted">
+                Example: B09262. If the Mil No has more than one order line or shipment, pick them from the
+                dropdowns before loading. The result shows the traceability journey from T_溯源_* and the DPP stage
+                mapping.
               </p>
             </div>
           </section>
@@ -637,12 +803,12 @@ export default function SupplyChainMappingPage() {
             role="dialog"
             aria-modal="true"
             aria-label="Public page QR code"
-            className="relative w-full max-w-sm rounded-2xl border border-[#e2e7d8] bg-[#fffef9] p-5 shadow-[0_24px_70px_rgba(23,49,39,0.28)]"
+            className="relative w-full max-w-sm rounded-2xl border border-[#e2e7d8] bg-paper p-5 shadow-[0_24px_70px_rgba(23,49,39,0.28)]"
           >
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-[#7a8c80]">PUBLIC PAGE</p>
-                <h2 className="mt-1 font-[family-name:var(--font-manrope)] text-lg font-bold tracking-[-0.02em] text-[#173127]">
+                <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-muted">PUBLIC PAGE</p>
+                <h2 className="mt-1 font-[family-name:var(--font-manrope)] text-lg font-bold tracking-[-0.02em] text-ink">
                   {lastSearched}
                 </h2>
               </div>
@@ -650,7 +816,7 @@ export default function SupplyChainMappingPage() {
                 type="button"
                 onClick={() => setQrOpen(false)}
                 aria-label="Close QR code"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#dfe3da] text-[#174f3a] transition hover:bg-[#eef1e7]"
+                className="flex h-11 w-11 shrink-0 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-[#dfe3da] text-forest transition hover:bg-[#eef1e7]"
               >
                 <X size={16} />
               </button>
@@ -660,8 +826,8 @@ export default function SupplyChainMappingPage() {
               fileName={lastSearched}
               note={
                 pageStatus === "published"
-                  ? "QR ini mengarah ke halaman publik yang sudah live."
-                  : "Publish halaman ini agar QR dapat dibuka."
+                  ? "This QR code points to the live public page."
+                  : "Publish this page to make the QR code work."
               }
             />
           </div>

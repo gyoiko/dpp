@@ -16,12 +16,14 @@
     "cms:example:supply-chain": "tsx server/examples/supplyChainReadOnly.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate-sqlite.mjs",
+    "db:migrate:d1": "node scripts/migrate-d1-local.mjs",
     "dpp:import": "node scripts/import-dpp.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
     "d3-geo": "^3.1.1",
+    "des.js": "^1.1.0",
     "dotenv": "^18.0.9",
     "drizzle-orm": "0.45.2",
     "express": "^5.3.0",

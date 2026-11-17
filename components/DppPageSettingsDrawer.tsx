@@ -15,7 +15,7 @@ import type { DppPage, DppPageStatus } from "@/types/dppPage";
 import type { TraceabilityFibre, TraceabilityRecord } from "@/types/traceability";
 
 const fieldClass =
-  "h-10 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10";
+  "h-11 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10 sm:h-10 sm:text-sm";
 const MAX_PHOTO_DATA_LENGTH = 1_500_000;
 
 async function compressPhoto(file: File): Promise<string> {
@@ -29,7 +29,7 @@ async function compressPhoto(file: File): Promise<string> {
 
   if (!context) {
     bitmap.close();
-    throw new Error("Browser tidak mendukung kompresi foto.");
+    throw new Error("This browser cannot compress the photo.");
   }
 
   context.fillStyle = "#ffffff";
@@ -44,7 +44,7 @@ async function compressPhoto(file: File): Promise<string> {
   }
 
   if (dataUrl.length > MAX_PHOTO_DATA_LENGTH) {
-    throw new Error("Foto masih terlalu besar setelah dikompres. Pilih foto lain.");
+    throw new Error("The photo is still too large after compression. Choose another photo.");
   }
 
   return dataUrl;
@@ -102,7 +102,7 @@ export default function DppPageSettingsDrawer({
         const payload = (await response.json()) as { page?: DppPage | null; error?: string };
 
         if (!response.ok) {
-          throw new Error(payload.error ?? "Gagal memuat halaman DPP.");
+          throw new Error(payload.error ?? "Failed to load the DPP page.");
         }
 
         let record: TraceabilityRecord | null = null;
@@ -145,7 +145,7 @@ export default function DppPageSettingsDrawer({
         setDirty(false);
       } catch (loadError) {
         if (active) {
-          setError(loadError instanceof Error ? loadError.message : "Gagal memuat halaman DPP.");
+          setError(loadError instanceof Error ? loadError.message : "Failed to load the DPP page.");
         }
       } finally {
         if (active) {
@@ -184,14 +184,14 @@ export default function DppPageSettingsDrawer({
       const payload = (await response.json()) as { page?: DppPage; error?: string };
 
       if (!response.ok || !payload.page) {
-        throw new Error(payload.error ?? "Gagal menyimpan halaman DPP.");
+        throw new Error(payload.error ?? "Failed to save the DPP page.");
       }
 
       setSavedPage(payload.page);
       setDirty(false);
       onNotify(`Page settings saved (${payload.page.status}).`);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Gagal menyimpan halaman DPP.");
+      setError(saveError instanceof Error ? saveError.message : "Failed to save the DPP page.");
     } finally {
       setSaving(false);
     }
@@ -213,7 +213,7 @@ export default function DppPageSettingsDrawer({
     }
 
     if (!file.type.startsWith("image/")) {
-      setError("Pilih file gambar (JPG, PNG, atau WebP).");
+      setError("Choose an image file (JPG, PNG, or WebP).");
       return;
     }
 
@@ -224,7 +224,7 @@ export default function DppPageSettingsDrawer({
       setPhotoData(await compressPhoto(file));
       setDirty(true);
     } catch (photoError) {
-      setError(photoError instanceof Error ? photoError.message : "Gagal memproses foto.");
+      setError(photoError instanceof Error ? photoError.message : "Failed to process the photo.");
     } finally {
       setPhotoLoading(false);
     }
@@ -253,21 +253,21 @@ export default function DppPageSettingsDrawer({
         role="dialog"
         aria-modal="true"
         aria-labelledby="page-settings-title"
-        className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col overflow-y-auto bg-[#fffef9] shadow-[0_0_60px_rgba(23,49,39,0.25)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col overflow-y-auto bg-paper shadow-[0_0_60px_rgba(23,49,39,0.25)]"
       >
         <header className="flex items-start justify-between gap-4 border-b border-[#dfe3da] px-6 py-5">
           <div>
-            <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-[#7a8c80]">DPP PAGE SETTINGS</p>
+            <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-muted">DPP PAGE SETTINGS</p>
             <h2 id="page-settings-title" className="mt-1 font-[family-name:var(--font-manrope)] text-xl font-bold tracking-[-0.02em]">
               {milRef}
             </h2>
-            <p className="mt-1 text-xs text-[#7a8c80]">Atur halaman publik DPP untuk MilRef ini.</p>
+            <p className="mt-1 text-xs text-muted">Set up the public DPP page for this MilRef.</p>
           </div>
           <button
             type="button"
             onClick={requestClose}
             aria-label="Close"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#dfe3da] text-[#174f3a] transition hover:bg-[#eef1e7]"
+            className="flex h-11 w-11 shrink-0 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-[#dfe3da] text-forest transition hover:bg-[#eef1e7]"
           >
             <X size={16} />
           </button>
@@ -275,14 +275,14 @@ export default function DppPageSettingsDrawer({
 
         <div className="flex-1 space-y-5 px-6 py-5">
           {loading ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-[#6f7f77]">
-              <Loader2 size={26} className="animate-spin text-[#174f3a]" />
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted">
+              <Loader2 size={26} className="animate-spin text-forest" />
               <p className="text-sm font-semibold">Loading page settings…</p>
             </div>
           ) : (
             <>
               <div>
-                <label htmlFor="page-title" className="mb-1.5 block text-xs font-bold text-[#173127]">
+                <label htmlFor="page-title" className="mb-1.5 block text-xs font-bold text-ink">
                   Page title
                 </label>
                 <input
@@ -298,7 +298,7 @@ export default function DppPageSettingsDrawer({
               </div>
 
               <div>
-                <label htmlFor="page-intro" className="mb-1.5 block text-xs font-bold text-[#173127]">
+                <label htmlFor="page-intro" className="mb-1.5 block text-xs font-bold text-ink">
                   Intro
                 </label>
                 <textarea
@@ -310,12 +310,12 @@ export default function DppPageSettingsDrawer({
                   }}
                   rows={4}
                   placeholder="Short introduction shown on the public DPP page"
-                  className="w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
+                  className="w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10 sm:text-sm"
                 />
               </div>
 
               <div>
-                <span className="mb-1.5 block text-xs font-bold text-[#173127]">Product photo</span>
+                <span className="mb-1.5 block text-xs font-bold text-ink">Product photo</span>
                 <div className="rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-3">
                   {photoData ? (
                     <img
@@ -324,14 +324,14 @@ export default function DppPageSettingsDrawer({
                       className="h-44 w-full rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-[#c7d0bd] text-xs font-semibold text-[#7a8c80]">
+                    <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-[#c7d0bd] text-xs font-semibold text-muted">
                       No product photo yet
                     </div>
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <label
                       htmlFor="product-photo"
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[#174f3a] px-3 text-xs sm:text-[11px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] ${
+                      className={`inline-flex h-11 cursor-pointer sm:h-9 items-center gap-2 rounded-lg border border-forest px-3 text-xs sm:text-[11px] font-extrabold text-forest transition hover:bg-[#eef1e7] ${
                         photoLoading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -352,20 +352,20 @@ export default function DppPageSettingsDrawer({
                           setPhotoData(null);
                           setDirty(true);
                         }}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e8c5ad] px-3 text-xs sm:text-[11px] font-extrabold text-[#8a4b3a] transition hover:bg-[#f4ded6]"
+                        className="inline-flex h-11 items-center sm:h-9 gap-1.5 rounded-lg border border-[#e8c5ad] px-3 text-xs sm:text-[11px] font-extrabold text-[#8a4b3a] transition hover:bg-[#f4ded6]"
                       >
                         <Trash2 size={13} /> Remove
                       </button>
                     )}
                   </div>
-                  <p className="mt-2 text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
+                  <p className="mt-2 text-[11px] sm:text-[10px] leading-4 text-muted">
                     JPG, PNG, or WebP. The image is resized and compressed automatically.
                   </p>
                 </div>
               </div>
 
               <div>
-                <label htmlFor="style-name" className="mb-1.5 block text-xs font-bold text-[#173127]">
+                <label htmlFor="style-name" className="mb-1.5 block text-xs font-bold text-ink">
                   Style name
                 </label>
                 <input
@@ -378,32 +378,32 @@ export default function DppPageSettingsDrawer({
                   placeholder={defaultTitle}
                   className={fieldClass}
                 />
-                <p className="mt-1.5 text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
-                  Judul yang tampil di tab Product halaman publik DPP. Kosongkan untuk memakai style dari ERP.
+                <p className="mt-1.5 text-[11px] sm:text-[10px] leading-4 text-muted">
+                  Title shown on the Product tab of the public DPP page. Leave blank to use the ERP style.
                 </p>
               </div>
 
               <div>
                 <div className="mb-1.5 flex items-baseline justify-between gap-3">
-                  <span className="text-xs font-bold text-[#173127]">Material composition</span>
+                  <span className="text-xs font-bold text-ink">Material composition</span>
                   {fibres.length > 0 && (
-                    <span className="text-[11px] sm:text-[10px] font-bold text-[#7a8c80]">
+                    <span className="text-[11px] sm:text-[10px] font-bold text-muted">
                       {fibres.length} item{fibres.length === 1 ? "" : "s"} · {compositionTotal}%
                     </span>
                   )}
                 </div>
                 {fibres.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-[#d8dfcf] px-4 py-3 text-xs text-[#7a8c80]">
+                  <div className="rounded-xl border border-dashed border-[#d8dfcf] px-4 py-3 text-xs text-muted">
                     No fibre composition data from the ERP for this MilRef.
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
-                      Setiap baris fibre di ERP otomatis muncul di sini. Tambah baris di ERP untuk menambah komposisi.
+                    <p className="text-[11px] sm:text-[10px] leading-4 text-muted">
+                      Each fibre row in ERP appears here automatically. Add rows in ERP to extend the composition.
                     </p>
                     {compositionTotal !== 100 && (
                       <div className="rounded-lg border border-[#e8d9b0] bg-[#faf3d8] px-3 py-2 text-[11px] sm:text-[10px] font-medium text-[#6b5722]">
-                        Total komposisi {compositionTotal}% — periksa kembali data fibre di ERP.
+                        Composition totals {compositionTotal}% — check the fibre data in ERP.
                       </div>
                     )}
                     {fibres.map((fibre, index) => {
@@ -412,11 +412,11 @@ export default function DppPageSettingsDrawer({
                       return (
                         <div key={key} className="rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-3">
                           <div className="flex items-baseline justify-between gap-3">
-                            <p className="text-xs font-bold text-[#173127]">{fibre.fibreType ?? "Fibre"}</p>
-                            <p className="text-xs font-extrabold text-[#174f3a]">{fibre.percentage ?? 0}%</p>
+                            <p className="text-xs font-bold text-ink">{fibre.fibreType ?? "Fibre"}</p>
+                            <p className="text-xs font-extrabold text-forest">{fibre.percentage ?? 0}%</p>
                           </div>
                           {fibre.sourceLot ? (
-                            <p className="mt-0.5 text-[11px] sm:text-[10px] text-[#7a8c80]">Yarn Count {fibre.sourceLot}</p>
+                            <p className="mt-0.5 text-[11px] sm:text-[10px] text-muted">Yarn Count {fibre.sourceLot}</p>
                           ) : null}
                           <textarea
                             value={compositionNotes[key] ?? ""}
@@ -427,7 +427,7 @@ export default function DppPageSettingsDrawer({
                             }}
                             rows={2}
                             placeholder="Describe this material (origin, process, certification...)"
-                            className="mt-2 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-xs font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
+                            className="mt-2 w-full rounded-lg border border-[#d8dfcf] bg-white px-3 py-2 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10 sm:text-xs"
                           />
                         </div>
                       );
@@ -438,9 +438,9 @@ export default function DppPageSettingsDrawer({
 
               <div>
                 <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="text-xs font-bold text-[#173127]">Certifications</span>
+                  <span className="text-xs font-bold text-ink">Certifications</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] sm:text-[10px] font-bold text-[#7a8c80]">
+                    <span className="text-[11px] sm:text-[10px] font-bold text-muted">
                       {visibleCertifications.length} of {DPP_CERTIFICATIONS.length} shown
                     </span>
                     <button
@@ -449,7 +449,7 @@ export default function DppPageSettingsDrawer({
                         setVisibleCertifications(DPP_CERTIFICATION_IDS);
                         setDirty(true);
                       }}
-                      className="text-[11px] sm:text-[10px] font-extrabold text-[#174f3a] underline-offset-2 hover:underline"
+                      className="text-[11px] sm:text-[10px] font-extrabold text-forest underline-offset-2 hover:underline"
                     >
                       Select all
                     </button>
@@ -465,8 +465,8 @@ export default function DppPageSettingsDrawer({
                     </button>
                   </div>
                 </div>
-                <p className="mb-2 text-[11px] sm:text-[10px] leading-4 text-[#7a8c80]">
-                  Pilih sertifikasi yang ditampilkan pada tab Badges di halaman publik DPP.
+                <p className="mb-2 text-[11px] sm:text-[10px] leading-4 text-muted">
+                  Choose the certifications shown on the Badges tab of the public DPP page.
                 </p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {DPP_CERTIFICATIONS.map((certification) => {
@@ -477,7 +477,7 @@ export default function DppPageSettingsDrawer({
                         key={certification.id}
                         className={`flex cursor-pointer items-center gap-2 rounded-xl border p-2 transition ${
                           checked
-                            ? "border-[#174f3a] bg-[#eef4e7]"
+                            ? "border-forest bg-[#eef4e7]"
                             : "border-[#e2e7d8] bg-white hover:bg-[#f6f8ef]"
                         }`}
                       >
@@ -494,7 +494,7 @@ export default function DppPageSettingsDrawer({
                             className="max-h-full max-w-full object-contain"
                           />
                         </span>
-                        <span className="min-w-0 text-[11px] sm:text-[10px] font-semibold leading-4 text-[#173127]">
+                        <span className="min-w-0 text-[11px] sm:text-[10px] font-semibold leading-4 text-ink">
                           {certification.label}
                         </span>
                       </label>
@@ -504,7 +504,7 @@ export default function DppPageSettingsDrawer({
               </div>
 
               <div>
-                <label htmlFor="page-status" className="mb-1.5 block text-xs font-bold text-[#173127]">
+                <label htmlFor="page-status" className="mb-1.5 block text-xs font-bold text-ink">
                   Status
                 </label>
                 <select
@@ -544,19 +544,19 @@ export default function DppPageSettingsDrawer({
               )}
 
               <div className="rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-4">
-                <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#8a978f]">Public URL</p>
-                <p className="mt-1 break-all text-xs font-semibold text-[#174f3a]">{publicUrl}</p>
+                <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-muted">Public URL</p>
+                <p className="mt-1 break-all text-xs font-semibold text-forest">{publicUrl}</p>
                 {savedPage?.status === "published" ? (
                   <a
                     href={publicUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-[11px] font-extrabold text-[#174f3a] underline-offset-2 hover:underline"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-[11px] font-extrabold text-forest underline-offset-2 hover:underline"
                   >
                     Open public page <ExternalLink size={13} />
                   </a>
                 ) : (
-                  <p className="mt-2 text-[11px] sm:text-[10px] text-[#7a8c80]">Publish the page to make this URL live.</p>
+                  <p className="mt-2 text-[11px] sm:text-[10px] text-muted">Publish the page to make this URL live.</p>
                 )}
               </div>
 
@@ -565,8 +565,8 @@ export default function DppPageSettingsDrawer({
                 fileName={milRef}
                 note={
                   savedPage?.status === "published"
-                    ? "QR ini mengarah ke halaman publik yang sudah live."
-                    : "Publish halaman ini agar QR dapat dibuka."
+                    ? "This QR code points to the live public page."
+                    : "Publish this page to make the QR code work."
                 }
               />
 
@@ -579,11 +579,11 @@ export default function DppPageSettingsDrawer({
           )}
         </div>
 
-        <footer className="sticky bottom-0 flex items-center justify-end gap-2 border-t border-[#dfe3da] bg-[#fffef9] px-6 py-4">
+        <footer className="sticky bottom-0 flex items-center justify-end gap-2 border-t border-[#dfe3da] bg-paper px-6 py-4">
           <button
             type="button"
             onClick={requestClose}
-            className="h-10 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-[#173127] transition hover:bg-[#f6f8ef]"
+            className="h-11 rounded-lg sm:h-10 border border-[#d8dfcf] px-4 text-xs font-extrabold text-ink transition hover:bg-[#f6f8ef]"
           >
             Close
           </button>
@@ -591,7 +591,7 @@ export default function DppPageSettingsDrawer({
             type="button"
             onClick={save}
             disabled={saving || loading || photoLoading || publishBlocked}
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d] disabled:opacity-60"
+            className="inline-flex h-11 items-center sm:h-10 gap-2 rounded-lg bg-forest px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d] disabled:opacity-60"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             Save page
@@ -602,7 +602,7 @@ export default function DppPageSettingsDrawer({
       <ConfirmDialog
         open={confirmClose}
         title="Discard unsaved changes?"
-        message="Perubahan pada page settings belum disimpan. Menutup panel akan membuang semua perubahan."
+        message="Page settings changes are not saved. Closing the panel will discard them."
         confirmLabel="Discard changes"
         cancelLabel="Keep editing"
         onConfirm={() => {

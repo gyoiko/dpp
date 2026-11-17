@@ -31,11 +31,20 @@ This starter does not use `wrangler.jsonc`.
 
 The CMS and write APIs are protected by a JWT session cookie (`dpp_session`, `HttpOnly`, `SameSite=Lax`). `POST /api/auth/login` issues the token; both the Next route handlers and the Express API verify it locally with `AUTH_SECRET`, so no shared session store is needed.
 
+Credentials are owned by GTI Soft: the login form sends the GTI username/NIK, the Express API (`POST /api/auth/login`) looks the account up in `LFSOFT_IDN.dbo.V_系统平台_用户表`, checks `激活状态`, and compares the password against the stored DES value (`cwDES1`). The Next login route then signs the session JWT.
+
+Login is restricted to GTI Soft accounts that either have access to menu `3001596` (`溯源文件查询`, `pkZhengShu.bpl` FormIndex 3) through their user group, or are `是否管理员 = 1`. GTI accounts with `是否管理员 = 1` get the `admin` role; all others get `scm`.
+
+After login, MD users only see projects where `T_溯源_主表.跟单员工号` matches their GTI employee number. Administrators (`是否管理员 = 1`) and members of the groups listed in `GTI_VIEW_ALL_GROUPS` (default `1`, 系统管理员) can see every project. The public passport page (`/dpp/:milRef`) remains public.
+
+- Set `GTI_DB_NAME` to the GTI Soft database name (default `LFSOFT_IDN`).
+- `GTI_VIEW_ALL_GROUPS` is a comma-separated list of GTI user-group codes that can see all projects. Default `1` (系统管理员); add `221` for Manager CI if needed.
+- `GTI_VIEW_ALL_EMPLOYEES` is a comma-separated list of GTI employee numbers (NIK) that can see all projects regardless of group. Current hardcoded exception: `26005878`.
 - Public: `/`, `/login`, `/dpp/:milRef`, `GET /api/dpp/traceability/:milRef`, `GET /api/health`.
 - Requires login: `/cms/*`, `/api/dpp/pages`, `/api/dpp/node-mappings`, `GET /api/dpp/supply-chain/:milRef`.
-- The first admin is created on first login while the users table is empty, using `AUTH_BOOTSTRAP_EMAIL` and `AUTH_BOOTSTRAP_PASSWORD`. Remove those two variables after the first login.
 - `reviewedBy` for node mappings comes from the session, never from the request body.
 - Run `npm run db:migrate` after adding migrations. Set `AUTH_COOKIE_SECURE=true` once the site is served over HTTPS.
+- Dev uses the local Cloudflare D1 binding in `.wrangler`, which is migrated separately: run `npm run db:migrate:d1` after adding migrations (or when DevTools shows `table ... has no column named ...`).
 
 ## Deployment (Windows / on-prem)
 

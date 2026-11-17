@@ -49,10 +49,10 @@ export default function DppQrCode({
     <div className="rounded-xl border border-[#e2e7d8] bg-[#f6f8ef] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#8a978f]">QR code</p>
-          <p className="mt-1 text-xs font-semibold text-[#173127]">Scan to open the public page</p>
+          <p className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-muted">QR code</p>
+          <p className="mt-1 text-xs font-semibold text-ink">Scan to open the public page</p>
         </div>
-        <QrCode size={16} className="shrink-0 text-[#174f3a]" />
+        <QrCode size={16} className="shrink-0 text-forest" />
       </div>
 
       <div className="mt-3 flex justify-center rounded-lg border border-[#e2e7d8] bg-white p-3">
@@ -83,15 +83,15 @@ export default function DppQrCode({
         )}
       </div>
 
-      <p className="mt-2 break-all text-center text-[10px] text-[#7a8c80]">{value || "Public URL not available yet."}</p>
-      <p className="mt-1 text-center text-[10px] leading-4 text-[#7a8c80]">{note}</p>
+      <p className="mt-2 break-all text-center text-[10px] text-muted">{value || "Public URL not available yet."}</p>
+      <p className="mt-1 text-center text-[10px] leading-4 text-muted">{note}</p>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={handleCopy}
           disabled={!value}
-          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#174f3a] px-3 text-[11px] font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 items-center sm:h-9 justify-center gap-1.5 rounded-lg border border-forest px-3 text-[11px] font-extrabold text-forest transition hover:bg-[#eef1e7] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {copied ? <Check size={13} /> : <Copy size={13} />}
           {copied ? "Copied" : "Copy link"}
@@ -100,7 +100,7 @@ export default function DppQrCode({
           type="button"
           onClick={handleDownload}
           disabled={!value}
-          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-[#174f3a] px-3 text-[11px] font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 items-center sm:h-9 justify-center gap-1.5 rounded-lg bg-forest px-3 text-[11px] font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download size={13} />
           Download PNG

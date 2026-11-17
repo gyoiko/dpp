@@ -10,11 +10,11 @@ export const dynamic = "force-dynamic";
 
 function Unavailable({ title, message }: { title: string; message: string }) {
   return (
-    <main className="grid min-h-screen place-items-center bg-[#e8e8dd] px-4 py-10">
-      <section className="w-full max-w-lg rounded-3xl border border-[#1731270f] bg-[#fffef9] p-8 text-center shadow-[0_24px_80px_rgba(30,47,39,0.12)]">
-        <p className="text-[10px] font-extrabold tracking-[0.18em] text-[#7a8c80]">DIGITAL PRODUCT PASSPORT</p>
+    <main className="grid min-h-screen place-items-center bg-canvas px-4 py-10">
+      <section className="w-full max-w-lg rounded-3xl border border-[#1731270f] bg-paper p-8 text-center shadow-[0_24px_80px_rgba(30,47,39,0.12)]">
+        <p className="text-[10px] font-extrabold tracking-[0.18em] text-muted">DIGITAL PRODUCT PASSPORT</p>
         <h1 className="mt-3 font-[family-name:var(--font-manrope)] text-2xl font-bold tracking-[-0.02em]">{title}</h1>
-        <p className="mt-3 text-sm leading-6 text-[#6f7f77]">{message}</p>
+        <p className="mt-3 text-sm leading-6 text-muted">{message}</p>
       </section>
     </main>
   );

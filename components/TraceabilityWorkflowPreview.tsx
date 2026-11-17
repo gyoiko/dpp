@@ -281,7 +281,7 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
       link.download = `${exportBase}-workflow.png`;
       link.click();
     } catch {
-      setExportError("Gagal membuat PNG. Coba lagi.");
+      setExportError("Failed to create the PNG. Try again.");
     } finally {
       setExporting(null);
     }
@@ -311,7 +311,7 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
       pdf.addImage(dataUrl, "PNG", 0, 0, image.width, image.height);
       pdf.save(`${exportBase}-workflow.pdf`);
     } catch {
-      setExportError("Gagal membuat PDF. Coba lagi.");
+      setExportError("Failed to create the PDF. Try again.");
     } finally {
       setExporting(null);
     }
@@ -326,35 +326,35 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
       aria-label="Workflow preview"
       className="fixed inset-0 z-[60] flex flex-col bg-[#f4f3ec]"
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d8d5c5] bg-[#fffef9] px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d8d5c5] bg-paper px-6 py-4">
         <div>
-          <p className="text-[10px] font-extrabold tracking-[0.18em] text-[#7a8c80]">WORKFLOW PREVIEW</p>
+          <p className="text-[10px] font-extrabold tracking-[0.18em] text-muted">WORKFLOW PREVIEW</p>
           <h2 className="mt-1 font-[family-name:var(--font-manrope)] text-xl font-bold tracking-[-0.02em]">
             {record.header?.style || record.milRef} · {record.milRef}
           </h2>
-          <p className="mt-1 text-xs text-[#7a8c80]">
+          <p className="mt-1 text-xs text-muted">
             Preview only — nothing is saved. {mapped.length} mapped node{mapped.length === 1 ? "" : "s"}
             {unmapped > 0 ? ` · ${unmapped} unmapped hidden` : ""}.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex h-10 items-center overflow-hidden rounded-lg border border-[#d8d5c5] bg-white">
+          <div className="inline-flex h-11 items-center sm:h-10 overflow-hidden rounded-lg border border-[#d8d5c5] bg-white">
             <button
               type="button"
               onClick={() => changeZoom(-ZOOM_STEP)}
               aria-label="Zoom out"
-              className="flex h-10 w-9 items-center justify-center text-[#174f3a] transition hover:bg-[#eef1e7]"
+              className="flex h-10 w-9 items-center justify-center text-forest transition hover:bg-[#eef1e7]"
             >
               <Minus size={15} />
             </button>
-            <span className="w-12 text-center text-[11px] font-extrabold text-[#173127]">
+            <span className="w-12 text-center text-[11px] font-extrabold text-ink">
               {Math.round(zoom * 100)}%
             </span>
             <button
               type="button"
               onClick={() => changeZoom(ZOOM_STEP)}
               aria-label="Zoom in"
-              className="flex h-10 w-9 items-center justify-center text-[#174f3a] transition hover:bg-[#eef1e7]"
+              className="flex h-10 w-9 items-center justify-center text-forest transition hover:bg-[#eef1e7]"
             >
               <Plus size={15} />
             </button>
@@ -363,7 +363,7 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
               onClick={applyFit}
               aria-label="Fit to view"
               title="Fit to view"
-              className="flex h-10 w-9 items-center justify-center border-l border-[#e5e2d4] text-[#174f3a] transition hover:bg-[#eef1e7]"
+              className="flex h-10 w-9 items-center justify-center border-l border-[#e5e2d4] text-forest transition hover:bg-[#eef1e7]"
             >
               <Maximize2 size={15} />
             </button>
@@ -373,7 +373,7 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
             type="button"
             onClick={() => void exportPng()}
             disabled={exporting !== null}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#174f3a] px-3 text-xs font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] disabled:opacity-60"
+            className="inline-flex h-11 items-center sm:h-10 gap-2 rounded-lg border border-forest px-3 text-xs font-extrabold text-forest transition hover:bg-[#eef1e7] disabled:opacity-60"
           >
             {exporting === "png" ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
             PNG
@@ -382,7 +382,7 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
             type="button"
             onClick={() => void exportPdf()}
             disabled={exporting !== null}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#174f3a] px-3 text-xs font-extrabold text-[#174f3a] transition hover:bg-[#eef1e7] disabled:opacity-60"
+            className="inline-flex h-11 items-center sm:h-10 gap-2 rounded-lg border border-forest px-3 text-xs font-extrabold text-forest transition hover:bg-[#eef1e7] disabled:opacity-60"
           >
             {exporting === "pdf" ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
             PDF
@@ -390,7 +390,7 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d]"
+            className="inline-flex h-11 items-center sm:h-10 gap-2 rounded-lg bg-forest px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d]"
           >
             <X size={15} /> Close preview
           </button>
@@ -417,9 +417,9 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
         onPointerCancel={handlePointerUp}
       >
         {mapped.length === 0 ? (
-          <div className="mx-auto mt-10 flex max-w-lg flex-col items-center gap-3 rounded-2xl border border-dashed border-[#c7c3b0] bg-[#fffef9] px-6 py-16 text-center">
-            <p className="text-sm font-bold text-[#173127]">No mapped nodes yet</p>
-            <p className="text-xs leading-5 text-[#7a8c80]">
+          <div className="mx-auto mt-10 flex max-w-lg flex-col items-center gap-3 rounded-2xl border border-dashed border-[#c7c3b0] bg-paper px-6 py-16 text-center">
+            <p className="text-sm font-bold text-ink">No mapped nodes yet</p>
+            <p className="text-xs leading-5 text-muted">
               Select a DPP stage for at least one journey node, then open Preview again.
             </p>
           </div>
@@ -463,10 +463,10 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
               {columns.map((column, columnIndex) => (
                 <div key={column.id} className="absolute" style={{ left: columnX(columnIndex), top: 0, width: CARD_WIDTH }}>
                   <div className="flex items-center justify-between px-1" style={{ height: HEADER_OFFSET }}>
-                    <span className="rounded-full border border-[#d3d0c0] bg-[#fffef9] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#6f7f77]">
+                    <span className="rounded-full border border-[#d3d0c0] bg-paper px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-muted">
                       {column.label}
                     </span>
-                    <span className="text-[9px] font-bold text-[#9aa69f]">{column.entries.length}</span>
+                    <span className="text-[9px] font-bold text-muted">{column.entries.length}</span>
                   </div>
 
                   {column.entries.map((entry, rowIndex) => {
@@ -478,26 +478,26 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
                     return (
                       <article
                         key={entry.node.id}
-                        className="absolute flex flex-col rounded-xl border border-[#cfcbb8] bg-[#fffef9] p-4 shadow-[0_6px_18px_rgba(23,49,39,0.06)]"
+                        className="absolute flex flex-col rounded-xl border border-[#cfcbb8] bg-paper p-4 shadow-[0_6px_18px_rgba(23,49,39,0.06)]"
                         style={{ top: cardY(rowIndex), width: CARD_WIDTH, height: CARD_HEIGHT }}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-bold text-[#173127]">{entry.node.supplier ?? "Unnamed supplier"}</p>
+                            <p className="truncate text-sm font-bold text-ink">{entry.node.supplier ?? "Unnamed supplier"}</p>
                             <p className="mt-0.5 truncate text-[11px] font-semibold text-[#5f6f67]">{process}</p>
                           </div>
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#174f3a] text-[9px] font-extrabold text-white">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-forest text-[9px] font-extrabold text-white">
                             {initials(entry.node.supplier ?? entry.node.role ?? "NA")}
                           </span>
                         </div>
 
-                        <p className="mt-1 truncate text-[10px] text-[#7a8c80]">{location || "Location not documented"}</p>
+                        <p className="mt-1 truncate text-[10px] text-muted">{location || "Location not documented"}</p>
 
                         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-                          <span className="rounded-full bg-[#eef4e7] px-2 py-0.5 text-[9px] font-extrabold text-[#174f3a]">
+                          <span className="rounded-full bg-[#eef4e7] px-2 py-0.5 text-[9px] font-extrabold text-forest">
                             {DPP_STAGE_LABELS[entry.stage]}
                           </span>
-                          <span className="text-[10px] font-bold text-[#173127]">
+                          <span className="text-[10px] font-bold text-ink">
                             Quantity PO {currency(entry.node.quantity)} {entry.node.unit ?? ""}
                           </span>
                         </div>
@@ -523,14 +523,14 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
 
             {supporting.some((group) => group.entries.length > 0) && (
               <div
-                className="mt-4 rounded-2xl border border-[#cfcbb8] bg-[#fffef9] p-4"
+                className="mt-4 rounded-2xl border border-[#cfcbb8] bg-paper p-4"
                 style={{ width: canvasWidth }}
               >
                 <div className="flex flex-wrap gap-5">
                   {supporting.map((group) =>
                     group.entries.length > 0 ? (
                       <div key={group.id} className="min-w-[240px] flex-1">
-                        <p className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
+                        <p className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.12em] text-muted">
                           <span
                             className={`h-2.5 w-2.5 rounded-full ${
                               group.id === "trader" ? "bg-[#2c6a9a]" : "bg-[#4f8a3d]"
@@ -545,7 +545,7 @@ export default function TraceabilityWorkflowPreview({ record, drafts, onClose }:
                               className={`inline-flex max-w-full items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold ${
                                 group.id === "trader"
                                   ? "bg-[#e8f0f7] text-[#2c5f86]"
-                                  : "bg-[#eef4e7] text-[#174f3a]"
+                                  : "bg-[#eef4e7] text-forest"
                               }`}
                             >
                               <span className="truncate">{entry.node.supplier ?? entry.node.role ?? "Unnamed"}</span>

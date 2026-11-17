@@ -7,7 +7,7 @@ import { Loader2, LockKeyhole } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -41,36 +41,36 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#e8e8dd] px-4 py-10 text-[#173127]">
-      <section className="w-full max-w-sm rounded-3xl border border-[#1731270f] bg-[#fffef9] p-6 shadow-[0_24px_80px_rgba(30,47,39,0.10)]">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef1e7] text-[#174f3a]">
+    <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 text-ink">
+      <section className="w-full max-w-sm rounded-3xl border border-[#1731270f] bg-paper p-6 shadow-[0_24px_80px_rgba(30,47,39,0.10)]">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef1e7] text-forest">
           <LockKeyhole size={20} />
         </div>
-        <p className="mt-4 text-[11px] font-extrabold tracking-[0.18em] text-[#7a8c80]">SCM CONSOLE</p>
+        <p className="mt-4 text-[11px] font-extrabold tracking-[0.18em] text-muted">SCM CONSOLE</p>
         <h1 className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-bold tracking-[-0.02em]">
           Sign in
         </h1>
-        <p className="mt-2 text-sm leading-6 text-[#6f7f77]">
-          Use your DPP account to access supply chain mapping and page publishing.
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Use your GTI Soft username (NIK) and password to access supply chain mapping and page publishing.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-3">
           <div>
-            <label htmlFor="email" className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#8a978f]">
-              Email
+            <label htmlFor="username" className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
+              Username / NIK
             </label>
             <input
-              id="email"
-              type="email"
+              id="username"
+              type="text"
               autoComplete="username"
               required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 h-11 w-full rounded-xl border border-[#d8dfcf] bg-white px-3 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              className="mt-1 h-11 w-full rounded-xl border border-[#d8dfcf] bg-white px-3 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10"
             />
           </div>
           <div>
-            <label htmlFor="password" className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#8a978f]">
+            <label htmlFor="password" className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
               Password
             </label>
             <input
@@ -80,7 +80,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-1 h-11 w-full rounded-xl border border-[#d8dfcf] bg-white px-3 text-sm font-medium outline-none transition focus:border-[#174f3a] focus:ring-4 focus:ring-[#174f3a]/10"
+              className="mt-1 h-11 w-full rounded-xl border border-[#d8dfcf] bg-white px-3 text-base font-medium outline-none transition focus:border-forest focus:ring-4 focus:ring-[#174f3a]/10"
             />
           </div>
 
@@ -93,7 +93,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#174f3a] px-4 text-sm font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 text-sm font-extrabold text-white transition hover:bg-[#123e2d] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading && <Loader2 size={16} className="animate-spin" />}
             {loading ? "Signing in…" : "Sign in"}

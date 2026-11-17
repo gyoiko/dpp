@@ -103,7 +103,7 @@ export default function TraceabilityMappingDrawer({
     const mappedNodes = record.nodes.filter((node) => views[node.id]?.stage);
 
     if (mappedNodes.length === 0) {
-      setError("Tidak ada node dengan DPP stage yang bisa disimpan.");
+      setError("No node with a DPP stage can be saved.");
       return;
     }
 
@@ -133,7 +133,7 @@ export default function TraceabilityMappingDrawer({
           const payload = (await response.json()) as { mapping?: TraceabilityNodeMapping; error?: string };
 
           if (!response.ok || !payload.mapping) {
-            throw new Error(payload.error ?? "Gagal menyimpan journey nodes.");
+            throw new Error(payload.error ?? "Failed to save journey nodes.");
           }
 
           return payload.mapping;
@@ -145,7 +145,7 @@ export default function TraceabilityMappingDrawer({
       );
       onSaved(saved);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Gagal menyimpan journey nodes.");
+      setError(saveError instanceof Error ? saveError.message : "Failed to save journey nodes.");
     } finally {
       setSaving(false);
     }
@@ -160,15 +160,15 @@ export default function TraceabilityMappingDrawer({
         role="dialog"
         aria-modal="true"
         aria-labelledby="traceability-mapping-title"
-        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-y-auto bg-[#fffef9] shadow-[0_0_60px_rgba(23,49,39,0.25)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-y-auto bg-paper shadow-[0_0_60px_rgba(23,49,39,0.25)]"
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#dfe3da] bg-[#fffef9] px-6 py-5">
+        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#dfe3da] bg-paper px-6 py-5">
           <div>
-            <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-[#7a8c80]">MAP TO DPP JOURNEY</p>
+            <p className="text-[11px] sm:text-[10px] font-extrabold tracking-[0.16em] text-muted">MAP TO DPP JOURNEY</p>
             <h2 id="traceability-mapping-title" className="mt-1 font-[family-name:var(--font-manrope)] text-xl font-bold tracking-[-0.02em]">
               {record.milRef}
             </h2>
-            <p className="mt-1 text-xs text-[#7a8c80]">
+            <p className="mt-1 text-xs text-muted">
               Read-only ERP data. Review the journey nodes, then save the draft to enable publishing this DPP page.
             </p>
           </div>
@@ -176,7 +176,7 @@ export default function TraceabilityMappingDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#dfe3da] text-[#174f3a] transition hover:bg-[#eef1e7]"
+            className="flex h-11 w-11 shrink-0 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-[#dfe3da] text-forest transition hover:bg-[#eef1e7]"
           >
             <X size={16} />
           </button>
@@ -192,12 +192,12 @@ export default function TraceabilityMappingDrawer({
               <section key={node.id} className="rounded-2xl border border-[#e2e7d8] bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#eef0e8] pb-3">
                   <div>
-                    <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#7a8c80]">
+                    <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.12em] text-muted">
                       #{node.seqNo ?? "—"} · {node.role ?? "Unnamed role"}
                       {node.roleDescription ? ` · ${node.roleDescription}` : ""}
                     </p>
-                    <p className="mt-1 text-sm font-bold text-[#173127]">{node.supplier ?? "—"}</p>
-                    <p className="mt-0.5 text-xs text-[#6f7f77]">
+                    <p className="mt-1 text-sm font-bold text-ink">{node.supplier ?? "—"}</p>
+                    <p className="mt-0.5 text-xs text-muted">
                       {[node.country, node.branchLabel ? `Consignee ${node.branchLabel}` : null]
                         .filter(Boolean)
                         .join(" · ") || "—"}
@@ -205,11 +205,11 @@ export default function TraceabilityMappingDrawer({
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">Quantity PO</p>
-                    <p className="text-sm font-bold text-[#173127]">
+                    <p className="text-[10px] sm:text-[9px] font-extrabold uppercase tracking-[0.1em] text-muted">Quantity PO</p>
+                    <p className="text-sm font-bold text-ink">
                       {node.quantity === null ? "—" : `${node.quantity.toLocaleString("en-US")} ${node.unit ?? ""}`.trim()}
                     </p>
-                    <p className="mt-0.5 text-[11px] sm:text-[10px] text-[#7a8c80]">
+                    <p className="mt-0.5 text-[11px] sm:text-[10px] text-muted">
                       Quantity RAW Material: {node.inputLot ?? "—"} → Quantity Finish Good: {node.outputLot ?? "—"}
                     </p>
                     {saved && (
@@ -222,31 +222,31 @@ export default function TraceabilityMappingDrawer({
 
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <div>
-                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
+                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-muted">
                       DPP stage
                     </p>
-                    <p className="mt-1 text-sm font-bold text-[#173127]">
+                    <p className="mt-1 text-sm font-bold text-ink">
                       {view.stage ? DPP_STAGE_LABELS[view.stage] : "Not mapped"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
+                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-muted">
                       Process label
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-[#173127]">{view.process || "—"}</p>
+                    <p className="mt-1 text-sm font-semibold text-ink">{view.process || "—"}</p>
                   </div>
                 </div>
 
                 {view.notes ? (
                   <div className="mt-3">
-                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7a8c80]">
+                    <p className="text-[11px] sm:text-[10px] font-extrabold uppercase tracking-[0.1em] text-muted">
                       Notes
                     </p>
-                    <p className="mt-1 text-xs text-[#6f7f77]">{view.notes}</p>
+                    <p className="mt-1 text-xs text-muted">{view.notes}</p>
                   </div>
                 ) : null}
 
-                <p className="mt-3 text-[10px] sm:text-[9px] leading-4 text-[#7a8c80]">
+                <p className="mt-3 text-[10px] sm:text-[9px] leading-4 text-muted">
                   DPP stage and process label are derived automatically from the ERP role. ERP values are read-only.
                 </p>
               </section>
@@ -260,15 +260,15 @@ export default function TraceabilityMappingDrawer({
           )}
         </div>
 
-        <footer className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-[#dfe3da] bg-[#fffef9] px-6 py-4">
-          <p className="mr-auto text-[10px] sm:text-[9px] leading-4 text-[#7a8c80]">
+        <footer className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-[#dfe3da] bg-paper px-6 py-4">
+          <p className="mr-auto text-[10px] sm:text-[9px] leading-4 text-muted">
             Saving the draft enables the page to be published.
           </p>
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="h-10 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-[#173127] transition hover:bg-[#f6f8ef] disabled:opacity-60"
+            className="h-11 rounded-lg sm:h-10 border border-[#d8dfcf] px-4 text-xs font-extrabold text-ink transition hover:bg-[#f6f8ef] disabled:opacity-60"
           >
             Cancel
           </button>
@@ -276,7 +276,7 @@ export default function TraceabilityMappingDrawer({
             type="button"
             onClick={() => setPreviewOpen(true)}
             disabled={saving}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-[#173127] transition hover:bg-[#f6f8ef] disabled:opacity-60"
+            className="inline-flex h-11 items-center sm:h-10 gap-2 rounded-lg border border-[#d8dfcf] px-4 text-xs font-extrabold text-ink transition hover:bg-[#f6f8ef] disabled:opacity-60"
           >
             Preview
           </button>
@@ -284,7 +284,7 @@ export default function TraceabilityMappingDrawer({
             type="button"
             onClick={() => void saveDraft()}
             disabled={saving}
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#174f3a] px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d] disabled:opacity-60"
+            className="inline-flex h-11 items-center sm:h-10 gap-2 rounded-lg bg-forest px-4 text-xs font-extrabold text-white transition hover:bg-[#123e2d] disabled:opacity-60"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             Save draft

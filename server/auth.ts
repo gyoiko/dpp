@@ -35,6 +35,20 @@ function readCookie(header: string | undefined, name: string): string | null {
   return null;
 }
 
+export async function getRequestSession(request: Request): Promise<SessionPayload | null> {
+  const token = readCookie(request.headers.cookie, SESSION_COOKIE);
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    return await verifySessionToken(token, getAuthSecret());
+  } catch {
+    return null;
+  }
+}
+
 export async function requireApiAuth(request: Request, response: Response, next: NextFunction): Promise<void> {
   const token = readCookie(request.headers.cookie, SESSION_COOKIE);
 

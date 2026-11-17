@@ -31,7 +31,7 @@ export default function Toast({
         key={toast.id}
         role="status"
         aria-live="polite"
-        className="pointer-events-auto flex items-center gap-2 rounded-full bg-[#174f3a] px-4 py-2.5 text-xs font-bold text-white shadow-[0_12px_30px_rgba(23,49,39,0.28)]"
+        className="pointer-events-auto flex items-center gap-2 rounded-full bg-forest px-4 py-2.5 text-xs font-bold text-white shadow-[0_12px_30px_rgba(23,49,39,0.28)]"
       >
         <Check size={15} className="shrink-0 text-[#d8f169]" />
         <span>{toast.message}</span>

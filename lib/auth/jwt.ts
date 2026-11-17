@@ -17,6 +17,8 @@ export type SessionInput = {
   email: string;
   name: string;
   role: SessionPayload["role"];
+  employeeNo: string;
+  canViewAll: boolean;
   tv: number;
 };
 
@@ -78,6 +80,8 @@ export async function verifySessionToken(
       typeof payload.email !== "string" ||
       typeof payload.name !== "string" ||
       !isAuthRole(payload.role) ||
+      typeof payload.employeeNo !== "string" ||
+      typeof payload.canViewAll !== "boolean" ||
       typeof payload.tv !== "number" ||
       typeof payload.iat !== "number" ||
       typeof payload.exp !== "number"
@@ -94,6 +98,8 @@ export async function verifySessionToken(
       email: payload.email,
       name: payload.name,
       role: payload.role,
+      employeeNo: payload.employeeNo,
+      canViewAll: payload.canViewAll,
       tv: payload.tv,
       iat: payload.iat,
       exp: payload.exp,

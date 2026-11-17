@@ -2,6 +2,8 @@ import cors from "cors";
 import express from "express";
 import { serverConfig } from "./config";
 import { requireApiAuth } from "./auth";
+import accessRouter from "./routes/accessRoute";
+import authRouter from "./routes/authRoute";
 import supplyChainRouter from "./routes/supplyChainRoute";
 import traceabilityRouter from "./routes/traceabilityRoute";
 
@@ -14,6 +16,8 @@ app.get("/api/health", (_request, response) => {
   response.json({ status: "ok", mode: serverConfig.useMockData ? "mock" : "erp" });
 });
 
+app.use("/api", authRouter);
+app.use("/api", accessRouter);
 app.use("/api/dpp/supply-chain", requireApiAuth);
 app.use("/api", supplyChainRouter);
 app.use("/api", traceabilityRouter);

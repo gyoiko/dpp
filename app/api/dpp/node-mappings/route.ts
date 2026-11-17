@@ -4,6 +4,7 @@ import { traceabilityNodeMappings } from "@/db/schema";
 import type { TraceabilityMappingStatus, TraceabilityNodeMapping } from "@/types/traceability";
 import { DPP_STAGES } from "@/types/traceability";
 import { requestIsSameOrigin, requireApiSession } from "@/lib/auth/session";
+import { filterAllowedKeDanHao, isProjectAllowed, ProjectAccessError } from "@/lib/auth/projectAccess";
 
 const STATUSES: readonly TraceabilityMappingStatus[] = ["draft", "reviewed"];
 
@@ -16,6 +17,10 @@ function isOneOf<T extends string>(value: unknown, options: readonly T[]): value
 }
 
 function toRouteErrorMessage(error: unknown) {
+  if (error instanceof ProjectAccessError) {
+    return error.message;
+  }
+
   const message = error instanceof Error ? error.message : "Unexpected error";
   const detail = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
   const combined = `${message}\n${detail}`;
@@ -52,6 +57,10 @@ export async function GET(request: Request) {
         return Response.json({ error: "milRef is invalid" }, { status: 400 });
       }
 
+      if (!(await isProjectAllowed(session, keDanHao))) {
+        return Response.json({ error: "You do not have access to this project." }, { status: 403 });
+      }
+
       const rows = await db
         .select()
         .from(traceabilityNodeMappings)
@@ -71,10 +80,15 @@ export async function GET(request: Request) {
       .from(traceabilityNodeMappings)
       .orderBy(desc(traceabilityNodeMappings.updatedAt))
       .limit(200);
+    const allowed = await filterAllowedKeDanHao(
+      session,
+      rows.map((row) => row.keDanHao),
+    );
 
-    return Response.json({ mappings: rows });
+    return Response.json({ mappings: rows.filter((row) => allowed.has(row.keDanHao)) });
   } catch (error) {
-    return Response.json({ error: toRouteErrorMessage(error) }, { status: 500 });
+    const status = error instanceof ProjectAccessError ? 502 : 500;
+    return Response.json({ error: toRouteErrorMessage(error) }, { status });
   }
 }
 
@@ -104,6 +118,10 @@ export async function POST(request: Request) {
 
     if (!keDanHao) {
       return Response.json({ error: "keDanHao is required" }, { status: 400 });
+    }
+
+    if (!(await isProjectAllowed(session, keDanHao))) {
+      return Response.json({ error: "You do not have access to this project." }, { status: 403 });
     }
 
     if (!/^\d+$/.test(keDanHang)) {
@@ -155,6 +173,7 @@ export async function POST(request: Request) {
 
     return Response.json({ mapping: mapping as TraceabilityNodeMapping }, { status: 201 });
   } catch (error) {
-    return Response.json({ error: toRouteErrorMessage(error) }, { status: 500 });
+    const status = error instanceof ProjectAccessError ? 502 : 500;
+    return Response.json({ error: toRouteErrorMessage(error) }, { status });
   }
 }

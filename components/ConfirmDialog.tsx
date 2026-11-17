@@ -53,17 +53,17 @@ export default function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-message"
-        className="relative w-full max-w-sm rounded-2xl border border-[#e2e7d8] bg-[#fffef9] p-5 shadow-[0_24px_70px_rgba(23,49,39,0.28)]"
+        className="relative w-full max-w-sm rounded-2xl border border-[#e2e7d8] bg-paper p-5 shadow-[0_24px_70px_rgba(23,49,39,0.28)]"
       >
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f4ded6] text-[#8a4b3a]">
+          <span className="flex h-11 w-11 shrink-0 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[#f4ded6] text-[#8a4b3a]">
             <AlertTriangle size={17} />
           </span>
           <div>
-            <h2 id="confirm-dialog-title" className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-[-0.01em] text-[#173127]">
+            <h2 id="confirm-dialog-title" className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-[-0.01em] text-ink">
               {title}
             </h2>
-            <p id="confirm-dialog-message" className="mt-1.5 text-xs leading-5 text-[#6f7f77]">
+            <p id="confirm-dialog-message" className="mt-1.5 text-xs leading-5 text-muted">
               {message}
             </p>
           </div>
@@ -73,14 +73,14 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="h-9 rounded-lg border border-[#d8dfcf] px-3 text-[11px] font-extrabold text-[#173127] transition hover:bg-[#f6f8ef]"
+            className="h-11 rounded-lg sm:h-9 border border-[#d8dfcf] px-3 text-[11px] font-extrabold text-ink transition hover:bg-[#f6f8ef]"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="h-9 rounded-lg bg-[#8a4b3a] px-3 text-[11px] font-extrabold text-white transition hover:bg-[#733d2f]"
+            className="h-11 rounded-lg sm:h-9 bg-[#8a4b3a] px-3 text-[11px] font-extrabold text-white transition hover:bg-[#733d2f]"
           >
             {confirmLabel}
           </button>

@@ -4,6 +4,7 @@ import { serialiseCompositionNotes } from "@/data/compositionNotes";
 import { serialiseVisibleCertifications } from "@/data/certifications";
 import { dppPages, traceabilityNodeMappings } from "@/db/schema";
 import type { DppPage, DppPageStatus } from "@/types/dppPage";
+import { filterAllowedKeDanHao, isProjectAllowed, ProjectAccessError } from "@/lib/auth/projectAccess";
 import { requestIsSameOrigin, requireApiSession } from "@/lib/auth/session";
 
 const STATUSES: readonly DppPageStatus[] = ["draft", "published"];
@@ -21,18 +22,32 @@ function parseMilRefValue(value: string) {
     return null;
   }
 
-  const separator = raw.indexOf("-");
-  const keDanHao = (separator === -1 ? raw : raw.slice(0, separator)).trim();
-  const keDanHang = (separator === -1 ? "1" : raw.slice(separator + 1).split("-")[0] || "1").trim();
+  const segments = raw.split("-");
+  const keDanHao = (segments[0] ?? "").trim();
+  const keDanHang = ((segments[1] ?? "").trim() || "1").trim();
+  const shipmentSerial = segments.length > 2 ? segments.slice(2).join("-").trim() || null : null;
 
   if (!/^[A-Za-z0-9_]+$/.test(keDanHao) || !/^\d+$/.test(keDanHang)) {
     return null;
   }
 
-  return { keDanHao, keDanHang, milRef: `${keDanHao}-${keDanHang}` };
+  if (shipmentSerial && !/^[A-Za-z0-9_]+$/.test(shipmentSerial)) {
+    return null;
+  }
+
+  return {
+    keDanHao,
+    keDanHang,
+    shipmentSerial,
+    milRef: shipmentSerial ? `${keDanHao}-${keDanHang}-${shipmentSerial}` : `${keDanHao}-${keDanHang}`,
+  };
 }
 
 function toRouteErrorMessage(error: unknown) {
+  if (error instanceof ProjectAccessError) {
+    return error.message;
+  }
+
   const message = error instanceof Error ? error.message : "Unexpected error";
   const detail = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
   const combined = `${message}\n${detail}`;
@@ -61,7 +76,17 @@ export async function GET(request: Request) {
     const db = await getDb();
 
     if (milRef) {
-      const [page] = await db.select().from(dppPages).where(eq(dppPages.milRef, milRef)).limit(1);
+      const parsed = parseMilRefValue(milRef);
+
+      if (!parsed) {
+        return Response.json({ error: "milRef must be KeDanHao-KeDanHang, e.g. B02345-1" }, { status: 400 });
+      }
+
+      if (!(await isProjectAllowed(session, parsed.keDanHao))) {
+        return Response.json({ error: "You do not have access to this project." }, { status: 403 });
+      }
+
+      const [page] = await db.select().from(dppPages).where(eq(dppPages.milRef, parsed.milRef)).limit(1);
       return Response.json({ page: page ?? null });
     }
 
@@ -81,9 +106,15 @@ export async function GET(request: Request) {
       .from(dppPages)
       .orderBy(desc(dppPages.updatedAt))
       .limit(200);
-    return Response.json({ pages });
+    const allowed = await filterAllowedKeDanHao(
+      session,
+      pages.map((page) => page.keDanHao),
+    );
+
+    return Response.json({ pages: pages.filter((page) => allowed.has(page.keDanHao)) });
   } catch (error) {
-    return Response.json({ error: toRouteErrorMessage(error) }, { status: 500 });
+    const status = error instanceof ProjectAccessError ? 502 : 500;
+    return Response.json({ error: toRouteErrorMessage(error) }, { status });
   }
 }
 
@@ -134,6 +165,10 @@ export async function POST(request: Request) {
 
     if (!parsed) {
       return Response.json({ error: "milRef must be KeDanHao-KeDanHang, e.g. B02345-1" }, { status: 400 });
+    }
+
+    if (!(await isProjectAllowed(session, parsed.keDanHao))) {
+      return Response.json({ error: "You do not have access to this project." }, { status: 403 });
     }
 
     if (photoData && !PHOTO_DATA_PATTERN.test(photoData)) {
@@ -239,6 +274,7 @@ export async function POST(request: Request) {
 
     return Response.json({ page: page as DppPage }, { status: 201 });
   } catch (error) {
-    return Response.json({ error: toRouteErrorMessage(error) }, { status: 500 });
+    const status = error instanceof ProjectAccessError ? 502 : 500;
+    return Response.json({ error: toRouteErrorMessage(error) }, { status });
   }
 }

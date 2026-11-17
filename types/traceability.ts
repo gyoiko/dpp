@@ -1,5 +1,6 @@
 export interface TraceabilityHeader {
   millNo: string | null;
+  orderLine: string | null;
   buyer: string | null;
   buyerPo: string | null;
   style: string | null;
@@ -8,6 +9,18 @@ export interface TraceabilityHeader {
   gtiOrderNo: string | null;
   materialReference: string | null;
   productForm: string | null;
+  customerArticle: string | null;
+  shipmentSerial: string | null;
+}
+
+export interface TraceabilityOption {
+  mainId: number;
+  keDanHao: string;
+  keDanHang: string;
+  buyerPo: string | null;
+  shipmentSerial: string | null;
+  customerArticle: string | null;
+  status: string | null;
 }
 
 export interface TraceabilityFibre {

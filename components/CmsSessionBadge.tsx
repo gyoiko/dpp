@@ -42,7 +42,7 @@ export default function CmsSessionBadge() {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3.5 py-1.5 text-xs font-bold text-[#174f3a]">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3.5 py-1.5 text-xs font-bold text-forest">
         <UserRound size={13} />
         {user.name || user.email}
       </span>
@@ -50,7 +50,7 @@ export default function CmsSessionBadge() {
         type="button"
         onClick={() => void signOut()}
         disabled={signingOut}
-        className="inline-flex items-center gap-1.5 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3.5 py-1.5 text-xs font-bold text-[#174f3a] disabled:opacity-50"
+        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-[#d3dcc8] bg-[#f6f8ef] px-3.5 py-1.5 text-xs font-bold text-forest disabled:opacity-50 sm:min-h-0"
       >
         <LogOut size={13} />
         {signingOut ? "Signing out…" : "Sign out"}

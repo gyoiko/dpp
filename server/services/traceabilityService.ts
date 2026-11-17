@@ -3,18 +3,27 @@ import type {
   TraceabilityFibre,
   TraceabilityHeader,
   TraceabilityNode,
+  TraceabilityOption,
   TraceabilityRecord,
 } from "../../types/traceability";
 import { fetchTraceData } from "../dbService";
-import { parseMilRef } from "../milRef";
+import { formatMilRef, parseMilRef, MilRefError } from "../milRef";
 import { toNumber, toText, toYesNoBoolean } from "../rowValues";
 
-const HEADER_QUERY = `SELECT TOP 1
-  ID, 客单号, 产品范围, 买家, 采购订单, GTI订单号, 款式, 物料参考, 产品形态, 状态
+const HEADER_QUERY = `SELECT TOP 50
+  ID, 客单号, 客单行, 产品范围, 买家, 采购订单, GTI订单号, 款式, 物料参考, 产品形态, 状态, 客花号, 出货流水号
+FROM [T_溯源_主表]
+WHERE 客单号 = @KeDanHao
+  AND 客单行 = @KeDanHang
+  AND 删除标志 = 0
+ORDER BY ID DESC`;
+
+const OPTIONS_QUERY = `SELECT TOP 100
+  ID, 客单号, 客单行, 采购订单, 出货流水号, 客花号, 状态
 FROM [T_溯源_主表]
 WHERE 客单号 = @KeDanHao
   AND 删除标志 = 0
-ORDER BY ID DESC`;
+ORDER BY 客单行, ID DESC`;
 
 const FIBRE_QUERY = `SELECT 序号, 纤维, 百分比, 物料批号
 FROM [T_溯源_纤维成分表]
@@ -61,6 +70,7 @@ function parseSeqNumbers(value: unknown): number[] {
 function mapHeader(row: Record<string, unknown>): TraceabilityHeader {
   return {
     millNo: toText(row["客单号"]),
+    orderLine: toText(row["客单行"]),
     buyer: toText(row["买家"]),
     buyerPo: toText(row["采购订单"]),
     style: toText(row["款式"]),
@@ -69,6 +79,8 @@ function mapHeader(row: Record<string, unknown>): TraceabilityHeader {
     gtiOrderNo: toText(row["GTI订单号"]),
     materialReference: toText(row["物料参考"]),
     productForm: toText(row["产品形态"]),
+    customerArticle: toText(row["客花号"]),
+    shipmentSerial: toText(row["出货流水号"]),
   };
 }
 
@@ -129,18 +141,85 @@ function mapDocument(
   };
 }
 
+function normaliseSerial(value: string | null): string {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function selectHeaderRow(
+  rows: Record<string, unknown>[],
+  parts: ReturnType<typeof parseMilRef>,
+): Record<string, unknown> | null {
+  if (rows.length === 0) {
+    return null;
+  }
+
+  if (parts.shipmentSerial) {
+    const match = rows.find(
+      (row) => normaliseSerial(toText(row["出货流水号"])) === normaliseSerial(parts.shipmentSerial),
+    );
+
+    if (!match) {
+      throw new MilRefError(
+        `No traceability record found for shipment ${parts.shipmentSerial} on ${parts.keDanHao}-${parts.keDanHang}.`,
+      );
+    }
+
+    return match;
+  }
+
+  if (rows.length === 1) {
+    return rows[0];
+  }
+
+  const shipments = [
+    ...new Set(rows.map((row) => toText(row["出货流水号"])).filter((value): value is string => Boolean(value))),
+  ];
+  const example = formatMilRef({ ...parts, shipmentSerial: shipments[0] ?? null });
+
+  throw new MilRefError(
+    shipments.length > 0
+      ? `Multiple shipments exist for ${parts.keDanHao}-${parts.keDanHang}: ${shipments.join(", ")}. Choose one, e.g. ${example}.`
+      : `Multiple records exist for ${parts.keDanHao}-${parts.keDanHang}. Add the shipment serial to the MilRef.`,
+  );
+}
+
+export async function fetchTraceabilityOptions(millNo: string): Promise<TraceabilityOption[]> {
+  const keDanHao = (millNo ?? "").trim();
+
+  if (!keDanHao) {
+    throw new MilRefError("Mil No is required.");
+  }
+
+  if (!/^[A-Za-z0-9_]+$/.test(keDanHao)) {
+    throw new MilRefError("Mil No may only contain letters, numbers, and underscores.");
+  }
+
+  const rows = await fetchTraceData<Record<string, unknown>>(OPTIONS_QUERY, { KeDanHao: keDanHao });
+
+  return rows.map((row) => ({
+    mainId: toNumber(row["ID"]) ?? 0,
+    keDanHao: toText(row["客单号"]) ?? keDanHao,
+    keDanHang: toText(row["客单行"]) ?? "1",
+    buyerPo: toText(row["采购订单"]),
+    shipmentSerial: toText(row["出货流水号"]),
+    customerArticle: toText(row["客花号"]),
+    status: toText(row["状态"]),
+  }));
+}
+
 export async function fetchTraceability(milRef: string): Promise<TraceabilityRecord> {
   const parts = parseMilRef(milRef);
   const base = {
-    milRef: `${parts.keDanHao}-${parts.keDanHang}`,
+    milRef: formatMilRef(parts),
     keDanHao: parts.keDanHao,
     keDanHang: parts.keDanHang,
   };
 
   const headerRows = await fetchTraceData<Record<string, unknown>>(HEADER_QUERY, {
     KeDanHao: parts.keDanHao,
+    KeDanHang: parts.keDanHang,
   });
-  const headerRow = headerRows[0];
+  const headerRow = selectHeaderRow(headerRows, parts);
 
   if (!headerRow) {
     return { ...base, header: null, fibres: [], nodes: [], documents: [] };
